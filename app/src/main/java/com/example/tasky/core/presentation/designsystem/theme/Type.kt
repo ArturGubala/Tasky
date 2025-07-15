@@ -71,6 +71,12 @@ val Typography = Typography(
     )
 )
 
+val Typography.headlineXSmall: TextStyle
+    get() = ExtendedTypography.headlineXSmall
+
+val Typography.labelXSmall: TextStyle
+    get() = ExtendedTypography.labelXSmall
+
 object ExtendedTypography {
     val headlineXSmall = TextStyle(
         fontFamily = Inter,

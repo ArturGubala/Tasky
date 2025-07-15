@@ -1,10 +1,12 @@
 package com.example.tasky.core.presentation.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = Light.Primary,
@@ -33,6 +35,39 @@ private val LightColorScheme = lightColorScheme(
     error = Dark.Error,
     outline = Dark.Outline
 )
+
+val ColorScheme.onSurfaceVariantOpacity70: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Dark.OnSurfaceVariantOpacity70 else Light.OnSurfaceVariantOpacity70
+
+val ColorScheme.success: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Dark.Success else Light.Success
+
+val ColorScheme.link: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Dark.Link else Light.Link
+
+val ColorScheme.backgroundOpacity50: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Dark.BackgroundOpacity50 else Light.BackgroundOpacity50
+
+val ColorScheme.surfaceHigher: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Dark.SurfaceHigher else Light.SurfaceHigher
+
+val ColorScheme.surfaceHigherOpacity60: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Dark.SurfaceHigherOpacity60 else Light.SurfaceHigherOpacity60
+
+val ColorScheme.secondaryOpacity80: Color
+    get() = Brand.SecondaryOpacity80
+
+val ColorScheme.tertiaryOpacity80: Color
+    get() = Brand.TertiaryOpacity80
+
+val ColorScheme.supplementary: Color
+    get() = Brand.Supplementary
 
 @Composable
 fun TaskyTheme(

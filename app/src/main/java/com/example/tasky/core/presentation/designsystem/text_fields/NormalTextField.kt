@@ -20,13 +20,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
+import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
 import com.example.tasky.core.presentation.designsystem.theme.success
 import com.example.tasky.core.presentation.designsystem.theme.surfaceHigher
 
@@ -44,6 +50,10 @@ fun NormalTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     hasError: Boolean = false
 ) {
+    var isFocused by remember {
+        mutableStateOf(false)
+    }
+
     BasicTextField(
         value = text,
         onValueChange = onValueChange,
@@ -52,18 +62,16 @@ fun NormalTextField(
                 color = MaterialTheme.colorScheme.surfaceHigher,
                 shape = RoundedCornerShape(10.dp)
             )
-            .then (
-            if (hasError) {
-                Modifier.border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.error,
-                    shape = RoundedCornerShape(10.dp)
-                )
-            } else {
-                Modifier
-            }
+            .border(
+                width = 1.dp,
+                color = if (hasError) MaterialTheme.colorScheme.error
+                        else Color.Transparent,
+                shape = RoundedCornerShape(10.dp)
+            )
             .padding(horizontal = 20.dp, vertical = 16.dp)
-        ),
+            .onFocusChanged {
+                isFocused = it.isFocused
+            },
         textStyle = textStyle,
         keyboardActions = keyboardActions,
         keyboardOptions = keyboardOptions,
@@ -77,7 +85,8 @@ fun NormalTextField(
                     if(text.isBlank() && hintText != null) {
                         Text(
                             text = hintText,
-                            color = hintColor,
+                            color = if (isFocused) MaterialTheme.colorScheme.onSurfaceVariantOpacity70
+                            else hintColor,
                             style = textStyle
                         )
                     } else {
@@ -115,17 +124,17 @@ private fun NormalTextFieldPreview() {
                 hintText = "Email address"
             )
             NormalTextField(
-                text = "somemail.pl",
+                text = "propermail@gmail.com",
+                onValueChange = {},
+                modifier = Modifier.width(328.dp),
+                hintText = "Email address"
+            )
+            NormalTextField(
+                text = "somemail@gmail.pl",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
                 hintText = "Email address",
                 hasError = true
-            )
-            NormalTextField(
-                text = "a.gubala@gmail.com",
-                onValueChange = {},
-                modifier = Modifier.width(328.dp),
-                hintText = "Email address"
             )
         }
     }

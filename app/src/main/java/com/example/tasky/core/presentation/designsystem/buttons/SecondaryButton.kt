@@ -1,5 +1,6 @@
 package com.example.tasky.core.presentation.designsystem.buttons
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,8 +39,10 @@ fun SecondaryButton(
     }
 }
 
-@Preview(name = "Light", showBackground = true, backgroundColor = 0xFFFFFFFF)
-@Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF000000)
+@Preview(name = "Light", showBackground = true, backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SecondaryButtonPreview() {
     TaskyTheme {

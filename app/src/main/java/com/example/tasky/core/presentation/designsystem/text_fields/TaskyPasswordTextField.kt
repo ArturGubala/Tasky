@@ -37,8 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
-import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
-import com.example.tasky.core.presentation.designsystem.theme.surfaceHigher
+import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
 fun TaskyPasswordTextField(
@@ -60,7 +59,7 @@ fun TaskyPasswordTextField(
         state = state,
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.surfaceHigher,
+                color = MaterialTheme.colorScheme.extended.surfaceHigher,
                 shape = RoundedCornerShape(10.dp)
             )
             .padding(horizontal = 20.dp, vertical = 16.dp)
@@ -81,7 +80,7 @@ fun TaskyPasswordTextField(
                     if(state.text.isBlank() && hintText != null) {
                         Text(
                             text = hintText,
-                            color = if (isFocused) MaterialTheme.colorScheme.onSurfaceVariantOpacity70
+                            color = if (isFocused) MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                                 else hintColor,
                             style = textStyle
                         )
@@ -100,7 +99,7 @@ fun TaskyPasswordTextField(
                         } else {
                             stringResource(id = R.string.hide_password)
                         },
-                        tint = MaterialTheme.colorScheme.onSurfaceVariantOpacity70
+                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                     )
                 }
             }

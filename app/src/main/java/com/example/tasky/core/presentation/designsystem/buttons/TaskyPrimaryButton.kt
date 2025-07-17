@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
-import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
+import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
 fun TaskyPrimaryButton(
@@ -31,7 +31,7 @@ fun TaskyPrimaryButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariantOpacity70,
+            disabledContainerColor = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
             disabledContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         modifier = modifier

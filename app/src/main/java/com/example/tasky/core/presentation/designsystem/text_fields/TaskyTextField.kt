@@ -32,9 +32,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
-import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
-import com.example.tasky.core.presentation.designsystem.theme.success
-import com.example.tasky.core.presentation.designsystem.theme.surfaceHigher
+import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
 fun TaskyTextField(
@@ -59,7 +57,7 @@ fun TaskyTextField(
         onValueChange = onValueChange,
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.surfaceHigher,
+                color = MaterialTheme.colorScheme.extended.surfaceHigher,
                 shape = RoundedCornerShape(10.dp)
             )
             .border(
@@ -85,7 +83,7 @@ fun TaskyTextField(
                     if(text.isBlank() && hintText != null) {
                         Text(
                             text = hintText,
-                            color = if (isFocused) MaterialTheme.colorScheme.onSurfaceVariantOpacity70
+                            color = if (isFocused) MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                             else hintColor,
                             style = textStyle
                         )
@@ -98,7 +96,7 @@ fun TaskyTextField(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Valid input",
-                        tint = MaterialTheme.colorScheme.success,
+                        tint = MaterialTheme.colorScheme.extended.success,
                         modifier = Modifier.size(20.dp)
                     )
                 }

@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
-import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
+import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
 fun TaskySecondaryButton(
@@ -29,7 +29,7 @@ fun TaskySecondaryButton(
         ),
         border = BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.onSurfaceVariantOpacity70
+            color = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
         )
     ) {
         Text(

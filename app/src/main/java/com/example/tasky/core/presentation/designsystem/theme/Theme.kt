@@ -6,6 +6,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
@@ -36,38 +40,29 @@ private val DarkColorScheme = darkColorScheme(
     outline = Dark.Outline
 )
 
-val ColorScheme.onSurfaceVariantOpacity70: Color
-    @Composable
-    get() = if (isSystemInDarkTheme()) Dark.OnSurfaceVariantOpacity70 else Light.OnSurfaceVariantOpacity70
+val lightExtendedColors = ExtendedColors(
+    backgroundOpacity50 = Light.BackgroundOpacity50,
+    surfaceHigher = Light.SurfaceHigher,
+    surfaceHigherOpacity60 = Light.SurfaceHigherOpacity60,
+    onSurfaceVariantOpacity70 = Light.OnSurfaceVariantOpacity70,
+    success = Light.Success,
+    link = Light.Link,
+    secondaryOpacity80 = Brand.SecondaryOpacity80,
+    tertiaryOpacity80 = Brand.TertiaryOpacity80,
+    supplementary = Brand.Supplementary
+)
 
-val ColorScheme.success: Color
-    @Composable
-    get() = if (isSystemInDarkTheme()) Dark.Success else Light.Success
-
-val ColorScheme.link: Color
-    @Composable
-    get() = if (isSystemInDarkTheme()) Dark.Link else Light.Link
-
-val ColorScheme.backgroundOpacity50: Color
-    @Composable
-    get() = if (isSystemInDarkTheme()) Dark.BackgroundOpacity50 else Light.BackgroundOpacity50
-
-val ColorScheme.surfaceHigher: Color
-    @Composable
-    get() = if (isSystemInDarkTheme()) Dark.SurfaceHigher else Light.SurfaceHigher
-
-val ColorScheme.surfaceHigherOpacity60: Color
-    @Composable
-    get() = if (isSystemInDarkTheme()) Dark.SurfaceHigherOpacity60 else Light.SurfaceHigherOpacity60
-
-val ColorScheme.secondaryOpacity80: Color
-    get() = Brand.SecondaryOpacity80
-
-val ColorScheme.tertiaryOpacity80: Color
-    get() = Brand.TertiaryOpacity80
-
-val ColorScheme.supplementary: Color
-    get() = Brand.Supplementary
+val darkExtendedColors = ExtendedColors(
+    backgroundOpacity50 = Dark.BackgroundOpacity50,
+    surfaceHigher = Dark.SurfaceHigher,
+    surfaceHigherOpacity60 = Dark.SurfaceHigherOpacity60,
+    onSurfaceVariantOpacity70 = Dark.OnSurfaceVariantOpacity70,
+    success = Dark.Success,
+    link = Dark.Link,
+    secondaryOpacity80 = Brand.SecondaryOpacity80,
+    tertiaryOpacity80 = Brand.TertiaryOpacity80,
+    supplementary = Brand.Supplementary
+)
 
 @Composable
 fun TaskyTheme(
@@ -79,9 +74,12 @@ fun TaskyTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    val extendedColors = if (darkTheme) darkExtendedColors else lightExtendedColors
+    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

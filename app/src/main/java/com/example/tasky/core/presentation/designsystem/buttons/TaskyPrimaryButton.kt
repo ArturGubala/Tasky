@@ -18,7 +18,7 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
 
 @Composable
-fun PrimaryButton(
+fun TaskyPrimaryButton(
     content: @Composable (() -> Unit),
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -52,7 +52,7 @@ private fun PrimaryButtonPreview() {
         Column(
             verticalArrangement = Arrangement.spacedBy(space = 5.dp)
         ) {
-            PrimaryButton(
+            TaskyPrimaryButton(
                 content = {
                     Text(
                         text = "Get started",
@@ -61,7 +61,7 @@ private fun PrimaryButtonPreview() {
                 },
                 onClick = {}
             )
-            PrimaryButton(
+            TaskyPrimaryButton(
                 content = {
                     CircularProgressIndicator(
                         modifier = Modifier.size(size = 24.dp),

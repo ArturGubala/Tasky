@@ -37,7 +37,7 @@ import com.example.tasky.core.presentation.designsystem.theme.success
 import com.example.tasky.core.presentation.designsystem.theme.surfaceHigher
 
 @Composable
-fun NormalTextField(
+fun TaskyTextField(
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -112,24 +112,24 @@ fun NormalTextField(
 @Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF000000,
     uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun NormalTextFieldPreview() {
+private fun TaskyTextFieldPreview() {
     TaskyTheme {
         Column(
             verticalArrangement = Arrangement.spacedBy(space = 5.dp)
         ) {
-            NormalTextField(
+            TaskyTextField(
                 text = "",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
                 hintText = "Email address"
             )
-            NormalTextField(
+            TaskyTextField(
                 text = "propermail@gmail.com",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
                 hintText = "Email address"
             )
-            NormalTextField(
+            TaskyTextField(
                 text = "somemail@gmail.pl",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),

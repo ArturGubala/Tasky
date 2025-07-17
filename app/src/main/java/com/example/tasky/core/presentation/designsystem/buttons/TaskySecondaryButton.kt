@@ -16,7 +16,7 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOpacity70
 
 @Composable
-fun SecondaryButton(
+fun TaskySecondaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -49,7 +49,7 @@ private fun SecondaryButtonPreview() {
         Column(
             verticalArrangement = Arrangement.spacedBy(space = 5.dp)
         ) {
-            SecondaryButton(
+            TaskySecondaryButton(
                 text = "Get started",
                 onClick = {}
             )

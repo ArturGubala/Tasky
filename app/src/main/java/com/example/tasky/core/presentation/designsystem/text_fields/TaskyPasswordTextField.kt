@@ -41,7 +41,7 @@ import com.example.tasky.core.presentation.designsystem.theme.onSurfaceVariantOp
 import com.example.tasky.core.presentation.designsystem.theme.surfaceHigher
 
 @Composable
-fun PasswordTextField(
+fun TaskyPasswordTextField(
     state: TextFieldState,
     isPasswordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
@@ -121,14 +121,14 @@ private fun PasswordTextFieldPreview() {
         Column(
             verticalArrangement = Arrangement.spacedBy(space = 5.dp)
         ) {
-            PasswordTextField(
+            TaskyPasswordTextField(
                 state = rememberTextFieldState(),
                 isPasswordVisible = false,
                 onTogglePasswordVisibility = {},
                 hintText = "Password",
                 modifier = Modifier.width(328.dp)
             )
-            PasswordTextField(
+            TaskyPasswordTextField(
                 state = rememberTextFieldState(
                     initialText = "1234567890"
                 ),
@@ -137,7 +137,7 @@ private fun PasswordTextFieldPreview() {
                 hintText = "Email address",
                 modifier = Modifier.width(328.dp)
             )
-            PasswordTextField(
+            TaskyPasswordTextField(
                 state = rememberTextFieldState(
                     initialText = "1234567890"
                 ),

@@ -50,11 +50,8 @@ fun TaskyPasswordTextField(
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(
         color = MaterialTheme.colorScheme.onSurface
     ),
+    isFocused: Boolean = false
 ) {
-    var isFocused by remember {
-        mutableStateOf(false)
-    }
-
     BasicSecureTextField(
         state = state,
         modifier = modifier
@@ -62,10 +59,7 @@ fun TaskyPasswordTextField(
                 color = MaterialTheme.colorScheme.extended.surfaceHigher,
                 shape = RoundedCornerShape(10.dp)
             )
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-            .onFocusChanged {
-                isFocused = it.isFocused
-            },
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         textStyle = MaterialTheme.typography.bodyMedium.copy(
             color = MaterialTheme.colorScheme.onSurface
         ),
@@ -126,6 +120,14 @@ private fun PasswordTextFieldPreview() {
                 onTogglePasswordVisibility = {},
                 hintText = "Password",
                 modifier = Modifier.width(328.dp)
+            )
+            TaskyPasswordTextField(
+                state = rememberTextFieldState(),
+                isPasswordVisible = false,
+                onTogglePasswordVisibility = {},
+                hintText = "Password",
+                modifier = Modifier.width(328.dp),
+                isFocused = true
             )
             TaskyPasswordTextField(
                 state = rememberTextFieldState(

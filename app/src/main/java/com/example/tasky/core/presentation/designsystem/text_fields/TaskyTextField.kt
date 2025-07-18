@@ -46,12 +46,9 @@ fun TaskyTextField(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    hasError: Boolean = false
+    hasError: Boolean = false,
+    isFocused: Boolean = false
 ) {
-    var isFocused by remember {
-        mutableStateOf(false)
-    }
-
     BasicTextField(
         value = text,
         onValueChange = onValueChange,
@@ -66,10 +63,7 @@ fun TaskyTextField(
                         else Color.Transparent,
                 shape = RoundedCornerShape(10.dp)
             )
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-            .onFocusChanged {
-                isFocused = it.isFocused
-            },
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         textStyle = textStyle,
         keyboardActions = keyboardActions,
         keyboardOptions = keyboardOptions,
@@ -120,6 +114,13 @@ private fun TaskyTextFieldPreview() {
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
                 hintText = "Email address"
+            )
+            TaskyTextField(
+                text = "",
+                onValueChange = {},
+                modifier = Modifier.width(328.dp),
+                hintText = "Email address",
+                isFocused = true
             )
             TaskyTextField(
                 text = "propermail@gmail.com",

@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,12 +21,23 @@ android {
     }
 
     buildTypes {
+        debug {
+            val apiKey = gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
+            val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL")
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        }
         release {
+            val apiKey = gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
+            val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

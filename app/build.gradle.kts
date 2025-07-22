@@ -19,25 +19,20 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val apiKey = gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
+        val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL")
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {
-        debug {
-            val apiKey = gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
-            val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL")
-            buildConfigField("String", "API_KEY", "\"$apiKey\"")
-            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
-        }
         release {
-            val apiKey = gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
-            val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_KEY", "\"$apiKey\"")
-            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
             signingConfig = signingConfigs.getByName("debug")
         }
     }

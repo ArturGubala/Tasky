@@ -12,6 +12,7 @@ composeBom = "2025.07.00"
 timber = "5.0.1"
 ktor = "3.2.2"
 ktorClientLogging = "3.2.2"
+splashscreen = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,7 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref="splashscreen"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -3,6 +3,7 @@ package com.example.tasky.core.presentation.designsystem.buttons
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +36,7 @@ fun TaskyPrimaryButton(
             disabledContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         modifier = modifier
+            .requiredHeight(56.dp)
     ) {
         content.invoke()
     }

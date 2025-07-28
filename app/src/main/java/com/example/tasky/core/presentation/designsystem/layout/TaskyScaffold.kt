@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.tasky.core.presentation.designsystem.layout
 
 import androidx.compose.foundation.layout.Column
@@ -20,7 +22,7 @@ import com.example.tasky.core.presentation.designsystem.containers.TaskyContentB
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 
 @Composable
-fun TaskyBaseLayout(
+fun TaskyScaffold(
     content: @Composable (() -> Unit),
     modifier: Modifier = Modifier,
     topBar: @Composable (() -> Unit) = {},
@@ -43,12 +45,11 @@ fun TaskyBaseLayout(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
-fun TaskyBaseLayoutPreview() {
+private fun TaskyBaseLayoutPreview() {
     TaskyTheme {
-        TaskyBaseLayout(
+        TaskyScaffold(
             content = {
                 Column(
                     modifier = Modifier

@@ -35,7 +35,7 @@ fun TaskyContentBox(
 
 @PreviewLightDark
 @Composable
-fun TaskyContentBoxPreview() {
+private fun TaskyContentBoxPreview() {
     TaskyTheme {
         TaskyContentBox(
             content = {

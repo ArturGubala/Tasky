@@ -1,6 +1,5 @@
 package com.example.tasky.core.presentation.designsystem.text_fields
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -108,10 +107,7 @@ fun TaskyPasswordTextField(
     )
 }
 
-@Preview(name = "Light", showBackground = true, backgroundColor = 0xFFFFFFFF,
-    uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF000000,
-    uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
 private fun PasswordTextFieldPreview() {
     TaskyTheme {

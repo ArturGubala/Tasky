@@ -28,7 +28,7 @@ fun TaskyLink(
 
 @PreviewLightDark
 @Composable
-fun TaskyLinkPreview() {
+private fun TaskyLinkPreview() {
     TaskyTheme {
         TaskyLink(
             onClick = {},

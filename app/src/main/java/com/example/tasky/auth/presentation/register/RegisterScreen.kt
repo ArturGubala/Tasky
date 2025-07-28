@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyLink
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyPrimaryButton
-import com.example.tasky.core.presentation.designsystem.layout.TaskyBaseLayout
+import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyPasswordTextField
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyTextField
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -42,7 +42,7 @@ fun RegisterScreenRoot(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RegisterScreen() {
-    TaskyBaseLayout(
+    TaskyScaffold(
         topBar = {
             TopAppBar(
                 title = {

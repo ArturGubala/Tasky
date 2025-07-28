@@ -1,8 +1,8 @@
 package com.example.tasky.core.presentation.designsystem.buttons
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -12,7 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
@@ -35,17 +35,13 @@ fun TaskyPrimaryButton(
             disabledContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         modifier = modifier
+            .requiredHeight(56.dp)
     ) {
         content.invoke()
     }
 }
 
-@Preview(name = "Light", showBackground = true, backgroundColor = 0xFFFFFFFF,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
-@Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF000000,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
+@PreviewLightDark
 @Composable
 private fun PrimaryButtonPreview() {
     TaskyTheme {

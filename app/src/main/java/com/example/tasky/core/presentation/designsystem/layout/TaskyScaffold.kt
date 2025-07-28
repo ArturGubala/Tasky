@@ -23,10 +23,10 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 
 @Composable
 fun TaskyScaffold(
-    content: @Composable (() -> Unit),
     modifier: Modifier = Modifier,
     topBar: @Composable (() -> Unit) = {},
     floatingActionButton: @Composable (() -> Unit) = {},
+    content: @Composable (() -> Unit),
 ) {
     Scaffold(
         modifier = modifier,

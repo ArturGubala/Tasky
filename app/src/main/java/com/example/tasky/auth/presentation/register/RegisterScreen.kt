@@ -60,84 +60,83 @@ private fun RegisterScreen() {
                     titleContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
-        },
-        content = {
-            Column(
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 28.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(32.dp)
+        ) {
+            Column (
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 28.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(32.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column (
+                TaskyTextField(
+                    text = "",
+                    onValueChange = {},
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    TaskyTextField(
-                        text = "",
-                        onValueChange = {},
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        hintText = stringResource(R.string.name)
-                    )
-                    TaskyTextField(
-                        text = "",
-                        onValueChange = {},
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        hintText = stringResource(R.string.email_address)
-                    )
-                    TaskyPasswordTextField(
-                        state = TextFieldState(""),
-                        isPasswordVisible = false,
-                        onTogglePasswordVisibility = {},
-                        hintText = stringResource(R.string.password),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
-                Column (
+                    hintText = stringResource(R.string.name)
+                )
+                TaskyTextField(
+                    text = "",
+                    onValueChange = {},
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    hintText = stringResource(R.string.email_address)
+                )
+                TaskyPasswordTextField(
+                    state = TextFieldState(""),
+                    isPasswordVisible = false,
+                    onTogglePasswordVisibility = {},
+                    hintText = stringResource(R.string.password),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+            Column (
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                TaskyPrimaryButton(
+                    content = {
+                        Text(
+                            text = stringResource(R.string.get_started),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
                 ) {
-                    TaskyPrimaryButton(
+                    Text(
+                        text = stringResource(R.string.already_have_an_account),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    TaskyLink(
+                        onClick = {},
                         content = {
                             Text(
-                                text = stringResource(R.string.get_started),
-                                style = MaterialTheme.typography.labelMedium
+                                text = stringResource(R.string.log_in),
+                                color = MaterialTheme.colorScheme.extended.link,
+                                style = MaterialTheme.typography.labelSmall
                             )
-                        },
-                        onClick = {},
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        }
                     )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.already_have_an_account),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        TaskyLink(
-                            onClick = {},
-                            content = {
-                                Text(
-                                    text = stringResource(R.string.log_in),
-                                    color = MaterialTheme.colorScheme.extended.link,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        )
-                    }
                 }
             }
         }
-    )
+    }
 }
 
 @PreviewLightDark

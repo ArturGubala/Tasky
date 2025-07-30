@@ -20,4 +20,6 @@
     <string name="error_bad_request">Invalid request, please check your input.</string>
     <string name="error_conflict">This action conflicts with the current state, please refresh and try again.</string>
     <string name="error_unknown">An unknown error occurred.</string>
+    <string name="error_email_exists">A user with that email already exists.</string>
+    <string name="registration_successful">Registration successful! You can log in now.</string>
 </resources>

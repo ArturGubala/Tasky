@@ -1,25 +1,29 @@
 package com.example.tasky.auth.presentation.register
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyLink
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyPrimaryButton
@@ -28,20 +32,56 @@ import com.example.tasky.core.presentation.designsystem.text_fields.TaskyPasswor
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyTextField
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RegisterScreenRoot(
-    onLogInClick: () -> Unit,
+    onLoginLinkClick: () -> Unit,
     onSuccessfulRegistration: () -> Unit,
     viewModel: RegisterViewModel = koinViewModel(),
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            RegisterEvent.OnLoginClick -> {
+                onLoginLinkClick()
+            }
+            is RegisterEvent.RegistrationFailure -> {
+                keyboardController?.hide()
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            RegisterEvent.RegistrationSuccess -> {
+                keyboardController?.hide()
+                Toast.makeText(
+                    context,
+                    R.string.registration_successful,
+                    Toast.LENGTH_LONG
+                ).show()
+                onSuccessfulRegistration()
+            }
+        }
+    }
+
+    RegisterScreen(
+        state = state,
+        onAction = viewModel::onAction
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RegisterScreen() {
+private fun RegisterScreen(
+    state: RegisterState,
+    onAction: (RegisterAction) -> Unit
+) {
     TaskyScaffold(
         topBar = {
             TopAppBar(
@@ -74,26 +114,30 @@ private fun RegisterScreen() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 TaskyTextField(
-                    text = "",
+                    text = state.name,
                     onValueChange = {},
                     modifier = Modifier
                         .fillMaxWidth(),
-                    hintText = stringResource(R.string.name)
+                    hintText = stringResource(R.string.name),
+                    hasError = state.isNameValid
                 )
                 TaskyTextField(
-                    text = "",
+                    text = state.email,
                     onValueChange = {},
                     modifier = Modifier
                         .fillMaxWidth(),
-                    hintText = stringResource(R.string.email_address)
+                    hintText = stringResource(R.string.email_address),
+                    hasError = state.isEmailValid
                 )
                 TaskyPasswordTextField(
-                    state = TextFieldState(""),
-                    isPasswordVisible = false,
-                    onTogglePasswordVisibility = {},
+                    state = state.password,
+                    isPasswordVisible = state.isPasswordVisible,
+                    onTogglePasswordVisibility = {
+                        onAction(RegisterAction.OnTogglePasswordVisibilityClick)
+                    },
                     hintText = stringResource(R.string.password),
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 )
             }
             Column (
@@ -108,7 +152,9 @@ private fun RegisterScreen() {
                             style = MaterialTheme.typography.labelMedium
                         )
                     },
-                    onClick = {},
+                    onClick = {
+                        onAction(RegisterAction.OnRegisterClick)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -124,7 +170,9 @@ private fun RegisterScreen() {
                         style = MaterialTheme.typography.labelSmall
                     )
                     TaskyLink(
-                        onClick = {},
+                        onClick = {
+                            onAction(RegisterAction.OnLoginClick)
+                        },
                         content = {
                             Text(
                                 text = stringResource(R.string.log_in),
@@ -143,6 +191,9 @@ private fun RegisterScreen() {
 @Composable
 private fun RegisterScreenPreview() {
     TaskyTheme {
-        RegisterScreen()
+        RegisterScreen(
+            state = RegisterState(),
+            onAction = {}
+        )
     }
 }

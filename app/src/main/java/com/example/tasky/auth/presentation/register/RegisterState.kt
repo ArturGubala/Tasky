@@ -8,8 +8,13 @@ data class RegisterState (
     val isNameValid: Boolean = false,
     val email: String = "",
     val isEmailValid: Boolean = false,
-    val password: TextFieldState = TextFieldState(),
+    val password: String = "",
     val isPasswordVisible: Boolean = false,
     val passwordValidationState: PasswordValidationState = PasswordValidationState(),
-    val isRegistering: Boolean = false
+    val isRegistering: Boolean = false,
+    val focusedField: FocusedField? = null,
 )
+
+enum class FocusedField {
+    NAME, EMAIL, PASSWORD
+}

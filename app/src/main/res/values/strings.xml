@@ -22,4 +22,10 @@
     <string name="error_unknown">An unknown error occurred.</string>
     <string name="error_email_exists">A user with that email already exists.</string>
     <string name="registration_successful">Registration successful! You can log in now.</string>
+    <string name="must_be_a_valid_name">Name must be between %d and %d characters long.</string>
+    <string name="must_be_a_valid_email">Must be a valid email</string>
+    <string name="at_least_x_characters">At least %d characters</string>
+    <string name="at_least_one_number">At least one number</string>
+    <string name="contains_lowercase_char">Contains lowercase character</string>
+    <string name="contains_uppercase_char">Contains uppercase character</string>
 </resources>

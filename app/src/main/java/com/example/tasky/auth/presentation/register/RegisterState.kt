@@ -5,9 +5,9 @@ import com.example.tasky.auth.domain.PasswordValidationState
 
 data class RegisterState (
     val name: String = "",
-    val isNameValid: Boolean = false,
+    val isNameValid: Boolean? = null,
     val email: String = "",
-    val isEmailValid: Boolean = false,
+    val isEmailValid: Boolean? = null,
     val password: String = "",
     val isPasswordVisible: Boolean = false,
     val passwordValidationState: PasswordValidationState = PasswordValidationState(),

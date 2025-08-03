@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.ViewCompat
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 
 class MainActivity : ComponentActivity() {
@@ -12,6 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         enableEdgeToEdge()
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets -> insets }
         setContent {
             TaskyTheme { }
         }

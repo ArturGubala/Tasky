@@ -1,10 +1,16 @@
 package com.example.tasky.core.presentation.designsystem.text_fields
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,12 +30,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
+import com.example.tasky.auth.presentation.register.ValidationItem
+import com.example.tasky.core.presentation.designsystem.TaskyErrorText
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 
@@ -40,71 +49,125 @@ fun TaskyPasswordTextField(
     onTogglePasswordVisibility: () -> Unit,
     hintText: String?,
     modifier: Modifier = Modifier,
+    onFocusChanged: ((Boolean) -> Unit)? = null,
     hintColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(
         color = MaterialTheme.colorScheme.onSurface
     ),
-    isFocused: Boolean = false
+    isValid: Boolean? = null,
+    isFocused: Boolean = false,
+    errors: List<ValidationItem>? = null
 ) {
-    BasicSecureTextField(
-        state = state,
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.extended.surfaceHigher,
-                shape = RoundedCornerShape(10.dp)
-            )
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        textStyle = MaterialTheme.typography.bodyMedium.copy(
-            color = MaterialTheme.colorScheme.onSurface
-        ),
-        decorator = TextFieldDecorator { innerTextField ->
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        BasicSecureTextField(
+            state = state,
+            modifier = modifier
+                .background(
+                    color = MaterialTheme.colorScheme.extended.surfaceHigher,
+                    shape = RoundedCornerShape(10.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = if (isValid != null && !isValid) MaterialTheme.colorScheme.error
+                    else Color.Transparent,
+                    shape = RoundedCornerShape(10.dp)
+                )
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .onFocusChanged { focusState ->
+                    onFocusChanged?.invoke(focusState.hasFocus)
+                },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.onSurface
+            ),
+            decorator = TextFieldDecorator { innerTextField ->
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(
-                    contentAlignment = Alignment.CenterStart
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    Box(
+                        contentAlignment = Alignment.CenterStart
+                    ) {
 
-                    if (state.text.isBlank() && hintText != null && isFocused) {
-                        Row {
+                        if (state.text.isBlank() && hintText != null && isFocused) {
+                            Row {
+                                Text(
+                                    text = hintText,
+                                    color = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
+                                    style = textStyle
+                                )
+                                innerTextField()
+                            }
+                        } else if (state.text.isBlank() && hintText != null && !isFocused) {
                             Text(
                                 text = hintText,
-                                color = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
+                                color = hintColor,
                                 style = textStyle
                             )
+                        } else {
                             innerTextField()
                         }
-                    } else if (state.text.isBlank() && hintText != null && !isFocused) {
-                        Text(
-                            text = hintText,
-                            color = hintColor,
-                            style = textStyle
+                    }
+
+                    IconButton(onClick = onTogglePasswordVisibility, modifier = Modifier.size(20.dp)) {
+                        Icon(
+                            imageVector = if (!isPasswordVisible) {
+                                Icons.Default.VisibilityOff
+                            } else Icons.Default.Visibility,
+                            contentDescription = if(isPasswordVisible) {
+                                stringResource(id = R.string.show_password)
+                            } else {
+                                stringResource(id = R.string.hide_password)
+                            },
+                            tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                         )
-                    } else {
-                        innerTextField()
                     }
                 }
-
-                IconButton(onClick = onTogglePasswordVisibility, modifier = Modifier.size(20.dp)) {
-                    Icon(
-                        imageVector = if (!isPasswordVisible) {
-                            Icons.Default.VisibilityOff
-                        } else Icons.Default.Visibility,
-                        contentDescription = if(isPasswordVisible) {
-                            stringResource(id = R.string.show_password)
+            },
+            textObfuscationMode = if (isPasswordVisible) {
+                TextObfuscationMode.Visible
+            } else TextObfuscationMode.Hidden,
+        )
+        AnimatedVisibility(
+            visible = isValid != null && !isValid,
+            enter = expandVertically(
+                expandFrom = Alignment.Top,
+                animationSpec = tween(
+                    durationMillis = 300
+                )
+            ),
+            exit = shrinkVertically(
+                shrinkTowards = Alignment.Top,
+                animationSpec = tween(
+                    durationMillis = 250
+                )
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.extended.surfaceHigher,
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                errors?.forEach { error ->
+                    TaskyErrorText(
+                        text = if (error.formatArgs.isNotEmpty()) {
+                            stringResource(error.textResId, *error.formatArgs.toTypedArray())
                         } else {
-                            stringResource(id = R.string.hide_password)
+                            stringResource(error.textResId)
                         },
-                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                        isValid = error.isValid
                     )
                 }
             }
-        },
-        textObfuscationMode = if (isPasswordVisible) {
-            TextObfuscationMode.Visible
-        } else TextObfuscationMode.Hidden,
-    )
+        }
+    }
 }
 
 @PreviewLightDark

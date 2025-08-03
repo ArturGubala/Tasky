@@ -1,23 +1,28 @@
 package com.example.tasky.auth.presentation.register
 
 import android.widget.Toast
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +49,7 @@ fun RegisterScreenRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -72,7 +78,11 @@ fun RegisterScreenRoot(
 
     RegisterScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        onClearFocus = {
+            keyboardController?.hide()
+            focusManager.clearFocus()
+        }
     )
 }
 
@@ -80,8 +90,18 @@ fun RegisterScreenRoot(
 @Composable
 private fun RegisterScreen(
     state: RegisterState,
-    onAction: (RegisterAction) -> Unit
+    onAction: (RegisterAction) -> Unit,
+    onClearFocus: (() -> Unit)? = null
 ) {
+    val passwordState = rememberTextFieldState(initialText = state.password)
+
+    LaunchedEffect(passwordState.text) {
+        val newPassword = passwordState.text.toString()
+        if (newPassword != state.password) {
+            onAction(RegisterAction.OnPasswordValueChanged(newPassword))
+        }
+    }
+
     TaskyScaffold(
         topBar = {
             TopAppBar(
@@ -94,7 +114,12 @@ private fun RegisterScreen(
                     )
                 },
                 modifier = Modifier
-                    .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp),
+                    .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            onClearFocus?.invoke()
+                        })
+                    },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
@@ -105,7 +130,12 @@ private fun RegisterScreen(
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 28.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        onClearFocus?.invoke()
+                    })
+                },
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             Column (
@@ -115,22 +145,32 @@ private fun RegisterScreen(
             ) {
                 TaskyTextField(
                     text = state.name,
-                    onValueChange = {},
+                    onValueChange = { onAction(RegisterAction.OnNameValueChanged(it)) },
+                    onFocusChanged = { hasFocus ->
+                        onAction(RegisterAction.OnFocusChanged(FocusedField.NAME, hasFocus))
+                    },
                     modifier = Modifier
                         .fillMaxWidth(),
                     hintText = stringResource(R.string.name),
-                    hasError = state.isNameValid
+                    isValid = state.isNameValid,
+                    isFocused = state.focusedField == FocusedField.NAME,
+                    errors = state.errors
                 )
                 TaskyTextField(
                     text = state.email,
-                    onValueChange = {},
+                    onValueChange = { onAction(RegisterAction.OnEmailValueChanged(it)) },
+                    onFocusChanged = { hasFocus ->
+                        onAction(RegisterAction.OnFocusChanged(FocusedField.EMAIL, hasFocus))
+                    },
                     modifier = Modifier
                         .fillMaxWidth(),
                     hintText = stringResource(R.string.email_address),
-                    hasError = state.isEmailValid
+                    isValid = state.isEmailValid,
+                    isFocused = state.focusedField == FocusedField.EMAIL,
+                    errors = state.errors
                 )
                 TaskyPasswordTextField(
-                    state = state.password,
+                    state = passwordState,
                     isPasswordVisible = state.isPasswordVisible,
                     onTogglePasswordVisibility = {
                         onAction(RegisterAction.OnTogglePasswordVisibilityClick)
@@ -138,6 +178,12 @@ private fun RegisterScreen(
                     hintText = stringResource(R.string.password),
                     modifier = Modifier
                         .fillMaxWidth(),
+                    onFocusChanged = { hasFocus ->
+                        onAction(RegisterAction.OnFocusChanged(FocusedField.PASSWORD, hasFocus))
+                    },
+                    isValid = state.passwordValidationState.isValidPasswordOrNull,
+                    isFocused = state.focusedField == FocusedField.PASSWORD,
+                    errors = state.errors
                 )
             }
             Column (

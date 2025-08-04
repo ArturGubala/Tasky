@@ -11,7 +11,7 @@ class UserDataValidator(
         return patternValidator.matches(email.trim())
     }
 
-    fun validatePassword(password: String, hasBeenValidated: Boolean): PasswordValidationState {
+    fun validatePassword(password: String): PasswordValidationState {
         val hasMinLength = password.length >= ValidationRules.MIN_PASSWORD_LENGTH
         val hasDigit = password.any { it.isDigit() }
         val hasLowerCaseCharacter = password.any { it.isLowerCase() }
@@ -21,8 +21,7 @@ class UserDataValidator(
             hasMinLength = hasMinLength,
             hasNumber = hasDigit,
             hasLowerCaseCharacter = hasLowerCaseCharacter,
-            hasUpperCaseCharacter = hasUpperCaseCharacter,
-            hasBeenValidated = hasBeenValidated
+            hasUpperCaseCharacter = hasUpperCaseCharacter
         )
     }
 }

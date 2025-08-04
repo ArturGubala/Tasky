@@ -1,6 +1,7 @@
 package com.example.tasky.core.presentation.designsystem.text_fields
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
+import com.example.tasky.auth.presentation.register.FocusedField
 import com.example.tasky.auth.presentation.register.ValidationItem
 import com.example.tasky.core.presentation.designsystem.TaskyErrorText
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -51,12 +53,12 @@ fun TaskyTextField(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    isValid: Boolean? = null,
+    isValid: Boolean = false,
     isFocused: Boolean = false,
-    errors: List<ValidationItem>? = null
+    errors: List<ValidationItem> = emptyList()
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.animateContentSize(animationSpec = tween(durationMillis = 150)),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         BasicTextField(
@@ -70,7 +72,7 @@ fun TaskyTextField(
                 )
                 .border(
                     width = 1.dp,
-                    color = if (isValid != null && !isValid) MaterialTheme.colorScheme.error
+                    color = if (!isValid && !isFocused && errors.isNotEmpty()) MaterialTheme.colorScheme.error
                     else Color.Transparent,
                     shape = RoundedCornerShape(10.dp)
                 )
@@ -108,7 +110,7 @@ fun TaskyTextField(
                         }
                     }
 
-                    if (text.isNotBlank() && isValid != null && isValid) {
+                    if (text.isNotBlank() && isValid) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Valid input",
@@ -120,11 +122,11 @@ fun TaskyTextField(
             }
         )
         AnimatedVisibility(
-            visible = isValid != null && !isValid,
+            visible = !isValid && !isFocused && errors.isNotEmpty(),
             enter = expandVertically(
                 expandFrom = Alignment.Top,
                 animationSpec = tween(
-                    durationMillis = 300
+                    durationMillis = 250
                 )
             ),
             exit = shrinkVertically(
@@ -189,10 +191,12 @@ private fun TaskyTextFieldPreview() {
                     ValidationItem(
                         textResId = R.string.must_be_a_valid_email,
                         isValid = false,
+                        focusedField = FocusedField.EMAIL
                     ),
                     ValidationItem(
                         textResId = R.string.must_be_a_valid_email,
                         isValid = true,
+                        focusedField = FocusedField.EMAIL
                     )
                 )
             )

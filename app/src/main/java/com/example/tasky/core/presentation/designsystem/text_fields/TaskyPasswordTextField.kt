@@ -1,6 +1,7 @@
 package com.example.tasky.core.presentation.designsystem.text_fields
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -54,12 +55,13 @@ fun TaskyPasswordTextField(
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(
         color = MaterialTheme.colorScheme.onSurface
     ),
-    isValid: Boolean? = null,
+    isValid: Boolean = false,
     isFocused: Boolean = false,
-    errors: List<ValidationItem>? = null
+    errors: List<ValidationItem> = emptyList()
 ) {
     Column(
-        modifier = modifier,
+
+        modifier = modifier.animateContentSize(animationSpec = tween(durationMillis = 150)),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         BasicSecureTextField(
@@ -71,7 +73,7 @@ fun TaskyPasswordTextField(
                 )
                 .border(
                     width = 1.dp,
-                    color = if (isValid != null && !isValid) MaterialTheme.colorScheme.error
+                    color = if (!isValid && !isFocused && errors.isNotEmpty()) MaterialTheme.colorScheme.error
                     else Color.Transparent,
                     shape = RoundedCornerShape(10.dp)
                 )
@@ -131,11 +133,11 @@ fun TaskyPasswordTextField(
             } else TextObfuscationMode.Hidden,
         )
         AnimatedVisibility(
-            visible = isValid != null && !isValid,
+            visible = !isValid && !isFocused && errors.isNotEmpty(),
             enter = expandVertically(
                 expandFrom = Alignment.Top,
                 animationSpec = tween(
-                    durationMillis = 300
+                    durationMillis = 250
                 )
             ),
             exit = shrinkVertically(

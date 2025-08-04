@@ -154,7 +154,7 @@ private fun RegisterScreen(
                     hintText = stringResource(R.string.name),
                     isValid = state.isNameValid,
                     isFocused = state.focusedField == FocusedField.NAME,
-                    errors = state.errors
+                    errors = state.errors.filter { it.focusedField == FocusedField.NAME }
                 )
                 TaskyTextField(
                     text = state.email,
@@ -167,7 +167,7 @@ private fun RegisterScreen(
                     hintText = stringResource(R.string.email_address),
                     isValid = state.isEmailValid,
                     isFocused = state.focusedField == FocusedField.EMAIL,
-                    errors = state.errors
+                    errors = state.errors.filter { it.focusedField == FocusedField.EMAIL }
                 )
                 TaskyPasswordTextField(
                     state = passwordState,
@@ -181,9 +181,9 @@ private fun RegisterScreen(
                     onFocusChanged = { hasFocus ->
                         onAction(RegisterAction.OnFocusChanged(FocusedField.PASSWORD, hasFocus))
                     },
-                    isValid = state.passwordValidationState.isValidPasswordOrNull,
+                    isValid = state.passwordValidationState.isValidPassword,
                     isFocused = state.focusedField == FocusedField.PASSWORD,
-                    errors = state.errors
+                    errors = state.errors.filter { it.focusedField == FocusedField.PASSWORD }
                 )
             }
             Column (

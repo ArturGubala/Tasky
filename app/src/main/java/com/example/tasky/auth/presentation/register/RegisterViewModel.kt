@@ -105,14 +105,7 @@ class RegisterViewModel(
         } else if (hasFocus) {
             _state.update { it ->
                 it.copy(
-                    isNameValid = if (it.isNameValid != null && !it.isNameValid) null else it.isNameValid,
-                    isEmailValid = if (it.isEmailValid != null && !it.isEmailValid) null else it.isEmailValid,
-                    passwordValidationState = if (it.passwordValidationState.hasBeenValidated &&
-                        !it.passwordValidationState.isValidPassword) {
-                        it.passwordValidationState.copy(hasBeenValidated = false)
-                    } else {
-                        it.passwordValidationState
-                    }
+                    errors = emptyList()
                 )
             }
         }
@@ -137,9 +130,8 @@ class RegisterViewModel(
                 }
             }
             FocusedField.PASSWORD -> {
-                val passwordValidationState = userDataValidator.validatePassword(
-                    password = _state.value.password,
-                    hasBeenValidated = true)
+                val passwordValidationState =
+                    userDataValidator.validatePassword(password = _state.value.password)
                 _state.update {
                     val updatedState = it.copy(
                         passwordValidationState = passwordValidationState

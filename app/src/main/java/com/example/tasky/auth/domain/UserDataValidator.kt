@@ -3,7 +3,7 @@ package com.example.tasky.auth.domain
 class UserDataValidator(
     private val patternValidator: PatternValidator
 ) {
-    fun validateName(name: String): Boolean {
+    fun isValidName(name: String): Boolean {
         return name.length in ValidationRules.MIN_NAME_LENGTH..ValidationRules.MAX_NAME_LENGTH
     }
 

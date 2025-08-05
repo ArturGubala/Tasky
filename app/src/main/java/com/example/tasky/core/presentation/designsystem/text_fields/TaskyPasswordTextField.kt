@@ -154,10 +154,10 @@ fun TaskyPasswordTextField(
                         color = MaterialTheme.colorScheme.extended.surfaceHigher,
                         shape = RoundedCornerShape(10.dp)
                     )
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                    .padding(start = 5.dp, top = 8.dp , end = 20.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                errors?.forEach { error ->
+                errors.forEach { error ->
                     TaskyErrorText(
                         text = if (error.formatArgs.isNotEmpty()) {
                             stringResource(error.textResId, *error.formatArgs.toTypedArray())

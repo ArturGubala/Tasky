@@ -3,6 +3,7 @@ package com.example.tasky.core.presentation.designsystem
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -34,13 +35,15 @@ fun TaskyErrorText(
             Icon(
                 imageVector = Icons.Outlined.CheckCircle,
                 contentDescription = "Success icon",
+                modifier = modifier.size(15.dp),
                 tint = MaterialTheme.colorScheme.extended.success
             )
             ErrorText(text = text, MaterialTheme.colorScheme.extended.success)
         } else {
             Icon(
                 imageVector = Icons.Outlined.ErrorOutline,
-                contentDescription = "Success icon",
+                contentDescription = "Error icon",
+                modifier = modifier.size(15.dp),
                 tint = MaterialTheme.colorScheme.error
             )
             ErrorText(text = text, color = MaterialTheme.colorScheme.error)
@@ -58,7 +61,7 @@ private fun ErrorText(
         text = text,
         modifier = modifier,
         color = color,
-        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp)
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp)
     )
 }
 

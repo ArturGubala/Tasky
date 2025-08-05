@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.tasky.BuildConfig
 import com.example.tasky.auth.di.authDataModule
 import com.example.tasky.auth.presentation.di.authViewModelModule
+import com.example.tasky.core.data.di.coreDataModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -22,7 +23,8 @@ class TaskyApp: Application() {
             androidContext(this@TaskyApp)
             modules(
                 authDataModule,
-                authViewModelModule
+                authViewModelModule,
+                coreDataModule
             )
         }
     }

@@ -79,10 +79,7 @@ fun RegisterScreenRoot(
     RegisterScreen(
         state = state,
         onAction = viewModel::onAction,
-        onClearFocus = {
-            keyboardController?.hide()
-            focusManager.clearFocus()
-        }
+        onClearFocus = { focusManager.clearFocus() }
     )
 }
 
@@ -202,7 +199,8 @@ private fun RegisterScreen(
                         onAction(RegisterAction.OnRegisterClick)
                     },
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    enabled = state.canRegister
                 )
                 Row(
                     modifier = Modifier

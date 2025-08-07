@@ -29,7 +29,8 @@ class AuthRepositoryImpl(
                     accessToken = result.data.accessToken,
                     refreshToken = result.data.refreshToken,
                     userName = result.data.username,
-                    userId = result.data.userId
+                    userId = result.data.userId,
+                    accessTokenExpirationTimestamp = result.data.accessTokenExpirationTimestamp,
                 )
             )
         }

@@ -20,6 +20,8 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class HttpClientFactory(
     private val sessionStorage: SessionStorage
@@ -65,11 +67,14 @@ class HttpClientFactory(
                         )
 
                         if(response is Result.Success) {
+                            val accessTokenExpirationTimestamp =
+                                Instant.now().plus(60, ChronoUnit.MINUTES).toString()
                             val newAuthInfo = AuthInfo(
                                 accessToken = response.data.accessToken,
                                 refreshToken = response.data.refreshToken,
                                 userName = info?.userName ?: "",
-                                userId = info?.userId ?: ""
+                                userId = info?.userId ?: "",
+                                accessTokenExpirationTimestamp = accessTokenExpirationTimestamp
                             )
                             sessionStorage.set(newAuthInfo)
 

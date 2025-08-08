@@ -5,5 +5,5 @@ data class AuthInfo(
     val refreshToken: String,
     val userName: String,
     val userId: String,
-    val accessTokenExpirationTimestamp: Long
+    val accessTokenExpirationTimestamp: String
 )

@@ -8,5 +8,5 @@ data class LoginResponse(
     val refreshToken: String,
     val username: String,
     val userId: String,
-    val accessTokenExpirationTimestamp: Long
+    val accessTokenExpirationTimestamp: String
 )

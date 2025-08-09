@@ -48,4 +48,13 @@ class AuthRepositoryImpl(
             )
         )
     }
+
+    override suspend fun refreshToken(refreshToken: String): EmptyResult<DataError.Network> {
+        return httpClient.post<RefreshRequest, Unit>(
+            route = "/auth/refresh",
+            body = RefreshRequest(
+                refreshToken = refreshToken
+            )
+        )
+    }
 }

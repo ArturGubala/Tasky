@@ -6,4 +6,5 @@ import com.example.tasky.core.domain.util.EmptyResult
 interface AuthRepository {
     suspend fun login(email: String, password: String): EmptyResult<DataError.Network>
     suspend fun register(fullName: String, email: String, password: String): EmptyResult<DataError.Network>
+    suspend fun refreshToken(refreshToken: String): EmptyResult<DataError.Network>
 }

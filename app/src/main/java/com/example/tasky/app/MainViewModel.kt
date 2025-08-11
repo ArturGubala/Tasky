@@ -3,8 +3,8 @@ package com.example.tasky.app
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.core.data.datastore.EncryptedSessionStorage
 import com.example.tasky.core.domain.AuthState
+import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +14,7 @@ import java.time.Instant
 import java.time.format.DateTimeParseException
 
 class MainViewModel(
-    private val sessionStorage: EncryptedSessionStorage,
+    private val sessionStorage: SessionStorage,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 

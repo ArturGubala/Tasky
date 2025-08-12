@@ -29,8 +29,7 @@ class AuthRepositoryImpl(
                     accessToken = result.data.accessToken,
                     refreshToken = result.data.refreshToken,
                     userName = result.data.username,
-                    userId = result.data.userId,
-                    accessTokenExpirationTimestamp = result.data.accessTokenExpirationTimestamp,
+                    userId = result.data.userId
                 )
             )
         }
@@ -45,15 +44,6 @@ class AuthRepositoryImpl(
                 fullName = fullName,
                 email = email,
                 password = password
-            )
-        )
-    }
-
-    override suspend fun refreshToken(refreshToken: String): EmptyResult<DataError.Network> {
-        return httpClient.post<RefreshRequest, Unit>(
-            route = "/auth/refresh",
-            body = RefreshRequest(
-                refreshToken = refreshToken
             )
         )
     }

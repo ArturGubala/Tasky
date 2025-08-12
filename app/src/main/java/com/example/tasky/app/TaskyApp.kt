@@ -2,6 +2,7 @@ package com.example.tasky.app
 
 import android.app.Application
 import com.example.tasky.BuildConfig
+import com.example.tasky.app.di.appModule
 import com.example.tasky.auth.di.authDataModule
 import com.example.tasky.auth.presentation.di.authViewModelModule
 import com.example.tasky.core.data.di.coreDataModule
@@ -22,6 +23,7 @@ class TaskyApp: Application() {
             androidLogger()
             androidContext(this@TaskyApp)
             modules(
+                appModule,
                 authDataModule,
                 authViewModelModule,
                 coreDataModule

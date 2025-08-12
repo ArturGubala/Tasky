@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 fun NavGraphBuilder.agendaNavGraph(
     navController: NavHostController
 ) {
-    navigation<AgendaRoute>(
+    navigation<AgendaGraph>(
         startDestination = AgendaScreen,
     ) {
         agendaScreen(navController = navController)
@@ -40,7 +40,7 @@ fun NavGraphBuilder.agendaScreen(
 }
 
 @Serializable
-object AgendaRoute
+object AgendaGraph
 
 @Serializable
 object AgendaScreen

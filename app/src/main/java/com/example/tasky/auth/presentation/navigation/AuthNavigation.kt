@@ -16,10 +16,10 @@ import kotlinx.serialization.Serializable
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavHostController,
-    isNewUser: Boolean
+    isLoggedIn: Boolean
 ) {
-    navigation<AuthRoute>(
-        startDestination = if (isNewUser) RegisterScreen else LoginScreen
+    navigation<AuthGraph>(
+        startDestination = if (isLoggedIn) LoginScreen else RegisterScreen
     ) {
         registerScreen(navController = navController)
         loginScreen(navController = navController)
@@ -56,7 +56,7 @@ fun NavGraphBuilder.loginScreen(
 }
 
 @Serializable
-object AuthRoute
+object AuthGraph
 
 @Serializable
 object RegisterScreen

@@ -2,7 +2,6 @@ package com.example.tasky.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.datastore.SessionStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,8 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val sessionStorage: SessionStorage,
-    private val authRepository: AuthRepository
+    private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())

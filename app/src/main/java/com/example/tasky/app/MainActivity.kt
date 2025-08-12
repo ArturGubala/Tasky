@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     TaskyNavHost(
                         navController = navController,
-                        authState = state.authState
+                        isLoggedIn = state.isLoggedIn
                     )
                 }
             }

@@ -4,7 +4,6 @@ package com.example.tasky.auth.presentation.register
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -53,6 +51,7 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.util.DeviceConfiguration
+import com.example.tasky.core.presentation.util.clearFocusOnTapOutside
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -130,11 +129,7 @@ private fun RegisterScreen(
                     Box(
                         modifier = Modifier
                             .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp)
-                            .pointerInput(Unit) {
-                                detectTapGestures(onTap = {
-                                    onClearFocus?.invoke()
-                                })
-                            }
+                            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() })
                     ) {
                         Text(
                             text = stringResource(R.string.create_your_account),
@@ -167,14 +162,9 @@ private fun RegisterScreen(
                 ) {
                     Box(
                         modifier = Modifier
-//                            .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp)
                             .padding(end = 24.dp)
                             .fillMaxHeight()
-                            .pointerInput(Unit) {
-                                detectTapGestures(onTap = {
-                                    onClearFocus?.invoke()
-                                })
-                            },
+                            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
                         contentAlignment = BiasAlignment(
                             horizontalBias = 0f,
                             verticalBias = -0.3f
@@ -219,11 +209,7 @@ private fun RegisterScreen(
                     Box(
                         modifier = Modifier
                             .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp)
-                            .pointerInput(Unit) {
-                                detectTapGestures(onTap = {
-                                    onClearFocus?.invoke()
-                                })
-                            }
+                            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() })
                     ) {
                         Text(
                             text = stringResource(R.string.create_your_account),
@@ -265,11 +251,7 @@ private fun RegisterFormSection(
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp, vertical = 28.dp)
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    onClearFocus?.invoke()
-                })
-            },
+            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Column (

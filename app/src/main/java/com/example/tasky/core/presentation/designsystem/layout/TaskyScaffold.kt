@@ -3,9 +3,12 @@
 package com.example.tasky.core.presentation.designsystem.layout
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,22 +29,17 @@ fun TaskyScaffold(
     modifier: Modifier = Modifier,
     topBar: @Composable (() -> Unit) = {},
     floatingActionButton: @Composable (() -> Unit) = {},
-    content: @Composable (() -> Unit),
+    content: @Composable ((PaddingValues) -> Unit),
 ) {
     Scaffold(
         modifier = modifier,
         topBar = topBar,
         floatingActionButton = floatingActionButton,
         containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onBackground
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        contentWindowInsets = WindowInsets.statusBars
     ) { padding ->
-        TaskyContentBox(
-            content = content,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.TopCenter
-        )
+        content.invoke(padding)
     }
 }
 
@@ -50,7 +48,22 @@ fun TaskyScaffold(
 private fun TaskyBaseLayoutPreview() {
     TaskyTheme {
         TaskyScaffold(
-            content = {
+            topBar = {
+                TopAppBar(
+                    title = { Text("Top app bar") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground
+                    )
+                )
+            }
+        ) { padding ->
+            TaskyContentBox(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.TopCenter
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -61,16 +74,7 @@ private fun TaskyBaseLayoutPreview() {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-            },
-            topBar = {
-                TopAppBar(
-                    title = { Text("Top app bar") },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground
-                    )
-                )
             }
-        )
+        }
     }
 }

@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +20,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
@@ -45,6 +42,7 @@ import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyLink
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyPrimaryButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
+import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyPasswordTextField
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyTextField
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -115,11 +113,7 @@ private fun RegisterScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onBackground,
-        contentWindowInsets = WindowInsets.statusBars
-    ) { padding ->
+    TaskyScaffold { padding ->
 
         when(deviceConfiguration) {
             DeviceConfiguration.MOBILE_PORTRAIT -> {

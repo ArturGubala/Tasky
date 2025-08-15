@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
@@ -25,6 +25,8 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -105,6 +107,7 @@ private fun RegisterScreen(
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
+    val Header = rememberRegisterHeader(R.string.create_your_account)
 
     LaunchedEffect(passwordState.text) {
         val newPassword = passwordState.text.toString()
@@ -120,19 +123,10 @@ private fun RegisterScreen(
                 Column(
                     modifier = Modifier.padding(padding)
                 ) {
-                    Box(
-                        modifier = Modifier
+                    Header(
+                        Modifier
                             .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp)
-                            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() })
-                    ) {
-                        Text(
-                            text = stringResource(R.string.create_your_account),
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    )
                     TaskyContentBox(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -154,24 +148,12 @@ private fun RegisterScreen(
                         .padding(start = 24.dp, top = 18.dp, end = 24.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
+                    Header(
+                        Modifier
                             .padding(end = 24.dp)
+                            .widthIn(max = 220.dp)
                             .fillMaxHeight()
-                            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
-                        contentAlignment = BiasAlignment(
-                            horizontalBias = 0f,
-                            verticalBias = -0.3f
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(R.string.create_your_account_landscape),
-                            modifier = Modifier.width(200.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    )
                     TaskyContentBox(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -200,22 +182,8 @@ private fun RegisterScreen(
                         .padding(horizontal = 156.dp)
                         .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp)
-                            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() })
-                    ) {
-                        Text(
-                            text = stringResource(R.string.create_your_account),
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    Header(Modifier.padding(start = 40.dp, top = 40.dp, end = 40.dp, bottom = 36.dp))
                     TaskyContentBox(
-//                        modifier = Modifier
-//                            .fillMaxSize(),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         RegisterFormSection(
@@ -228,8 +196,6 @@ private fun RegisterScreen(
                 }
             }
         }
-
-
     }
 }
 
@@ -339,6 +305,26 @@ private fun RegisterFormSection(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun rememberRegisterHeader(textRes: Int) = remember(textRes) {
+    movableContentOf<Modifier> { modifier ->
+        Box(
+            modifier = modifier,
+            contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
+        ) {
+            Text(
+                text = stringResource(textRes),
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                softWrap = true
+            )
         }
     }
 }

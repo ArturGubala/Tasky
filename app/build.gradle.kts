@@ -98,4 +98,7 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Adaptive
+    implementation(libs.androidx.compose.material3.adaptive)
 }

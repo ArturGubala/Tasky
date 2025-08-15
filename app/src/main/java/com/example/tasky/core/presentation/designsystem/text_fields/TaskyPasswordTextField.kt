@@ -60,13 +60,13 @@ fun TaskyPasswordTextField(
     errors: List<ValidationItem> = emptyList()
 ) {
     Column(
-
         modifier = modifier.animateContentSize(animationSpec = tween(durationMillis = 150)),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         BasicSecureTextField(
             state = state,
-            modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth()
                 .background(
                     color = MaterialTheme.colorScheme.extended.surfaceHigher,
                     shape = RoundedCornerShape(10.dp)

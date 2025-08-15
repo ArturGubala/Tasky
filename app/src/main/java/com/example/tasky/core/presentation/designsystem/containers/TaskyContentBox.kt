@@ -19,9 +19,9 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 
 @Composable
 fun TaskyContentBox(
-    content: @Composable (() -> Unit),
     modifier: Modifier = Modifier,
-    contentAlignment: Alignment = Alignment.CenterStart
+    contentAlignment: Alignment = Alignment.CenterStart,
+    content: @Composable (() -> Unit),
 ) {
     Box(
         modifier = modifier

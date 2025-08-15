@@ -1,10 +1,13 @@
 package com.example.tasky.app
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.input.key.Key.Companion.Window
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
@@ -21,7 +24,11 @@ class MainActivity : ComponentActivity() {
         installSplashScreen().apply {
             setKeepOnScreenCondition { viewModel.state.value.isCheckingAuth }
         }
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            // TODO: is that hard-styled system bar color ok or should it be dynamic somehow?
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+        )
         // TODO: change to something that change color for system bars to transparent,
         // TODO: have to play with that
 //        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets -> insets }

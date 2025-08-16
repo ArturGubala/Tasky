@@ -1,11 +1,11 @@
 package com.example.tasky.auth.presentation.register
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.UserDataValidator
+import com.example.tasky.auth.domain.ValidationItem
 import com.example.tasky.auth.domain.ValidationRules
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.Result
@@ -189,10 +189,3 @@ class RegisterViewModel(
 enum class FocusedField {
     NAME, EMAIL, PASSWORD
 }
-
-data class ValidationItem(
-    @StringRes val textResId: Int,
-    val isValid: Boolean,
-    val formatArgs: List<Any> = emptyList(),
-    val focusedField: FocusedField
-)

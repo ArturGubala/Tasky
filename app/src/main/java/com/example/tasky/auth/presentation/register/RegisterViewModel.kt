@@ -152,7 +152,7 @@ class RegisterViewModel(
                 !_state.value.isRegistering
     }
 
-    fun getValidationItemsForFocusedField(): List<ValidationItem> {
+    private fun getValidationItemsForFocusedField(): List<ValidationItem> {
         return when (_state.value.focusedField) {
             RegisterFocusedField.NAME -> getNameValidationItems()
             RegisterFocusedField.EMAIL -> getEmailValidationItems()

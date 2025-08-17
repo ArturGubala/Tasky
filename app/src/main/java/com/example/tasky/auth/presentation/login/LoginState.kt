@@ -1,5 +1,6 @@
 package com.example.tasky.auth.presentation.login
 
+import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.ValidationItem
 
 data class LoginState(
@@ -10,5 +11,6 @@ data class LoginState(
     val isPasswordVisible: Boolean = false,
     val canLogin: Boolean = false,
     val isLoggingIn: Boolean = false,
+    val focusedField: FocusedField? = null,
     val errors: List<ValidationItem> = emptyList(),
 )

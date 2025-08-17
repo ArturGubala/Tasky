@@ -34,7 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
-import com.example.tasky.auth.presentation.register.FocusedField
+import com.example.tasky.auth.presentation.register.RegisterFocusedField
 import com.example.tasky.auth.domain.ValidationItem
 import com.example.tasky.core.presentation.designsystem.TaskyErrorText
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -191,12 +191,12 @@ private fun TaskyTextFieldPreview() {
                     ValidationItem(
                         textResId = R.string.must_be_a_valid_email,
                         isValid = false,
-                        focusedField = FocusedField.EMAIL
+                        focusedField = RegisterFocusedField.EMAIL
                     ),
                     ValidationItem(
                         textResId = R.string.must_be_a_valid_email,
                         isValid = true,
-                        focusedField = FocusedField.EMAIL
+                        focusedField = RegisterFocusedField.EMAIL
                     )
                 )
             )

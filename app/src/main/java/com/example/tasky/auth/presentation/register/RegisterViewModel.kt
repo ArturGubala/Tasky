@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
 import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.UserDataValidator
 import com.example.tasky.auth.domain.ValidationItem
 import com.example.tasky.auth.domain.ValidationRules
@@ -117,21 +118,21 @@ class RegisterViewModel(
 
     private fun validateFieldOnFocusLoss(field: FocusedField) {
         when (field) {
-            FocusedField.NAME -> {
+            RegisterFocusedField.NAME -> {
                 val isNameValid = userDataValidator.isValidName(_state.value.name)
                 _state.update {
                     val updatedState = it.copy(isNameValid = isNameValid)
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
-            FocusedField.EMAIL -> {
+            RegisterFocusedField.EMAIL -> {
                 val isEmailValid = userDataValidator.validateEmail(_state.value.email)
                 _state.update {
                     val updatedState = it.copy(isEmailValid = isEmailValid)
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
-            FocusedField.PASSWORD -> {
+            RegisterFocusedField.PASSWORD -> {
                 val passwordValidationState =
                     userDataValidator.validatePassword(password = _state.value.password)
                 _state.update {
@@ -153,10 +154,11 @@ class RegisterViewModel(
 
     fun getValidationItemsForFocusedField(): List<ValidationItem> {
         return when (_state.value.focusedField) {
-            FocusedField.NAME -> getNameValidationItems()
-            FocusedField.EMAIL -> getEmailValidationItems()
-            FocusedField.PASSWORD -> _state.value.passwordValidationState.getPasswordValidationItems()
+            RegisterFocusedField.NAME -> getNameValidationItems()
+            RegisterFocusedField.EMAIL -> getEmailValidationItems()
+            RegisterFocusedField.PASSWORD -> _state.value.passwordValidationState.getPasswordValidationItems()
             null -> emptyList()
+            else -> emptyList()
         }
     }
 
@@ -167,7 +169,7 @@ class RegisterViewModel(
                     textResId = R.string.must_be_a_valid_name,
                     isValid = _state.value.isNameValid,
                     formatArgs = listOf(ValidationRules.MIN_NAME_LENGTH, ValidationRules.MAX_NAME_LENGTH),
-                    focusedField = FocusedField.NAME
+                    focusedField = RegisterFocusedField.NAME
                 )
             )
         } else emptyList()
@@ -179,13 +181,13 @@ class RegisterViewModel(
                 ValidationItem(
                     textResId = R.string.must_be_a_valid_email,
                     isValid = _state.value.isEmailValid,
-                    focusedField = FocusedField.EMAIL
+                    focusedField = RegisterFocusedField.EMAIL
                 )
             )
         } else emptyList()
     }
 }
 
-enum class FocusedField {
+enum class RegisterFocusedField : FocusedField {
     NAME, EMAIL, PASSWORD
 }

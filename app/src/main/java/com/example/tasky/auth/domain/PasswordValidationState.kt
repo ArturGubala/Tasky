@@ -1,7 +1,7 @@
 package com.example.tasky.auth.domain
 
 import com.example.tasky.R
-import com.example.tasky.auth.presentation.register.FocusedField
+import com.example.tasky.auth.presentation.register.RegisterFocusedField
 
 data class PasswordValidationState(
     val hasMinLength: Boolean = false,
@@ -19,20 +19,20 @@ data class PasswordValidationState(
                     textResId = R.string.at_least_x_characters,
                     isValid = hasMinLength,
                     formatArgs = listOf(ValidationRules.MIN_PASSWORD_LENGTH),
-                    focusedField = FocusedField.PASSWORD
+                    focusedField = RegisterFocusedField.PASSWORD
                 ),
                 ValidationItem(
                     textResId = R.string.at_least_one_number,
                     isValid = hasNumber,
-                    focusedField = FocusedField.PASSWORD),
+                    focusedField = RegisterFocusedField.PASSWORD),
                 ValidationItem(
                     textResId = R.string.contains_lowercase_char,
                     isValid = hasLowerCaseCharacter,
-                    focusedField = FocusedField.PASSWORD),
+                    focusedField = RegisterFocusedField.PASSWORD),
                 ValidationItem(
                     textResId = R.string.contains_uppercase_char,
                     isValid = hasUpperCaseCharacter,
-                    focusedField = FocusedField.PASSWORD)
+                    focusedField = RegisterFocusedField.PASSWORD)
             )
         } else emptyList()
     }

@@ -223,27 +223,27 @@ private fun RegisterFormSection(
                 text = state.name,
                 onValueChange = { onAction(RegisterAction.OnNameValueChanged(it)) },
                 onFocusChanged = { hasFocus ->
-                    onAction(RegisterAction.OnFocusChanged(FocusedField.NAME, hasFocus))
+                    onAction(RegisterAction.OnFocusChanged(RegisterFocusedField.NAME, hasFocus))
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
                 hintText = stringResource(R.string.name),
                 isValid = state.isNameValid,
-                isFocused = state.focusedField == FocusedField.NAME,
-                errors = state.errors.filter { it.focusedField == FocusedField.NAME }
+                isFocused = state.focusedField == RegisterFocusedField.NAME,
+                errors = state.errors.filter { it.focusedField == RegisterFocusedField.NAME }
             )
             TaskyTextField(
                 text = state.email,
                 onValueChange = { onAction(RegisterAction.OnEmailValueChanged(it)) },
                 onFocusChanged = { hasFocus ->
-                    onAction(RegisterAction.OnFocusChanged(FocusedField.EMAIL, hasFocus))
+                    onAction(RegisterAction.OnFocusChanged(RegisterFocusedField.EMAIL, hasFocus))
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
                 hintText = stringResource(R.string.email_address),
                 isValid = state.isEmailValid,
-                isFocused = state.focusedField == FocusedField.EMAIL,
-                errors = state.errors.filter { it.focusedField == FocusedField.EMAIL }
+                isFocused = state.focusedField == RegisterFocusedField.EMAIL,
+                errors = state.errors.filter { it.focusedField == RegisterFocusedField.EMAIL }
             )
             TaskyPasswordTextField(
                 state = passwordState,
@@ -255,11 +255,11 @@ private fun RegisterFormSection(
                 modifier = Modifier
                     .fillMaxWidth(),
                 onFocusChanged = { hasFocus ->
-                    onAction(RegisterAction.OnFocusChanged(FocusedField.PASSWORD, hasFocus))
+                    onAction(RegisterAction.OnFocusChanged(RegisterFocusedField.PASSWORD, hasFocus))
                 },
                 isValid = state.passwordValidationState.isValidPassword,
-                isFocused = state.focusedField == FocusedField.PASSWORD,
-                errors = state.errors.filter { it.focusedField == FocusedField.PASSWORD }
+                isFocused = state.focusedField == RegisterFocusedField.PASSWORD,
+                errors = state.errors.filter { it.focusedField == RegisterFocusedField.PASSWORD }
             )
         }
         Column (

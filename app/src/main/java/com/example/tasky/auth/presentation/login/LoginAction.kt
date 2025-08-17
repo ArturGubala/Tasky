@@ -1,7 +1,7 @@
 package com.example.tasky.auth.presentation.login
 
 sealed interface LoginAction {
-    data object OnTogglePasswordVisibility: LoginAction
+    data object OnTogglePasswordVisibilityClick: LoginAction
     data object OnLoginClick: LoginAction
     data object OnRegisterClick: LoginAction
     data class OnEmailValueChanged(val email: String) : LoginAction

@@ -7,6 +7,5 @@ data class LoginResponse(
     val accessToken: String,
     val refreshToken: String,
     val username: String,
-    val userId: String,
-    val accessTokenExpirationTimestamp: String
+    val userId: String
 )

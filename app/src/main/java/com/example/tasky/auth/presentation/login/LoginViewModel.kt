@@ -7,7 +7,6 @@ import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.UserDataValidator
 import com.example.tasky.auth.domain.ValidationItem
-import com.example.tasky.auth.presentation.register.RegisterFocusedField
 import com.example.tasky.core.domain.util.Result
 import com.example.tasky.core.presentation.ui.asUiText
 import kotlinx.coroutines.channels.Channel
@@ -31,7 +30,7 @@ class LoginViewModel(
         when (action) {
             LoginAction.OnLoginClick -> loginUser()
             LoginAction.OnRegisterClick -> onRegisterCLick()
-            LoginAction.OnTogglePasswordVisibility -> changePasswordVisibility()
+            LoginAction.OnTogglePasswordVisibilityClick -> changePasswordVisibility()
             is LoginAction.OnEmailValueChanged -> {
                 _state.update { it.copy(email = action.email) }
                 validateFieldOnFocusLoss(_state.value.focusedField!!)
@@ -128,8 +127,8 @@ class LoginViewModel(
 
     private fun getValidationItemsForFocusedField(): List<ValidationItem> {
         return when (_state.value.focusedField) {
-            RegisterFocusedField.EMAIL -> getEmailValidationItems()
-            RegisterFocusedField.PASSWORD -> getPasswordValidationItems()
+            LoginFocusedField.EMAIL -> getEmailValidationItems()
+            LoginFocusedField.PASSWORD -> getPasswordValidationItems()
             null -> emptyList()
             else -> emptyList()
         }
@@ -141,19 +140,19 @@ class LoginViewModel(
                 ValidationItem(
                     textResId = R.string.must_be_a_valid_email,
                     isValid = _state.value.isEmailValid,
-                    focusedField = RegisterFocusedField.EMAIL
+                    focusedField = LoginFocusedField.EMAIL
                 )
             )
         } else emptyList()
     }
 
     private fun getPasswordValidationItems(): List<ValidationItem> {
-        return if (_state.value.email.isNotEmpty() && !_state.value.isEmailValid) {
+        return if (_state.value.password.isEmpty() && !_state.value.isPasswordValid) {
             listOf(
                 ValidationItem(
                     textResId = R.string.field_can_not_be_empty,
                     isValid = _state.value.isEmailValid,
-                    focusedField = RegisterFocusedField.NAME
+                    focusedField = LoginFocusedField.PASSWORD
                 )
             )
         } else emptyList()

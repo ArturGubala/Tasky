@@ -2,7 +2,6 @@ package com.example.tasky.auth.domain
 
 import com.example.tasky.R
 import com.example.tasky.auth.presentation.register.FocusedField
-import com.example.tasky.auth.presentation.register.ValidationItem
 
 data class PasswordValidationState(
     val hasMinLength: Boolean = false,

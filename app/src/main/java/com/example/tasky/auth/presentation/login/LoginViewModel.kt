@@ -34,12 +34,12 @@ class LoginViewModel(
             LoginAction.OnTogglePasswordVisibilityClick -> changePasswordVisibility()
             is LoginAction.OnEmailValueChanged -> {
                 _state.update { it.copy(email = action.email) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canLogin = checkIfCanLogin()) }
             }
             is LoginAction.OnPasswordValueChanged -> {
                 _state.update { it.copy(password = action.password) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canLogin = checkIfCanLogin()) }
 
             }
@@ -87,7 +87,7 @@ class LoginViewModel(
 
     private fun handleFocusChange(field: FocusedField?, hasFocus: Boolean) {
         if (!hasFocus && _state.value.focusedField != null) {
-            validateFieldOnFocusLoss(_state.value.focusedField!!)
+            validateFieldOnFocusLoss()
         }
 
         _state.update {
@@ -105,8 +105,8 @@ class LoginViewModel(
                 !_state.value.isLoggingIn
     }
 
-    private fun validateFieldOnFocusLoss(field: FocusedField) {
-        when (field) {
+    private fun validateFieldOnFocusLoss() {
+        when (_state.value.focusedField) {
             LoginFocusedField.EMAIL -> {
                 val isEmailValid = userDataValidator.validateEmail(_state.value.email)
                 _state.update {
@@ -123,6 +123,7 @@ class LoginViewModel(
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
+            null -> {}
         }
     }
 

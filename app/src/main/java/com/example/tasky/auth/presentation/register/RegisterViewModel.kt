@@ -36,19 +36,19 @@ class RegisterViewModel(
             RegisterAction.OnTogglePasswordVisibilityClick -> changePasswordVisibility()
             is RegisterAction.OnNameValueChanged -> {
                 _state.update { it.copy(name = action.name) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canRegister = checkIfCanRegister()) }
             }
 
             is RegisterAction.OnEmailValueChanged -> {
                 _state.update { it.copy(email = action.email) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canRegister = checkIfCanRegister()) }
             }
 
             is RegisterAction.OnPasswordValueChanged -> {
                 _state.update { it.copy(password = action.password) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canRegister = checkIfCanRegister()) }
 
             }
@@ -104,7 +104,7 @@ class RegisterViewModel(
 
     private fun handleFocusChange(field: FocusedField?, hasFocus: Boolean) {
         if (!hasFocus && _state.value.focusedField != null) {
-            validateFieldOnFocusLoss(_state.value.focusedField!!)
+            validateFieldOnFocusLoss()
         }
 
         _state.update {
@@ -116,8 +116,8 @@ class RegisterViewModel(
 
     }
 
-    private fun validateFieldOnFocusLoss(field: FocusedField) {
-        when (field) {
+    private fun validateFieldOnFocusLoss() {
+        when (_state.value.focusedField) {
             RegisterFocusedField.NAME -> {
                 val isNameValid = userDataValidator.isValidName(_state.value.name)
                 _state.update {
@@ -142,6 +142,7 @@ class RegisterViewModel(
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
+            null -> {}
         }
     }
 

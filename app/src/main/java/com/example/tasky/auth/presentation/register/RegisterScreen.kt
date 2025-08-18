@@ -93,7 +93,10 @@ fun RegisterScreenRoot(
     RegisterScreen(
         state = state,
         onAction = viewModel::onAction,
-        onClearFocus = { focusManager.clearFocus() }
+        onClearFocus = {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
     )
 }
 
@@ -116,7 +119,10 @@ private fun RegisterScreen(
         }
     }
 
-    TaskyScaffold { padding ->
+    TaskyScaffold(
+        modifier = Modifier
+            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
+    ) { padding ->
 
         when(deviceConfiguration) {
             DeviceConfiguration.MOBILE_PORTRAIT -> {
@@ -135,8 +141,7 @@ private fun RegisterScreen(
                         RegisterFormSection(
                             state = state,
                             passwordState = passwordState,
-                            onAction = onAction,
-                            onClearFocus = onClearFocus
+                            onAction = onAction
                         )
                     }
                 }
@@ -166,8 +171,7 @@ private fun RegisterScreen(
                             RegisterFormSection(
                                 state = state,
                                 passwordState = passwordState,
-                                onAction = onAction,
-                                onClearFocus = onClearFocus
+                                onAction = onAction
                             )
                         }
                     }
@@ -189,8 +193,7 @@ private fun RegisterScreen(
                         RegisterFormSection(
                             state = state,
                             passwordState = passwordState,
-                            onAction = onAction,
-                            onClearFocus = onClearFocus
+                            onAction = onAction
                         )
                     }
                 }
@@ -203,15 +206,13 @@ private fun RegisterScreen(
 private fun RegisterFormSection(
     state: RegisterState,
     passwordState: TextFieldState,
-    onAction: (RegisterAction) -> Unit,
-    onClearFocus: (() -> Unit)? = null
+    onAction: (RegisterAction) -> Unit
 ) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 16.dp, vertical = 28.dp)
-            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
+            .padding(horizontal = 16.dp, vertical = 28.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Column (

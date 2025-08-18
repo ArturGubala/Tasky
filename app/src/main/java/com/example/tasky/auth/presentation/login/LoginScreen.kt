@@ -90,7 +90,10 @@ fun LoginScreenRoot(
     LoginScreen(
         state = state,
         onAction = viewModel::onAction,
-        onClearFocus = { focusManager.clearFocus() }
+        onClearFocus = {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
     )
 }
 
@@ -113,7 +116,10 @@ private fun LoginScreen(
         }
     }
 
-    TaskyScaffold { padding ->
+    TaskyScaffold(
+        modifier = Modifier
+            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
+    ) { padding ->
 
         when(deviceConfiguration) {
             DeviceConfiguration.MOBILE_PORTRAIT -> {
@@ -132,8 +138,7 @@ private fun LoginScreen(
                         LoginFormSection(
                             state = state,
                             passwordState = passwordState,
-                            onAction = onAction,
-                            onClearFocus = onClearFocus
+                            onAction = onAction
                         )
                     }
                 }
@@ -163,8 +168,7 @@ private fun LoginScreen(
                             LoginFormSection(
                                 state = state,
                                 passwordState = passwordState,
-                                onAction = onAction,
-                                onClearFocus = onClearFocus
+                                onAction = onAction
                             )
                         }
                     }
@@ -186,8 +190,7 @@ private fun LoginScreen(
                         LoginFormSection(
                             state = state,
                             passwordState = passwordState,
-                            onAction = onAction,
-                            onClearFocus = onClearFocus
+                            onAction = onAction
                         )
                     }
                 }
@@ -200,15 +203,13 @@ private fun LoginScreen(
 private fun LoginFormSection(
     state: LoginState,
     passwordState: TextFieldState,
-    onAction: (LoginAction) -> Unit,
-    onClearFocus: (() -> Unit)? = null
+    onAction: (LoginAction) -> Unit
 ) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 16.dp, vertical = 28.dp)
-            .clearFocusOnTapOutside(onClear = { onClearFocus?.invoke() }),
+            .padding(horizontal = 16.dp, vertical = 28.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Column (

@@ -1,10 +1,9 @@
 package com.example.tasky.auth.domain
 
-import androidx.annotation.StringRes
+import com.example.tasky.core.presentation.ui.UiText
 
 data class ValidationItem(
-    @param:StringRes val textResId: Int,
+    val message: UiText,
     val isValid: Boolean,
-    val formatArgs: List<Any> = emptyList(),
     val focusedField: FocusedField
 )

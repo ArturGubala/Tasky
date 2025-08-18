@@ -8,6 +8,7 @@ import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.UserDataValidator
 import com.example.tasky.auth.domain.ValidationItem
 import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -138,7 +139,7 @@ class LoginViewModel(
         return if (_state.value.email.isNotEmpty() && !_state.value.isEmailValid) {
             listOf(
                 ValidationItem(
-                    textResId = R.string.must_be_a_valid_email,
+                    message = UiText.StringResource(R.string.must_be_a_valid_email),
                     isValid = _state.value.isEmailValid,
                     focusedField = LoginFocusedField.EMAIL
                 )
@@ -150,7 +151,7 @@ class LoginViewModel(
         return if (_state.value.password.isEmpty() && !_state.value.isPasswordValid) {
             listOf(
                 ValidationItem(
-                    textResId = R.string.field_can_not_be_empty,
+                    message = UiText.StringResource(R.string.field_can_not_be_empty),
                     isValid = _state.value.isEmailValid,
                     focusedField = LoginFocusedField.PASSWORD
                 )

@@ -166,9 +166,11 @@ class RegisterViewModel(
         return if (_state.value.name.isNotEmpty() && !_state.value.isNameValid) {
             listOf(
                 ValidationItem(
-                    textResId = R.string.must_be_a_valid_name,
+                    message = UiText.StringResource(
+                        id = R.string.must_be_a_valid_name,
+                        args = arrayOf(ValidationRules.MIN_NAME_LENGTH, ValidationRules.MAX_NAME_LENGTH)
+                    ),
                     isValid = _state.value.isNameValid,
-                    formatArgs = listOf(ValidationRules.MIN_NAME_LENGTH, ValidationRules.MAX_NAME_LENGTH),
                     focusedField = RegisterFocusedField.NAME
                 )
             )
@@ -179,7 +181,7 @@ class RegisterViewModel(
         return if (_state.value.email.isNotEmpty() && !_state.value.isEmailValid) {
             listOf(
                 ValidationItem(
-                    textResId = R.string.must_be_a_valid_email,
+                    message = UiText.StringResource(R.string.must_be_a_valid_email),
                     isValid = _state.value.isEmailValid,
                     focusedField = RegisterFocusedField.EMAIL
                 )

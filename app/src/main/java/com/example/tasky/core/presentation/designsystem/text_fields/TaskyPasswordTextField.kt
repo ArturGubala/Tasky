@@ -159,11 +159,7 @@ fun TaskyPasswordTextField(
             ) {
                 errors.forEach { error ->
                     TaskyErrorText(
-                        text = if (error.formatArgs.isNotEmpty()) {
-                            stringResource(error.textResId, *error.formatArgs.toTypedArray())
-                        } else {
-                            stringResource(error.textResId)
-                        },
+                        text = error.message.asString(),
                         isValid = error.isValid
                     )
                 }

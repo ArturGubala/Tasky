@@ -190,6 +190,8 @@ class RegisterViewModel(
     }
 }
 
-enum class RegisterFocusedField : FocusedField {
-    NAME, EMAIL, PASSWORD
+sealed class RegisterFocusedField : FocusedField {
+    object NAME : RegisterFocusedField()
+    object EMAIL : RegisterFocusedField()
+    object PASSWORD : RegisterFocusedField()
 }

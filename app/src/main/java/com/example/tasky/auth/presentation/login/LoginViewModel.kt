@@ -160,6 +160,7 @@ class LoginViewModel(
     }
 }
 
-enum class LoginFocusedField : FocusedField {
-    EMAIL, PASSWORD
+sealed class LoginFocusedField : FocusedField {
+    object EMAIL : LoginFocusedField()
+    object PASSWORD : LoginFocusedField()
 }

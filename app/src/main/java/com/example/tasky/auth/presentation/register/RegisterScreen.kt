@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.core.presentation.designsystem.buttons.TaskyLink
+import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyPrimaryButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
@@ -293,7 +293,7 @@ private fun RegisterFormSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelSmall
                 )
-                TaskyLink(
+                TaskyTextButton(
                     onClick = {
                         onAction(RegisterAction.OnLoginClick)
                     },

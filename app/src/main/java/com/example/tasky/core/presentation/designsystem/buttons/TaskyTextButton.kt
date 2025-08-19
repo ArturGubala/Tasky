@@ -11,7 +11,7 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
-fun TaskyLink(
+fun TaskyTextButton(
     onClick: () -> Unit,
     content: @Composable (() -> Unit),
     modifier: Modifier = Modifier
@@ -28,9 +28,9 @@ fun TaskyLink(
 
 @PreviewLightDark
 @Composable
-private fun TaskyLinkPreview() {
+private fun TaskyTextButtonPreview() {
     TaskyTheme {
-        TaskyLink(
+        TaskyTextButton(
             onClick = {},
             content = {
                 Text(

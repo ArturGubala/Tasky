@@ -29,16 +29,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
-import com.example.tasky.auth.presentation.register.FocusedField
-import com.example.tasky.auth.presentation.register.ValidationItem
+import com.example.tasky.auth.presentation.register.RegisterFocusedField
+import com.example.tasky.auth.domain.ValidationItem
 import com.example.tasky.core.presentation.designsystem.TaskyErrorText
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.ui.UiText
 
 @Composable
 fun TaskyTextField(
@@ -148,11 +148,7 @@ fun TaskyTextField(
             ) {
                 errors.forEach { error ->
                     TaskyErrorText(
-                        text = if (error.formatArgs.isNotEmpty()) {
-                            stringResource(error.textResId, *error.formatArgs.toTypedArray())
-                        } else {
-                            stringResource(error.textResId)
-                        },
+                        text = error.message.asString(),
                         isValid = error.isValid
                     )
                 }
@@ -189,14 +185,14 @@ private fun TaskyTextFieldPreview() {
                 isValid = false,
                 errors = listOf(
                     ValidationItem(
-                        textResId = R.string.must_be_a_valid_email,
+                        message = UiText.StringResource(R.string.must_be_a_valid_email),
                         isValid = false,
-                        focusedField = FocusedField.EMAIL
+                        focusedField = RegisterFocusedField.EMAIL
                     ),
                     ValidationItem(
-                        textResId = R.string.must_be_a_valid_email,
+                        message = UiText.StringResource(R.string.must_be_a_valid_email),
                         isValid = true,
-                        focusedField = FocusedField.EMAIL
+                        focusedField = RegisterFocusedField.EMAIL
                     )
                 )
             )

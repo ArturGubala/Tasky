@@ -1,6 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-package com.example.tasky.auth.presentation.register
+package com.example.tasky.auth.presentation.login
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -18,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -55,10 +52,10 @@ import com.example.tasky.core.presentation.util.clearFocusOnTapOutside
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun RegisterScreenRoot(
-    onLoginLinkClick: () -> Unit,
-    onSuccessfulRegistration: () -> Unit,
-    viewModel: RegisterViewModel = koinViewModel(),
+fun LoginScreenRoot(
+    onRegisterLinkClick: () -> Unit,
+    onSuccessfulLogin: () -> Unit,
+    viewModel: LoginViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -67,10 +64,10 @@ fun RegisterScreenRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            RegisterEvent.OnLoginClick -> {
-                onLoginLinkClick()
+            LoginEvent.OnRegisterClick -> {
+                onRegisterLinkClick()
             }
-            is RegisterEvent.RegistrationFailure -> {
+            is LoginEvent.LoginFailure -> {
                 keyboardController?.hide()
                 Toast.makeText(
                     context,
@@ -78,19 +75,19 @@ fun RegisterScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-            RegisterEvent.RegistrationSuccess -> {
+            LoginEvent.LoginSuccess -> {
                 keyboardController?.hide()
                 Toast.makeText(
                     context,
-                    R.string.registration_successful,
+                    R.string.you_are_logged_in,
                     Toast.LENGTH_LONG
                 ).show()
-                onSuccessfulRegistration()
+                onSuccessfulLogin()
             }
         }
     }
 
-    RegisterScreen(
+    LoginScreen(
         state = state,
         onAction = viewModel::onAction,
         onClearFocus = {
@@ -101,21 +98,21 @@ fun RegisterScreenRoot(
 }
 
 @Composable
-private fun RegisterScreen(
-    state: RegisterState,
-    onAction: (RegisterAction) -> Unit,
+private fun LoginScreen(
+    state: LoginState,
+    onAction: (LoginAction) -> Unit,
     onClearFocus: (() -> Unit)? = null
 ) {
     val passwordState = rememberTextFieldState(initialText = state.password)
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
-    val Header = rememberRegisterHeader(R.string.create_your_account)
+    val Header = rememberLoginHeader(R.string.create_your_account)
 
     LaunchedEffect(passwordState.text) {
         val newPassword = passwordState.text.toString()
         if (newPassword != state.password) {
-            onAction(RegisterAction.OnPasswordValueChanged(newPassword))
+            onAction(LoginAction.OnPasswordValueChanged(newPassword))
         }
     }
 
@@ -138,7 +135,7 @@ private fun RegisterScreen(
                             .fillMaxSize(),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        RegisterFormSection(
+                        LoginFormSection(
                             state = state,
                             passwordState = passwordState,
                             onAction = onAction
@@ -168,7 +165,7 @@ private fun RegisterScreen(
                             modifier = Modifier
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            RegisterFormSection(
+                            LoginFormSection(
                                 state = state,
                                 passwordState = passwordState,
                                 onAction = onAction
@@ -190,7 +187,7 @@ private fun RegisterScreen(
                     TaskyContentBox(
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        RegisterFormSection(
+                        LoginFormSection(
                             state = state,
                             passwordState = passwordState,
                             onAction = onAction
@@ -203,10 +200,10 @@ private fun RegisterScreen(
 }
 
 @Composable
-private fun RegisterFormSection(
-    state: RegisterState,
+private fun LoginFormSection(
+    state: LoginState,
     passwordState: TextFieldState,
-    onAction: (RegisterAction) -> Unit
+    onAction: (LoginAction) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -221,46 +218,33 @@ private fun RegisterFormSection(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             TaskyTextField(
-                text = state.name,
-                onValueChange = { onAction(RegisterAction.OnNameValueChanged(it)) },
-                onFocusChanged = { hasFocus ->
-                    onAction(RegisterAction.OnFocusChanged(RegisterFocusedField.NAME, hasFocus))
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                hintText = stringResource(R.string.name),
-                isValid = state.isNameValid,
-                isFocused = state.focusedField == RegisterFocusedField.NAME,
-                errors = state.errors.filter { it.focusedField == RegisterFocusedField.NAME }
-            )
-            TaskyTextField(
                 text = state.email,
-                onValueChange = { onAction(RegisterAction.OnEmailValueChanged(it)) },
+                onValueChange = { onAction(LoginAction.OnEmailValueChanged(it)) },
                 onFocusChanged = { hasFocus ->
-                    onAction(RegisterAction.OnFocusChanged(RegisterFocusedField.EMAIL, hasFocus))
+                    onAction(LoginAction.OnFocusChanged(LoginFocusedField.EMAIL, hasFocus))
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
                 hintText = stringResource(R.string.email_address),
                 isValid = state.isEmailValid,
-                isFocused = state.focusedField == RegisterFocusedField.EMAIL,
-                errors = state.errors.filter { it.focusedField == RegisterFocusedField.EMAIL }
+                isFocused = state.focusedField == LoginFocusedField.EMAIL,
+                errors = state.errors.filter { it.focusedField == LoginFocusedField.EMAIL }
             )
             TaskyPasswordTextField(
                 state = passwordState,
                 isPasswordVisible = state.isPasswordVisible,
                 onTogglePasswordVisibility = {
-                    onAction(RegisterAction.OnTogglePasswordVisibilityClick)
+                    onAction(LoginAction.OnTogglePasswordVisibilityClick)
                 },
                 hintText = stringResource(R.string.password),
                 modifier = Modifier
                     .fillMaxWidth(),
                 onFocusChanged = { hasFocus ->
-                    onAction(RegisterAction.OnFocusChanged(RegisterFocusedField.PASSWORD, hasFocus))
+                    onAction(LoginAction.OnFocusChanged(LoginFocusedField.PASSWORD, hasFocus))
                 },
-                isValid = state.passwordValidationState.isValidPassword,
-                isFocused = state.focusedField == RegisterFocusedField.PASSWORD,
-                errors = state.errors.filter { it.focusedField == RegisterFocusedField.PASSWORD }
+                isValid = state.isPasswordValid,
+                isFocused = state.focusedField == LoginFocusedField.PASSWORD,
+                errors = state.errors.filter { it.focusedField == LoginFocusedField.PASSWORD }
             )
         }
         Column (
@@ -271,16 +255,16 @@ private fun RegisterFormSection(
             TaskyPrimaryButton(
                 content = {
                     Text(
-                        text = stringResource(R.string.get_started),
+                        text = stringResource(R.string.log_in),
                         style = MaterialTheme.typography.labelMedium
                     )
                 },
                 onClick = {
-                    onAction(RegisterAction.OnRegisterClick)
+                    onAction(LoginAction.OnLoginClick)
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
-                enabled = state.canRegister
+                enabled = state.canLogin
             )
             Row(
                 modifier = Modifier
@@ -289,17 +273,17 @@ private fun RegisterFormSection(
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = stringResource(R.string.already_have_an_account),
+                    text = stringResource(R.string.dont_have_an_account),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelSmall
                 )
                 TaskyLink(
                     onClick = {
-                        onAction(RegisterAction.OnLoginClick)
+                        onAction(LoginAction.OnRegisterClick)
                     },
                     content = {
                         Text(
-                            text = stringResource(R.string.log_in),
+                            text = stringResource(R.string.sign_up),
                             color = MaterialTheme.colorScheme.extended.link,
                             style = MaterialTheme.typography.labelSmall
                         )
@@ -311,7 +295,7 @@ private fun RegisterFormSection(
 }
 
 @Composable
-private fun rememberRegisterHeader(textRes: Int) = remember(textRes) {
+private fun rememberLoginHeader(textRes: Int) = remember(textRes) {
     movableContentOf<Modifier> { modifier ->
         Box(
             modifier = modifier,
@@ -333,10 +317,10 @@ private fun rememberRegisterHeader(textRes: Int) = remember(textRes) {
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
-private fun RegisterScreenPreview() {
+private fun LoginScreenPreview() {
     TaskyTheme {
-        RegisterScreen(
-            state = RegisterState(),
+        LoginScreen(
+            state = LoginState(),
             onAction = {}
         )
     }

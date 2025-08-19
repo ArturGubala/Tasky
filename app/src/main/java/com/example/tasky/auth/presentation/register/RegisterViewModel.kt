@@ -1,11 +1,12 @@
 package com.example.tasky.auth.presentation.register
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
 import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.UserDataValidator
+import com.example.tasky.auth.domain.ValidationItem
 import com.example.tasky.auth.domain.ValidationRules
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.Result
@@ -35,19 +36,19 @@ class RegisterViewModel(
             RegisterAction.OnTogglePasswordVisibilityClick -> changePasswordVisibility()
             is RegisterAction.OnNameValueChanged -> {
                 _state.update { it.copy(name = action.name) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canRegister = checkIfCanRegister()) }
             }
 
             is RegisterAction.OnEmailValueChanged -> {
                 _state.update { it.copy(email = action.email) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canRegister = checkIfCanRegister()) }
             }
 
             is RegisterAction.OnPasswordValueChanged -> {
                 _state.update { it.copy(password = action.password) }
-                validateFieldOnFocusLoss(_state.value.focusedField!!)
+                validateFieldOnFocusLoss()
                 _state.update { it.copy(canRegister = checkIfCanRegister()) }
 
             }
@@ -103,7 +104,7 @@ class RegisterViewModel(
 
     private fun handleFocusChange(field: FocusedField?, hasFocus: Boolean) {
         if (!hasFocus && _state.value.focusedField != null) {
-            validateFieldOnFocusLoss(_state.value.focusedField!!)
+            validateFieldOnFocusLoss()
         }
 
         _state.update {
@@ -115,23 +116,23 @@ class RegisterViewModel(
 
     }
 
-    private fun validateFieldOnFocusLoss(field: FocusedField) {
-        when (field) {
-            FocusedField.NAME -> {
+    private fun validateFieldOnFocusLoss() {
+        when (_state.value.focusedField) {
+            RegisterFocusedField.NAME -> {
                 val isNameValid = userDataValidator.isValidName(_state.value.name)
                 _state.update {
                     val updatedState = it.copy(isNameValid = isNameValid)
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
-            FocusedField.EMAIL -> {
+            RegisterFocusedField.EMAIL -> {
                 val isEmailValid = userDataValidator.validateEmail(_state.value.email)
                 _state.update {
                     val updatedState = it.copy(isEmailValid = isEmailValid)
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
-            FocusedField.PASSWORD -> {
+            RegisterFocusedField.PASSWORD -> {
                 val passwordValidationState =
                     userDataValidator.validatePassword(password = _state.value.password)
                 _state.update {
@@ -141,6 +142,7 @@ class RegisterViewModel(
                     updatedState.copy(errors = getValidationItemsForFocusedField())
                 }
             }
+            null -> {}
         }
     }
 
@@ -151,12 +153,13 @@ class RegisterViewModel(
                 !_state.value.isRegistering
     }
 
-    fun getValidationItemsForFocusedField(): List<ValidationItem> {
+    private fun getValidationItemsForFocusedField(): List<ValidationItem> {
         return when (_state.value.focusedField) {
-            FocusedField.NAME -> getNameValidationItems()
-            FocusedField.EMAIL -> getEmailValidationItems()
-            FocusedField.PASSWORD -> _state.value.passwordValidationState.getPasswordValidationItems()
+            RegisterFocusedField.NAME -> getNameValidationItems()
+            RegisterFocusedField.EMAIL -> getEmailValidationItems()
+            RegisterFocusedField.PASSWORD -> _state.value.passwordValidationState.getPasswordValidationItems()
             null -> emptyList()
+            else -> emptyList()
         }
     }
 
@@ -164,10 +167,12 @@ class RegisterViewModel(
         return if (_state.value.name.isNotEmpty() && !_state.value.isNameValid) {
             listOf(
                 ValidationItem(
-                    textResId = R.string.must_be_a_valid_name,
+                    message = UiText.StringResource(
+                        id = R.string.must_be_a_valid_name,
+                        args = arrayOf(ValidationRules.MIN_NAME_LENGTH, ValidationRules.MAX_NAME_LENGTH)
+                    ),
                     isValid = _state.value.isNameValid,
-                    formatArgs = listOf(ValidationRules.MIN_NAME_LENGTH, ValidationRules.MAX_NAME_LENGTH),
-                    focusedField = FocusedField.NAME
+                    focusedField = RegisterFocusedField.NAME
                 )
             )
         } else emptyList()
@@ -177,22 +182,17 @@ class RegisterViewModel(
         return if (_state.value.email.isNotEmpty() && !_state.value.isEmailValid) {
             listOf(
                 ValidationItem(
-                    textResId = R.string.must_be_a_valid_email,
+                    message = UiText.StringResource(R.string.must_be_a_valid_email),
                     isValid = _state.value.isEmailValid,
-                    focusedField = FocusedField.EMAIL
+                    focusedField = RegisterFocusedField.EMAIL
                 )
             )
         } else emptyList()
     }
 }
 
-enum class FocusedField {
-    NAME, EMAIL, PASSWORD
+sealed class RegisterFocusedField : FocusedField {
+    object NAME : RegisterFocusedField()
+    object EMAIL : RegisterFocusedField()
+    object PASSWORD : RegisterFocusedField()
 }
-
-data class ValidationItem(
-    @StringRes val textResId: Int,
-    val isValid: Boolean,
-    val formatArgs: List<Any> = emptyList(),
-    val focusedField: FocusedField
-)

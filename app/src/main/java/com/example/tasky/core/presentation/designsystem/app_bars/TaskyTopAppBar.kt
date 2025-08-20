@@ -16,9 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -50,7 +47,7 @@ fun TaskyTopAppBar(
 @PreviewLightDark
 @Composable
 private fun TaskyTopAppBarPreview() {
-    val isCalendarExpanded: Boolean by remember { mutableStateOf(false) }
+    val isCalendarExpanded = false
     val icon: ImageVector =
         if (isCalendarExpanded) Icons.Filled.ArrowDropDown
         else Icons.AutoMirrored.Outlined.ArrowRight

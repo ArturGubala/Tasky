@@ -296,15 +296,14 @@ private fun RegisterFormSection(
                 TaskyTextButton(
                     onClick = {
                         onAction(RegisterAction.OnLoginClick)
-                    },
-                    content = {
-                        Text(
-                            text = stringResource(R.string.log_in),
-                            color = MaterialTheme.colorScheme.extended.link,
-                            style = MaterialTheme.typography.labelSmall
-                        )
                     }
-                )
+                ) {
+                    Text(
+                        text = stringResource(R.string.log_in),
+                        color = MaterialTheme.colorScheme.extended.link,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
     }

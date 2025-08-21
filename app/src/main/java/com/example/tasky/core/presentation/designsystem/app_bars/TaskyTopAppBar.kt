@@ -11,10 +11,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,17 +34,26 @@ fun TaskyTopAppBar(
     leftActions: @Composable (() -> Unit),
     rightActions: @Composable (() -> Unit),
     modifier: Modifier = Modifier,
-    title: @Composable (() -> Unit) = {}
+    title: @Composable (() -> Unit) = {},
+    colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
+        containerColor = MaterialTheme.colorScheme.background,
+        titleContentColor = MaterialTheme.colorScheme.background,
+        navigationIconContentColor = MaterialTheme.colorScheme.background,
+        actionIconContentColor = MaterialTheme.colorScheme.background,
+    )
 ) {
-    Row(
+    CenterAlignedTopAppBar(
+        title = title,
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        leftActions.invoke()
-        title.invoke()
-        rightActions.invoke()
-    }
+        navigationIcon = leftActions,
+        actions = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) { rightActions.invoke() }
+        },
+        colors = colors
+    )
 }
 
 @PreviewLightDark

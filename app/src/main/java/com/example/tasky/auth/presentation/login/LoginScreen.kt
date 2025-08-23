@@ -280,15 +280,14 @@ private fun LoginFormSection(
                 TaskyTextButton(
                     onClick = {
                         onAction(LoginAction.OnRegisterClick)
-                    },
-                    content = {
-                        Text(
-                            text = stringResource(R.string.sign_up),
-                            color = MaterialTheme.colorScheme.extended.link,
-                            style = MaterialTheme.typography.labelSmall
-                        )
                     }
-                )
+                ) {
+                    Text(
+                        text = stringResource(R.string.sign_up),
+                        color = MaterialTheme.colorScheme.extended.link,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
     }

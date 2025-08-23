@@ -13,8 +13,8 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 @Composable
 fun TaskyTextButton(
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable (() -> Unit),
-    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
@@ -31,14 +31,13 @@ fun TaskyTextButton(
 private fun TaskyTextButtonPreview() {
     TaskyTheme {
         TaskyTextButton(
-            onClick = {},
-            content = {
-                Text(
-                    text = "LOG IN",
-                    color = MaterialTheme.colorScheme.extended.link,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-        )
+            onClick = {}
+        ) {
+            Text(
+                text = "LOG IN",
+                color = MaterialTheme.colorScheme.extended.link,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
     }
 }

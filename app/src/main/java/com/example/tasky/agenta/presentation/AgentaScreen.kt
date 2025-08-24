@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRight
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
+import com.example.tasky.core.presentation.designsystem.buttons.TaskyProfileButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
@@ -40,7 +40,8 @@ fun AgendaScreenRoot() {
 
 @Composable
 private fun AgendaScreen() {
-    var expanded by remember { mutableStateOf(false) }
+    var fabexpanded by remember { mutableStateOf(false) }
+    var profileexpanded by remember { mutableStateOf(false) }
 
 
     TaskyScaffold(
@@ -51,7 +52,7 @@ private fun AgendaScreen() {
                         onClick = {}
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
                                 text = "MARCH",
@@ -68,6 +69,7 @@ private fun AgendaScreen() {
                 },
                 rightActions = {
                     Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Icon(
@@ -75,10 +77,13 @@ private fun AgendaScreen() {
                             contentDescription = "Arrow right icon",
                             tint = MaterialTheme.colorScheme.onBackground
                         )
-                        Icon(
-                            imageVector = Icons.Outlined.Person,
-                            contentDescription = "Arrow right icon",
-                            tint = MaterialTheme.colorScheme.onBackground
+                        TaskyProfileButtonMenu(
+                            text = "AG",
+                            onClick = {
+                                profileexpanded = !profileexpanded
+                                      },
+                            expanded = profileexpanded,
+                            menuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions()
                         )
                     }
                 },
@@ -89,19 +94,19 @@ private fun AgendaScreen() {
         },
         floatingActionButton = {
             TaskyFloatingActionButtonMenu(
-                onClick = { expanded = !expanded },
-                menuOptions = DefaultMenuOptions.getTaskyMenuOptions(
+                onClick = { fabexpanded = !fabexpanded },
+                menuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
                     onEventClick = {
-                        expanded = false
+                        fabexpanded = false
                     },
                     onTaskClick = {
-                        expanded = false
+                        fabexpanded = false
                     },
                     onReminderClick = {
-                        expanded = false
+                        fabexpanded = false
                     }
                 ),
-                expanded = expanded,
+                expanded = fabexpanded,
             )
         }
     ) { padding ->

@@ -6,7 +6,7 @@ import com.example.tasky.core.presentation.util.MenuOption
 import com.example.tasky.core.presentation.util.MenuOptionType
 
 object DefaultMenuOptions {
-    fun getTaskyMenuOptions(
+    internal fun getTaskyFabMenuOptions(
         onEventClick: () -> Unit = {},
         onTaskClick: () -> Unit = {},
         onReminderClick: () -> Unit = {}
@@ -16,7 +16,7 @@ object DefaultMenuOptions {
             displayName = "Event",
             iconRes = R.drawable.ic_calendar_today,
             contentDescription = "Create event",
-            size = 20.dp,
+            iconSize = 20.dp,
             onClick = onEventClick
         ),
         MenuOption(
@@ -24,7 +24,7 @@ object DefaultMenuOptions {
             displayName = "Task",
             iconRes = R.drawable.ic_check,
             contentDescription = "Create task",
-            size = 20.dp,
+            iconSize = 20.dp,
             onClick = onTaskClick
         ),
         MenuOption(
@@ -32,8 +32,21 @@ object DefaultMenuOptions {
             displayName = "Reminder",
             iconRes = R.drawable.ic_bell,
             contentDescription = "Create reminder",
-            size = 20.dp,
+            iconSize = 20.dp,
             onClick = onReminderClick
+        )
+    )
+
+    internal fun getTaskyProfileMenuOptions(
+        onLogoutClick: () -> Unit = {}
+    ): List<MenuOption> = listOf(
+        MenuOption(
+            type = MenuOptionType.Logout,
+            displayName = "Log out",
+            iconRes = R.drawable.ic_offline,
+            contentDescription = "Offline icon",
+            iconSize = 20.dp,
+            onClick = onLogoutClick
         )
     )
 }

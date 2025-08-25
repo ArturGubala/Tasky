@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.tasky.agenta.presentation.AgendaScreenRoot
+import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen
 import kotlinx.serialization.Serializable
 
 fun NavGraphBuilder.agendaNavGraph(
@@ -24,7 +25,9 @@ fun NavGraphBuilder.agendaScreen(
     navController: NavController
 ) {
     composable<AgendaScreen> {
-        AgendaScreenRoot()
+        AgendaScreenRoot(
+            onSuccessfulLogout = { navController.navigateToLoginScreen() }
+        )
     }
 }
 

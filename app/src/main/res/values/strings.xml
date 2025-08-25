@@ -26,6 +26,8 @@
     <string name="error_email_exists">A user with that email already exists.</string>
     <string name="registration_successful">Registration successful! You can log in now.</string>
     <string name="you_are_logged_in">You\'re logged in.</string>
+    <string name="you_are_logged_out">You\'re logged out.</string>
+    <string name="logged_out_error">An error occurred while trying to log out.</string>
     <string name="error_email_password_incorrect">The email or password is incorrect.</string>
     <string name="must_be_a_valid_name">Name must be between %d and %d characters long.</string>
     <string name="must_be_a_valid_email">Must be a valid email</string>

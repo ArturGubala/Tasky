@@ -2,6 +2,7 @@
 
 package com.example.tasky.agenta.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
@@ -32,14 +35,48 @@ import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
+import com.example.tasky.core.presentation.ui.ObserveAsEvents
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AgendaScreenRoot() {
-    AgendaScreen()
+fun AgendaScreenRoot(
+    onSuccessfulLogout: () -> Unit,
+    viewModel: AgendaViewModel = koinViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is AgendaEvent.LogoutFailure -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            AgendaEvent.LogoutSuccessful -> {
+                Toast.makeText(
+                    context,
+                    R.string.you_are_logged_out,
+                    Toast.LENGTH_LONG
+                ).show()
+                onSuccessfulLogout()
+            }
+        }
+    }
+
+    AgendaScreen(
+        state = state,
+        onAction = viewModel::onAction
+    )
 }
 
 @Composable
-private fun AgendaScreen() {
+private fun AgendaScreen(
+    state: AgendaState,
+    onAction: (AgendaAction) -> Unit,
+) {
     var fabexpanded by remember { mutableStateOf(false) }
     var profileexpanded by remember { mutableStateOf(false) }
 
@@ -79,11 +116,9 @@ private fun AgendaScreen() {
                         )
                         TaskyProfileButtonMenu(
                             text = "AG",
-                            onClick = {
-                                profileexpanded = !profileexpanded
-                                      },
+                            onClick = { profileexpanded = !profileexpanded },
                             expanded = profileexpanded,
-                            menuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions()
+                            menuOptions = state.profileButtonMenuOptions
                         )
                     }
                 },
@@ -95,17 +130,7 @@ private fun AgendaScreen() {
         floatingActionButton = {
             TaskyFloatingActionButtonMenu(
                 onClick = { fabexpanded = !fabexpanded },
-                menuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
-                    onEventClick = {
-                        fabexpanded = false
-                    },
-                    onTaskClick = {
-                        fabexpanded = false
-                    },
-                    onReminderClick = {
-                        fabexpanded = false
-                    }
-                ),
+                menuOptions = state.fabButtonMenuOptions,
                 expanded = fabexpanded,
             )
         }
@@ -126,6 +151,9 @@ private fun AgendaScreen() {
 @Composable
 private fun AgendaScreenPreview() {
     TaskyTheme {
-        AgendaScreen()
+        AgendaScreen(
+            state = AgendaState(),
+            onAction = {}
+        )
     }
 }

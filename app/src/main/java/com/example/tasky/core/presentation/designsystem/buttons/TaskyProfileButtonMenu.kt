@@ -56,7 +56,6 @@ fun TaskyProfileButtonMenu(
                     text = {
                         Text(
                             text = menuOption.displayName,
-//                            color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
@@ -66,15 +65,16 @@ fun TaskyProfileButtonMenu(
                     },
                     leadingIcon = {
                         menuOption.iconRes?.let {
-                            Icon(
-                                painter = painterResource(id = it),
-                                contentDescription = menuOption.contentDescription,
-                                modifier = Modifier.size(menuOption.iconSize),
-//                                tint = MaterialTheme.colorScheme.error
-                            )
+                            if (!menuOption.enable) {
+                                Icon(
+                                    painter = painterResource(id = it),
+                                    contentDescription = menuOption.contentDescription,
+                                    modifier = Modifier.size(menuOption.iconSize),
+                                )
+                            }
                         }
                     },
-                    enabled = false,
+                    enabled = menuOption.enable,
                     colors = MenuDefaults.itemColors(
                         textColor = MaterialTheme.colorScheme.error,
                         leadingIconColor = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,

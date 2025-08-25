@@ -63,7 +63,7 @@ fun TaskyProfileButtonMenu(
                         menuOption.onClick()
                         onClick()
                     },
-                    leadingIcon = {
+                    trailingIcon = {
                         menuOption.iconRes?.let {
                             if (!menuOption.enable) {
                                 Icon(

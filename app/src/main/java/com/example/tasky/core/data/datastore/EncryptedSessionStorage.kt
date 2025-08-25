@@ -34,7 +34,7 @@ class EncryptedSessionStorage(
             encryptedData?.let { encrypted ->
                 cryptoManager.decryptObject<AuthInfo>(encrypted, json)
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -52,7 +52,7 @@ class EncryptedSessionStorage(
                     preferences[AUTH_INFO_KEY] = encryptedData
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

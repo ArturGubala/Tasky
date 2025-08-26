@@ -77,10 +77,6 @@ private fun AgendaScreen(
     state: AgendaState,
     onAction: (AgendaAction) -> Unit,
 ) {
-    var fabexpanded by remember { mutableStateOf(false) }
-    var profileexpanded by remember { mutableStateOf(false) }
-
-
     TaskyScaffold(
         topBar = {
             TaskyTopAppBar(
@@ -116,8 +112,8 @@ private fun AgendaScreen(
                         )
                         TaskyProfileButtonMenu(
                             text = "AG",
-                            onClick = { profileexpanded = !profileexpanded },
-                            expanded = profileexpanded,
+                            onClick = { onAction(AgendaAction.OnProfileButtonClick) },
+                            expanded = state.profileMenuExpanded,
                             menuOptions = state.profileButtonMenuOptions
                         )
                     }
@@ -129,9 +125,9 @@ private fun AgendaScreen(
         },
         floatingActionButton = {
             TaskyFloatingActionButtonMenu(
-                onClick = { fabexpanded = !fabexpanded },
+                onClick = { onAction(AgendaAction.OnFabButtonClick) },
                 menuOptions = state.fabButtonMenuOptions,
-                expanded = fabexpanded,
+                expanded = state.fabMenuExpanded,
             )
         }
     ) { padding ->

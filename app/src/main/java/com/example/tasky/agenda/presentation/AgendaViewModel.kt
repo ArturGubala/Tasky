@@ -75,10 +75,17 @@ class AgendaViewModel(
     fun onAction(action: AgendaAction) {
         when(action) {
             AgendaAction.OnLogoutClick -> logout()
+            AgendaAction.OnFabButtonClick -> {
+                _state.update { it.copy(fabMenuExpanded = !_state.value.fabMenuExpanded) }
+            }
+            AgendaAction.OnProfileButtonClick -> {
+                _state.update { it.copy(profileMenuExpanded = !_state.value.profileMenuExpanded) }
+            }
         }
     }
 
     private fun logout() {
+        _state.update { it.copy(profileMenuExpanded = false) }
         viewModelScope.launch {
             val authInfo = sessionStorage.get() ?: run {
                 eventChannel.send(AgendaEvent.LogoutFailure(

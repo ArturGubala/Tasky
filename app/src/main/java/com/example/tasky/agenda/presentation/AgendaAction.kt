@@ -5,4 +5,6 @@ interface AgendaAction {
     data object OnEventClick: AgendaAction
     data object OnTaskClick: AgendaAction
     data object OnReminderClick: AgendaAction
+    data object OnFabButtonClick: AgendaAction
+    data object OnProfileButtonClick: AgendaAction
 }

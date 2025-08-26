@@ -47,4 +47,13 @@ class AuthRepositoryImpl(
             )
         )
     }
+
+    override suspend fun logout(refreshToken: String): EmptyResult<DataError.Network> {
+        return httpClient.post<LogoutRequest, Unit>(
+            route = "/auth/logout",
+            body = LogoutRequest(
+                refreshToken = refreshToken
+            )
+        )
+    }
 }

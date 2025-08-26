@@ -1,11 +1,12 @@
-package com.example.tasky.agenta.presentation.navigation
+package com.example.tasky.agenda.presentation.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.example.tasky.agenta.presentation.AgendaScreenRoot
+import com.example.tasky.agenda.presentation.AgendaScreenRoot
+import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen
 import kotlinx.serialization.Serializable
 
 fun NavGraphBuilder.agendaNavGraph(
@@ -24,7 +25,9 @@ fun NavGraphBuilder.agendaScreen(
     navController: NavController
 ) {
     composable<AgendaScreen> {
-        AgendaScreenRoot()
+        AgendaScreenRoot(
+            onSuccessfulLogout = { navController.navigateToLoginScreen() }
+        )
     }
 }
 

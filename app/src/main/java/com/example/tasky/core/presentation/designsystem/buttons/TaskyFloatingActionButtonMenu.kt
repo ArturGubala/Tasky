@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.example.tasky.agenta.presentation.DefaultMenuOptions
+import com.example.tasky.agenda.presentation.DefaultMenuOptions
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.util.MenuOption
 
@@ -82,12 +82,14 @@ fun TaskyFloatingActionButtonMenu(
                         onClick()
                     },
                     leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = menuOption.iconRes),
-                            contentDescription = menuOption.contentDescription,
-                            modifier = Modifier.size(menuOption.size),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        menuOption.iconRes?.let {
+                            Icon(
+                                painter = painterResource(id = it),
+                                contentDescription = menuOption.contentDescription,
+                                modifier = Modifier.size(menuOption.iconSize),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     },
                     colors = MenuDefaults.itemColors(
                         textColor = MaterialTheme.colorScheme.primary,
@@ -112,7 +114,7 @@ private fun TaskyFloatingActionButtonMenuPreview() {
             TaskyFloatingActionButtonMenu(
                 onClick = { expanded = !expanded },
                 expanded = expanded,
-                menuOptions = DefaultMenuOptions.getTaskyMenuOptions(
+                menuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
                     onEventClick = { },
                     onTaskClick = { },
                     onReminderClick = { }

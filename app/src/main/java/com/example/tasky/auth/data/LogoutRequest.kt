@@ -1,0 +1,8 @@
+package com.example.tasky.auth.data
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class LogoutRequest(
+    val refreshToken: String
+)

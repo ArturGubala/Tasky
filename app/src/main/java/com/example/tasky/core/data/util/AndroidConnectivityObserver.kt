@@ -15,7 +15,7 @@ class AndroidConnectivityObserver(
     context: Context
 ): ConnectivityObserver {
 
-    private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
+    private val connectivityManager by lazy { context.getSystemService<ConnectivityManager>()!! }
 
     override val isConnected: Flow<Boolean>
         get() = callbackFlow {

@@ -11,10 +11,12 @@ import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.MenuOptionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,14 +27,18 @@ class AgendaViewModel(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
-    val state = _state.asStateFlow()
+    val state = _state
+        .onStart {
+            initializeMenuOptions()
+            observeConnectivity()
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            AgendaState(),
+        )
     private val eventChannel = Channel<AgendaEvent>()
     val events = eventChannel.receiveAsFlow()
-
-    init {
-        initializeMenuOptions()
-        observeConnectivity()
-    }
 
     private fun initializeMenuOptions() {
         val fabMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(

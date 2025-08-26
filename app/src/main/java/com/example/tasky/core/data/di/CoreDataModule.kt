@@ -6,7 +6,9 @@ import com.example.tasky.core.data.util.AndroidConnectivityObserver
 import com.example.tasky.core.data.util.CryptoManager
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val coreDataModule = module {
@@ -17,8 +19,5 @@ val coreDataModule = module {
     single<SessionStorage> {
         EncryptedSessionStorage(get(), get(named("session")))
     }
-    single<ConnectivityObserver> {
-        AndroidConnectivityObserver(get())
-    }
-
+    singleOf(::AndroidConnectivityObserver).bind<ConnectivityObserver>()
 }

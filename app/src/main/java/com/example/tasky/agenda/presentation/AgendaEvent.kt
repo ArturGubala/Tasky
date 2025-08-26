@@ -1,4 +1,4 @@
-package com.example.tasky.agenta.presentation
+package com.example.tasky.agenda.presentation
 
 import com.example.tasky.core.presentation.ui.UiText
 

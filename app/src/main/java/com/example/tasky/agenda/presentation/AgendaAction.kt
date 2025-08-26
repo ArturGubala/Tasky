@@ -1,4 +1,4 @@
-package com.example.tasky.agenta.presentation
+package com.example.tasky.agenda.presentation
 
 interface AgendaAction {
     data object OnLogoutClick: AgendaAction

@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.example.tasky.agenta.presentation.navigation.navigateToAgendaScreen
+import com.example.tasky.agenda.presentation.navigation.navigateToAgendaScreen
 import com.example.tasky.auth.presentation.login.LoginScreenRoot
 import com.example.tasky.auth.presentation.register.RegisterScreenRoot
 import kotlinx.serialization.Serializable

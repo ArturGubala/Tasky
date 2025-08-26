@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.tasky.agenta.presentation
+package com.example.tasky.agenda.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement

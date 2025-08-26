@@ -2,7 +2,7 @@ package com.example.tasky.app
 
 import android.app.Application
 import com.example.tasky.BuildConfig
-import com.example.tasky.agenta.di.agendaViewModelModule
+import com.example.tasky.agenda.di.agendaViewModelModule
 import com.example.tasky.app.di.appModule
 import com.example.tasky.auth.di.authDataModule
 import com.example.tasky.auth.presentation.di.authViewModelModule

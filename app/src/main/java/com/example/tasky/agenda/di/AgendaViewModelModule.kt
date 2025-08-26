@@ -1,6 +1,6 @@
-package com.example.tasky.agenta.di
+package com.example.tasky.agenda.di
 
-import com.example.tasky.agenta.presentation.AgendaViewModel
+import com.example.tasky.agenda.presentation.AgendaViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 

@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation
+package com.example.tasky.agenda.presentation.agenda_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

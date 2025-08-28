@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation
+package com.example.tasky.agenda.presentation.agenda_list
 
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R

@@ -21,7 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.example.tasky.agenda.presentation.DefaultMenuOptions
+import com.example.tasky.agenda.presentation.agenda_list.DefaultMenuOptions
 import com.example.tasky.core.presentation.designsystem.TaskyProfileIcon
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended

@@ -79,7 +79,6 @@ fun TaskyFloatingActionButtonMenu(
                     },
                     onClick = {
                         menuOption.onClick()
-                        onClick()
                     },
                     leadingIcon = {
                         menuOption.iconRes?.let {

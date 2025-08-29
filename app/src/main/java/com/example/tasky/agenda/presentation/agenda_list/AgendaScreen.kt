@@ -25,6 +25,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.util.AgendaMode
+import com.example.tasky.agenda.presentation.util.AgendaType
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyProfileButtonMenu
@@ -38,6 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AgendaScreenRoot(
     onSuccessfulLogout: () -> Unit,
+    onFabMenuOptionClick: (AgendaType, AgendaMode, String) -> Unit,
     viewModel: AgendaViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -59,6 +62,13 @@ fun AgendaScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
                 onSuccessfulLogout()
+            }
+            is AgendaEvent.OnFabMenuOptionClick -> {
+                onFabMenuOptionClick(
+                    event.agendaType,
+                    event.agendaMode,
+                    event.agendaId
+                )
             }
         }
     }

@@ -3,6 +3,8 @@ package com.example.tasky.agenda.presentation.agenda_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.util.AgendaMode
+import com.example.tasky.agenda.presentation.util.AgendaType
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
@@ -10,6 +12,7 @@ import com.example.tasky.core.domain.util.Result
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.MenuOptionType
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
@@ -80,6 +83,37 @@ class AgendaViewModel(
             }
             AgendaAction.OnProfileButtonClick -> {
                 _state.update { it.copy(profileMenuExpanded = !_state.value.profileMenuExpanded) }
+            }
+            AgendaAction.OnTaskClick -> {
+                _state.update { it.copy(fabMenuExpanded = false) }
+                viewModelScope.launch {
+                    // TODO: Don't know why, but without that delay menu collapse on next screen, tried few things, nothing works
+                    delay(100)
+                    eventChannel.send(AgendaEvent.OnFabMenuOptionClick(
+                        agendaType = AgendaType.TASK,
+                        agendaMode = AgendaMode.EDIT
+                    ))
+                }
+            }
+            AgendaAction.OnEventClick -> {
+                _state.update { it.copy(fabMenuExpanded = false) }
+                viewModelScope.launch {
+                    delay(100)
+                    eventChannel.send(AgendaEvent.OnFabMenuOptionClick(
+                        agendaType = AgendaType.EVENT,
+                        agendaMode = AgendaMode.EDIT
+                    ))
+                }
+            }
+            AgendaAction.OnReminderClick -> {
+                _state.update { it.copy(fabMenuExpanded = false) }
+                viewModelScope.launch {
+                    delay(100)
+                    eventChannel.send(AgendaEvent.OnFabMenuOptionClick(
+                        agendaType = AgendaType.REMINDER,
+                        agendaMode = AgendaMode.EDIT
+                    ))
+                }
             }
         }
     }

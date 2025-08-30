@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.presentation.agenda_list.AgendaAction
 import com.example.tasky.agenda.presentation.agenda_list.AgendaEvent
-import com.example.tasky.agenda.presentation.util.AgendaMode
-import com.example.tasky.agenda.presentation.util.AgendaType
+import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfigProvider
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import kotlinx.coroutines.channels.Channel
@@ -17,20 +17,20 @@ import kotlinx.coroutines.flow.stateIn
 
 
 class AgendaDetailViewModel(
-    private val agendaMode: AgendaMode,
-    private val agendaType: AgendaType,
+    private val agendaDetailView: AgendaDetailView,
+    private val agendaItemType: AgendaItemType,
     private val agendaId: String?,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState(
-        agendaType = agendaType,
-        agendaMode = agendaMode,
-        agendaDetailConfig = AgendaTypeConfigProvider.getConfig(type = agendaType)
+        agendaItemType = agendaItemType,
+        agendaDetailView = agendaDetailView,
+        agendaDetailConfig = AgendaTypeConfigProvider.getConfig(type = agendaItemType)
     ))
     val state = _state
         .onStart {
-            if (agendaMode == AgendaMode.EDIT && agendaId != null) {
+            if (agendaDetailView == AgendaDetailView.EDIT && agendaId != null) {
                 // TODO: Get agenda details from db by provided id
             }
         }
@@ -38,9 +38,9 @@ class AgendaDetailViewModel(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
             AgendaDetailState(
-                agendaType = agendaType,
-                agendaMode = agendaMode,
-                agendaDetailConfig = AgendaTypeConfigProvider.getConfig(type = agendaType)
+                agendaItemType = agendaItemType,
+                agendaDetailView = agendaDetailView,
+                agendaDetailConfig = AgendaTypeConfigProvider.getConfig(type = agendaItemType)
             ),
         )
     private val eventChannel = Channel<AgendaEvent>()

@@ -1,6 +1,6 @@
 package com.example.tasky.agenda.presentation.util
 
-enum class AgendaMode {
-    VIEW,
+enum class AgendaDetailView {
+    READ_ONLY,
     EDIT
 }

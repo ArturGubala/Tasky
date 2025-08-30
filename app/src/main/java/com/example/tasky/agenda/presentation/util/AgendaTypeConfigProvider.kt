@@ -13,30 +13,30 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 object AgendaTypeConfigProvider {
-    fun getConfig(type: AgendaType): AgendaTypeConfig {
+    fun getConfig(type: AgendaItemType): AgendaTypeConfig {
         return when (type) {
-            AgendaType.TASK -> createTaskConfig()
-            AgendaType.EVENT -> createEventConfig()
-            AgendaType.REMINDER -> createReminderConfig()
+            AgendaItemType.TASK -> createTaskConfig()
+            AgendaItemType.EVENT -> createEventConfig()
+            AgendaItemType.REMINDER -> createReminderConfig()
         }
     }
 
     private fun createTaskConfig() = AgendaTypeConfig(
-        type = AgendaType.TASK,
+        type = AgendaItemType.TASK,
         displayName = "Task",
         editTitleTemplateRes = R.string.edit_title,
         colorProvider = { MaterialTheme.colorScheme.secondary }
     )
 
     private fun createEventConfig() = AgendaTypeConfig(
-        type = AgendaType.EVENT,
+        type = AgendaItemType.EVENT,
         displayName = "Event",
         editTitleTemplateRes = R.string.edit_title,
         colorProvider = { MaterialTheme.colorScheme.tertiary }
     )
 
     private fun createReminderConfig() = AgendaTypeConfig(
-        type = AgendaType.REMINDER,
+        type = AgendaItemType.REMINDER,
         displayName = "Reminder",
         editTitleTemplateRes = R.string.edit_title,
         colorProvider = { MaterialTheme.colorScheme.extended.surfaceHigher },
@@ -45,7 +45,7 @@ object AgendaTypeConfigProvider {
 }
 
 data class AgendaTypeConfig(
-    val type: AgendaType,
+    val type: AgendaItemType,
     val displayName: String,
     @param:StringRes val editTitleTemplateRes: Int,
     private val colorProvider: @Composable () -> Color,
@@ -58,17 +58,17 @@ data class AgendaTypeConfig(
     fun getStrokeColor(): Color? = strokeColorProvider?.invoke()
 
     fun getAppBarTitle(
-        mode: AgendaMode,
+        mode: AgendaDetailView,
         context: Context,
         itemDate: LocalDateTime? = null
     ): String {
         return when (mode) {
-            AgendaMode.VIEW -> {
+            AgendaDetailView.READ_ONLY -> {
                 itemDate?.let { date ->
                     formatDateForTitle(date, context)
                 } ?: context.getString(R.string.no_date)
             }
-            AgendaMode.EDIT -> context.getString(editTitleTemplateRes, displayName)
+            AgendaDetailView.EDIT -> context.getString(editTitleTemplateRes, displayName)
         }
     }
 

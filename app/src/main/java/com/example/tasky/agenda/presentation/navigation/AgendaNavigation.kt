@@ -8,8 +8,8 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailScreenRoot
 import com.example.tasky.agenda.presentation.agenda_list.AgendaScreenRoot
-import com.example.tasky.agenda.presentation.util.AgendaMode
-import com.example.tasky.agenda.presentation.util.AgendaType
+import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen
 import kotlinx.serialization.Serializable
 
@@ -32,19 +32,19 @@ fun NavGraphBuilder.agendaListScreen(
     composable<AgendaListScreen> {
         AgendaScreenRoot(
             onSuccessfulLogout = { navController.navigateToLoginScreen() },
-            onFabMenuOptionClick = { agendaType, agendaMode, agendaId ->
-                navController.navigateToAgendaDetailScreen(agendaType, agendaMode, agendaId)
+            onFabMenuOptionClick = { agendaItemType, agendaDetailView, agendaId ->
+                navController.navigateToAgendaDetailScreen(agendaItemType, agendaDetailView, agendaId)
             }
         )
     }
 }
 
-fun NavController.navigateToAgendaDetailScreen(agendaType: AgendaType,
-                                               agendaMode: AgendaMode,
+fun NavController.navigateToAgendaDetailScreen(agendaItemType: AgendaItemType,
+                                               agendaDetailView: AgendaDetailView,
                                                agendaId: String)
 = navigate(AgendaDetailScreen(
-    agendaType = agendaType,
-    agendaMode = agendaMode,
+    agendaItemType = agendaItemType,
+    agendaDetailView = agendaDetailView,
     agendaId = agendaId
 ))
 
@@ -54,8 +54,8 @@ fun NavGraphBuilder.agendaDetailScreen(
     composable<AgendaDetailScreen> {
         val args = it.toRoute<AgendaDetailScreen>()
         AgendaDetailScreenRoot(
-            agendaType = args.agendaType,
-            agendaMode = args.agendaMode,
+            agendaItemType = args.agendaItemType,
+            agendaDetailView = args.agendaDetailView,
             agendaId = args.agendaId,
             onBackClick = {}
         )
@@ -70,7 +70,7 @@ object AgendaListScreen
 
 @Serializable
 data class AgendaDetailScreen(
-    val agendaType: AgendaType,
-    val agendaMode: AgendaMode,
+    val agendaItemType: AgendaItemType,
+    val agendaDetailView: AgendaDetailView,
     val agendaId: String = ""
 )

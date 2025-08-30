@@ -1,6 +1,6 @@
 package com.example.tasky.agenda.presentation.util
 
-enum class AgendaType {
+enum class AgendaItemType {
     TASK,
     EVENT,
     REMINDER

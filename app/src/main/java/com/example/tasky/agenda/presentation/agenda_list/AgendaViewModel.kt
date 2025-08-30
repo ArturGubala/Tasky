@@ -3,8 +3,8 @@ package com.example.tasky.agenda.presentation.agenda_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
-import com.example.tasky.agenda.presentation.util.AgendaMode
-import com.example.tasky.agenda.presentation.util.AgendaType
+import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
@@ -90,8 +90,8 @@ class AgendaViewModel(
                     // TODO: Don't know why, but without that delay menu collapse on next screen, tried few things, nothing works
                     delay(100)
                     eventChannel.send(AgendaEvent.OnFabMenuOptionClick(
-                        agendaType = AgendaType.TASK,
-                        agendaMode = AgendaMode.EDIT
+                        agendaItemType = AgendaItemType.TASK,
+                        agendaDetailView = AgendaDetailView.EDIT
                     ))
                 }
             }
@@ -100,8 +100,8 @@ class AgendaViewModel(
                 viewModelScope.launch {
                     delay(100)
                     eventChannel.send(AgendaEvent.OnFabMenuOptionClick(
-                        agendaType = AgendaType.EVENT,
-                        agendaMode = AgendaMode.EDIT
+                        agendaItemType = AgendaItemType.EVENT,
+                        agendaDetailView = AgendaDetailView.EDIT
                     ))
                 }
             }
@@ -110,8 +110,8 @@ class AgendaViewModel(
                 viewModelScope.launch {
                     delay(100)
                     eventChannel.send(AgendaEvent.OnFabMenuOptionClick(
-                        agendaType = AgendaType.REMINDER,
-                        agendaMode = AgendaMode.EDIT
+                        agendaItemType = AgendaItemType.REMINDER,
+                        agendaDetailView = AgendaDetailView.EDIT
                     ))
                 }
             }

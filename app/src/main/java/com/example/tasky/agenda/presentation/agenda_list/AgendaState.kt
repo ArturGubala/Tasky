@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.presentation
+package com.example.tasky.agenda.presentation.agenda_list
 
 import com.example.tasky.core.presentation.util.MenuOption
 

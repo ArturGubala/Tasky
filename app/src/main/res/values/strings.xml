@@ -38,4 +38,6 @@
     <string name="field_can_not_be_empty">Password field can not be empty.</string>
     <string name="no_date">No date provided</string>
     <string name="edit_title">EDIT %1$s</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 </resources>

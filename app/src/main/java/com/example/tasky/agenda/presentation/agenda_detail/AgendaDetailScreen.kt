@@ -11,9 +11,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -199,21 +201,44 @@ fun AgendaDetailScreen(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    TaskyLabel(
-                        text = "Project X",
-                        textStyle = MaterialTheme.typography.headlineLarge,
-                        modifier = Modifier,
-                        labelLeadingIcon = {
-                            TaskyCircle(
-                                size = 20.dp,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier
-                            )
-                        }
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp)
+                    ) {
+                        TaskyLabel(
+                            text = "Project X",
+                            textStyle = MaterialTheme.typography.headlineLarge,
+                            modifier = Modifier,
+                            labelLeadingIcon = {
+                                TaskyCircle(
+                                    size = 20.dp,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier
+                                )
+                            }
+                        )
+                    }
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.extended.surfaceHigher
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp)
+                    ) {
+                        Text(
+                            text = "Weekly plan\n" +
+                                    "Role distribution",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.extended.surfaceHigher
                     )
                 }
             }

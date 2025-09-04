@@ -21,7 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
-import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,17 +41,20 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 @SuppressLint("DefaultLocale")
 @Composable
 fun TaskyTimePicker(
-    time: String,
+    timePickerState: TimePickerState,
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
-    onTimeSelected: (String) -> Unit = {},
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
-    var selectedTime by remember { mutableStateOf(time) }
+    val selectedTime = String.format(
+        "%02d:%02d",
+        timePickerState.hour,
+        timePickerState.minute
+    );
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(4.dp))
             .background(color = MaterialTheme.colorScheme.extended.surfaceHigher)
             .clickable(enabled = !isReadOnly) {
                 showTimePicker = true
@@ -84,19 +87,11 @@ fun TaskyTimePicker(
     }
 
     if (showTimePicker && !isReadOnly) {
-        val timePickerState = rememberTimePickerState()
-
         TimePickerDialog(
             onDismissRequest = { showTimePicker = false },
             confirmButton = {
                 TaskyTextButton(
                     onClick = {
-                        selectedTime = String.format(
-                            "%02d:%02d",
-                            timePickerState.hour,
-                            timePickerState.minute
-                        )
-                        onTimeSelected(selectedTime)
                         showTimePicker = false
                     },
                     modifier = Modifier
@@ -138,9 +133,8 @@ fun TaskyTimePicker(
 fun TaskyTimePickerPreview() {
     TaskyTheme {
         TaskyTimePicker(
-            time = "10:15",
+            timePickerState = TimePickerState(0, 0, true),
             isReadOnly = false,
-            onTimeSelected = {},
             modifier = Modifier
                 .width(120.dp)
         )

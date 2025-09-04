@@ -25,7 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +50,9 @@ fun TaskyDatePicker(
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)
-    var selectedDate = datePickerState.selectedDateMillis?.let { dateFormat.format(Date(it)) }
+    val selectedDate = datePickerState.selectedDateMillis?.let { dateFormat.format(Date(it)) }
 
     Box(
         modifier = modifier

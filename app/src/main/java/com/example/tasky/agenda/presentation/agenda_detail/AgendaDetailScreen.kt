@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.tasky.agenda.presentation.agenda_detail
 
 import androidx.compose.foundation.border
@@ -7,15 +9,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +46,8 @@ import com.example.tasky.core.presentation.designsystem.icons.TaskyCircle
 import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
 import com.example.tasky.core.presentation.designsystem.labels.TaskyLabel
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
+import com.example.tasky.core.presentation.designsystem.pickers.TaskyDatePicker
+import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import org.koin.androidx.compose.koinViewModel
@@ -82,6 +89,8 @@ fun AgendaDetailScreen(
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig
 ) {
+    val isReadOnly = agendaDetailView == AgendaDetailView.EDIT
+
     TaskyScaffold(
         topBar = {
             when(agendaDetailView) {
@@ -201,7 +210,7 @@ fun AgendaDetailScreen(
                     )
                 }
 
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -227,7 +236,7 @@ fun AgendaDetailScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 24.dp)
+                            .padding(vertical = 20.dp)
                     ) {
                         Text(
                             text = "Weekly plan\n" +
@@ -235,6 +244,37 @@ fun AgendaDetailScreen(
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodyMedium
                         )
+                    }
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.extended.surfaceHigher
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.at),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TaskyTimePicker(
+                                timePickerState = state.timeFromState,
+                                modifier = Modifier.requiredWidth(120.dp),
+                                isReadOnly = isReadOnly
+                            )
+                            TaskyDatePicker(
+                                datePickerState = state.dateFromState,
+                                modifier = Modifier.requiredWidth(156.dp),
+                                isReadOnly = isReadOnly
+                            )
+                        }
                     }
                     HorizontalDivider(
                         thickness = 1.dp,

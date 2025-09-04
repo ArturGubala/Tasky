@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
@@ -98,14 +100,14 @@ fun TaskyTimePicker(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Confirm"
+                        text = stringResource(R.string.confirm)
                     )
                 }
 
             },
             title = {
                 Text(
-                    text = "Chose time"
+                    text = stringResource(R.string.chose_time)
                 )
             },
             containerColor = MaterialTheme.colorScheme.extended.surfaceHigher,
@@ -116,7 +118,7 @@ fun TaskyTimePicker(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Cancel"
+                        text = stringResource(R.string.cancel)
                     )
                 }
             }

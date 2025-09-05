@@ -13,14 +13,20 @@ object DateTimeFormatter {
     }
 
     @SuppressLint("ConstantLocale")
-    private val dateFormat = SimpleDateFormat(DateTimeFormats.TASKY_DETAIL_PICKER_DATE, Locale.getDefault())
-
+    private val taskyDetailPickerDateFormat = SimpleDateFormat(DateTimeFormats.TASKY_DETAIL_PICKER_DATE, Locale.getDefault())
     fun formatTaskyDetailPickerDate(dateMillis: Long): String {
-        return dateFormat.format(Date(dateMillis))
+        return taskyDetailPickerDateFormat.format(Date(dateMillis))
+    }
+
+    @SuppressLint("ConstantLocale")
+    private val taskyDetailTitleDateFormat = SimpleDateFormat(DateTimeFormats.TASKY_DETAIL_TITLE_DATE, Locale.getDefault())
+    fun formatTaskyDetailTitleDate(dateMillis: Long): String {
+        return taskyDetailTitleDateFormat.format(Date(dateMillis))
     }
 }
 
 object DateTimeFormats {
     const val TASKY_DETAIL_PICKER_TIME = "%02d:%02d"
     const val TASKY_DETAIL_PICKER_DATE = "MMM dd, yyyy"
+    const val TASKY_DETAIL_TITLE_DATE = "dd MMMM yyyy"
 }

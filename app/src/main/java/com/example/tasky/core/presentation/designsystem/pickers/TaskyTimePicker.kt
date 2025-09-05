@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -43,16 +42,12 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 @SuppressLint("DefaultLocale")
 @Composable
 fun TaskyTimePicker(
+    selectedTime: String,
     timePickerState: TimePickerState,
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
 ) {
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
-    val selectedTime = String.format(
-        "%02d:%02d",
-        timePickerState.hour,
-        timePickerState.minute
-    )
 
     Box(
         modifier = modifier
@@ -61,7 +56,7 @@ fun TaskyTimePicker(
             .clickable(enabled = !isReadOnly) {
                 showTimePicker = true
             }
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(start = 12.dp, top = 4.dp, end = 4.dp, bottom = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -79,9 +74,9 @@ fun TaskyTimePicker(
 
             if (!isReadOnly) {
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
+                    imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "Select time",
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -135,6 +130,7 @@ fun TaskyTimePicker(
 fun TaskyTimePickerPreview() {
     TaskyTheme {
         TaskyTimePicker(
+            selectedTime = "01:23",
             timePickerState = TimePickerState(0, 0, true),
             isReadOnly = false,
             modifier = Modifier

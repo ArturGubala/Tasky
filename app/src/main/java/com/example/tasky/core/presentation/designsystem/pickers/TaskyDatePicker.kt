@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -39,20 +38,17 @@ import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun TaskyDatePicker(
+    selectedDate: String,
     datePickerState: DatePickerState,
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
 ) {
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
-    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)
-    val selectedDate = datePickerState.selectedDateMillis?.let { dateFormat.format(Date(it)) }
 
     Box(
         modifier = modifier
@@ -61,7 +57,7 @@ fun TaskyDatePicker(
             .clickable(enabled = !isReadOnly) {
                 showDatePicker = true
             }
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(start = 12.dp, top = 4.dp, end = 4.dp, bottom = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -69,7 +65,7 @@ fun TaskyDatePicker(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = selectedDate ?: stringResource(R.string.nothing_selected),
+                text = selectedDate,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
@@ -79,9 +75,9 @@ fun TaskyDatePicker(
 
             if (!isReadOnly) {
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
+                    imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = stringResource(R.string.select_date),
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -134,7 +130,8 @@ fun TaskyDatePicker(
 fun TaskyDatePickerPreview() {
     TaskyTheme {
         TaskyDatePicker(
-            datePickerState = DatePickerState(locale = Locale.ENGLISH, initialSelectedDateMillis = System.currentTimeMillis()),
+            selectedDate = "Jul 21, 2022",
+            datePickerState = DatePickerState(locale = Locale.getDefault(), initialSelectedDateMillis = System.currentTimeMillis()),
             isReadOnly = false,
             modifier = Modifier
                 .width(150.dp)

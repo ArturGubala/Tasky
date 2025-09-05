@@ -50,9 +50,9 @@ import com.example.tasky.core.presentation.designsystem.pickers.TaskyDatePicker
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.time.LocalDateTime
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -75,7 +75,7 @@ fun AgendaDetailScreenRoot(
         appBarTitle = agendaItemTypeConfiguration.getAppBarTitle(
             mode = agendaDetailView,
             context = context,
-            itemDate = LocalDateTime.now()
+            itemDate = null
         ),
         agendaDetailView = agendaDetailView,
         agendaItemTypeConfiguration = agendaItemTypeConfiguration
@@ -89,7 +89,7 @@ fun AgendaDetailScreen(
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig
 ) {
-    val isReadOnly = agendaDetailView == AgendaDetailView.EDIT
+    val isReadOnly = agendaDetailView == AgendaDetailView.READ_ONLY
 
     TaskyScaffold(
         topBar = {
@@ -102,7 +102,7 @@ fun AgendaDetailScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
-                                    contentDescription = "Close ison",
+                                    contentDescription = "Close icon",
                                     tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
@@ -113,7 +113,7 @@ fun AgendaDetailScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit ison",
+                                    contentDescription = "Edit icon",
                                     tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
@@ -265,11 +265,20 @@ fun AgendaDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             TaskyTimePicker(
+                                selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                    hour = state.timeFromState.hour,
+                                    minute = state.timeFromState.minute
+                                ),
                                 timePickerState = state.timeFromState,
                                 modifier = Modifier.requiredWidth(120.dp),
                                 isReadOnly = isReadOnly
                             )
                             TaskyDatePicker(
+                                selectedDate = state.dateFromState.selectedDateMillis?.let {
+                                    DateTimeFormatter.formatTaskyDetailPickerDate(
+                                        dateMillis = it
+                                    )
+                                } ?: stringResource(R.string.nothing_selected),
                                 datePickerState = state.dateFromState,
                                 modifier = Modifier.requiredWidth(156.dp),
                                 isReadOnly = isReadOnly

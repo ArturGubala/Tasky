@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -21,7 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
-import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,11 +42,12 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 @Composable
 fun TaskyTimePicker(
     selectedTime: String,
-    timePickerState: TimePickerState,
+    onValueChange: (hour: Int, minute: Int) -> Unit,
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
 ) {
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState()
 
     Box(
         modifier = modifier
@@ -90,6 +90,7 @@ fun TaskyTimePicker(
                 TaskyTextButton(
                     onClick = {
                         showTimePicker = false
+                        onValueChange(timePickerState.hour, timePickerState.minute)
                     },
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -129,12 +130,12 @@ fun TaskyTimePicker(
 @Composable
 fun TaskyTimePickerPreview() {
     TaskyTheme {
-        TaskyTimePicker(
-            selectedTime = "01:23",
-            timePickerState = TimePickerState(0, 0, true),
-            isReadOnly = false,
-            modifier = Modifier
-                .width(120.dp)
-        )
+//        TaskyTimePicker(
+//            selectedTime = "01:23",
+//            timePickerState = TimePickerState(0, 0, true),
+//            isReadOnly = false,
+//            modifier = Modifier
+//                .width(120.dp)
+//        )
     }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -88,10 +89,14 @@ class AgendaDetailViewModel(
 
     private fun updateUtcDate(currentTimestamp: ZonedDateTime, dateMillis: Long): ZonedDateTime {
         val localTime = LocalTime.of(currentTimestamp.hour, currentTimestamp.minute)
-        val localDate = Instant.ofEpochMilli(dateMillis)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
+        val localDate = epochMillisToLocalDate(dateMillis)
         val localDateTime = ZonedDateTime.of(localDate, localTime, ZoneId.of("UTC"))
         return localDateTime
+    }
+
+    private fun epochMillisToLocalDate(epochMillis: Long): LocalDate {
+        return Instant.ofEpochMilli(epochMillis)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
     }
 }

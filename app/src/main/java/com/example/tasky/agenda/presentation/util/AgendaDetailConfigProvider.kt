@@ -11,13 +11,23 @@ import com.example.tasky.core.presentation.util.DateTimeFormatter
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-object AgendaTypeConfigProvider {
+object AgendaDetailConfigProvider {
     fun getConfig(type: AgendaItemType): AgendaTypeConfig {
         return when (type) {
             AgendaItemType.TASK -> createTaskConfig()
             AgendaItemType.EVENT -> createEventConfig()
             AgendaItemType.REMINDER -> createReminderConfig()
         }
+    }
+
+    fun getDefaultReminderIntervals(): List<AgendaReminderInterval> {
+        return listOf(
+            AgendaReminderInterval(600000L, "10 minutes before"),
+            AgendaReminderInterval(1800000L, "30 minutes before"),
+            AgendaReminderInterval(3600000L, "1 hour before"),
+            AgendaReminderInterval(21600000L, "6 hours before"),
+            AgendaReminderInterval(86400000L, "1 day before")
+        )
     }
 
     private fun createTaskConfig() = AgendaTypeConfig(

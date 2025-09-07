@@ -38,10 +38,11 @@ import com.example.tasky.R
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
-import com.example.tasky.agenda.presentation.util.AgendaTypeConfigProvider
+import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
+import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyNotificationReminderDropdown
 import com.example.tasky.core.presentation.designsystem.icons.TaskyCircle
 import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
 import com.example.tasky.core.presentation.designsystem.labels.TaskyLabel
@@ -67,11 +68,12 @@ fun AgendaDetailScreenRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val agendaItemTypeConfiguration by remember(agendaItemType) {
-        mutableStateOf(AgendaTypeConfigProvider.getConfig(type = agendaItemType))
+        mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
     }
 
     AgendaDetailScreen(
         state = state,
+        viewModel::onAction,
         appBarTitle = agendaItemTypeConfiguration.getAppBarTitle(
             mode = agendaDetailView,
             context = context,
@@ -85,9 +87,10 @@ fun AgendaDetailScreenRoot(
 @Composable
 fun AgendaDetailScreen(
     state: AgendaDetailState,
+    onAction: (AgendaDetailAction) -> Unit,
     appBarTitle: String,
     agendaDetailView: AgendaDetailView,
-    agendaItemTypeConfiguration: AgendaTypeConfig
+    agendaItemTypeConfiguration: AgendaTypeConfig,
 ) {
     val isReadOnly = agendaDetailView == AgendaDetailView.READ_ONLY
 
@@ -266,24 +269,51 @@ fun AgendaDetailScreen(
                         ) {
                             TaskyTimePicker(
                                 selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                    hour = state.timeFromState.hour,
-                                    minute = state.timeFromState.minute
+                                    hour = state.localTimestamp.hour,
+                                    minute = state.localTimestamp.minute,
                                 ),
-                                timePickerState = state.timeFromState,
+                                onValueChange = { hour, minute ->
+                                    onAction(
+                                        AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
+                                    )
+                                },
                                 modifier = Modifier.requiredWidth(120.dp),
                                 isReadOnly = isReadOnly
                             )
                             TaskyDatePicker(
-                                selectedDate = state.dateFromState.selectedDateMillis?.let {
-                                    DateTimeFormatter.formatTaskyDetailPickerDate(
-                                        dateMillis = it
+                                selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                    dateMillis = state.timestamp.toInstant().toEpochMilli()
+                                ),
+                                onValueChange = { dateMillis ->
+                                    onAction(
+                                        AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
                                     )
-                                } ?: stringResource(R.string.nothing_selected),
-                                datePickerState = state.dateFromState,
+                                },
                                 modifier = Modifier.requiredWidth(156.dp),
                                 isReadOnly = isReadOnly
                             )
                         }
+                    }
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.extended.surfaceHigher
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TaskyNotificationReminderDropdown(
+                            selectedReminder = state.selectedAgendaReminderInterval,
+                            availableIntervals = AgendaDetailConfigProvider.getDefaultReminderIntervals(),
+                            onReminderSelected = {
+                                onAction(
+                                    AgendaDetailAction.OnAgendaReminderIntervalSelect(reminder = it)
+                                )
+                            }
+                        )
                     }
                     HorizontalDivider(
                         thickness = 1.dp,
@@ -301,9 +331,10 @@ private fun AgendaDetailScreenPreview() {
     TaskyTheme {
         AgendaDetailScreen(
             state = AgendaDetailState(),
+            onAction = {},
             appBarTitle = "Title",
             agendaDetailView = AgendaDetailView.EDIT,
-            agendaItemTypeConfiguration = AgendaTypeConfigProvider.getConfig(type = AgendaItemType.TASK)
+            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK)
         )
     }
 }

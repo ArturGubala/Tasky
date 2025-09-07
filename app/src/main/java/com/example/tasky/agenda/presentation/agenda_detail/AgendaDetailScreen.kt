@@ -6,13 +6,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -35,10 +34,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
-import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
@@ -184,6 +183,7 @@ fun AgendaDetailScreen(
         ) {
             Column (
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(28.dp)
             ) {
@@ -213,7 +213,7 @@ fun AgendaDetailScreen(
                     )
                 }
 
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Column {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -319,6 +319,30 @@ fun AgendaDetailScreen(
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.extended.surfaceHigher
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.extended.surfaceHigher
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        TaskyTextButton(
+                            onClick = {}
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    R.string.delete_context,
+                                    agendaItemTypeConfiguration.displayName.uppercase()
+                                ),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
                 }
             }
         }

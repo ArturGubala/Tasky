@@ -38,6 +38,7 @@
     <string name="field_can_not_be_empty">Password field can not be empty.</string>
     <string name="no_date">No date provided</string>
     <string name="edit_title">EDIT %1$s</string>
+    <string name="delete_context">DELETE %1$s</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="nothing_selected">Nothing selected</string>
@@ -46,4 +47,9 @@
     <string name="choose_date">Choose date</string>
     <string name="at">At</string>
     <string name="chose_time">Chose time</string>
+    <string name="reminder_10_min">10 minutes before</string>
+    <string name="reminder_30_min">30 minutes before</string>
+    <string name="reminder_1_hour">1 hour before</string>
+    <string name="reminder_6_hours">6 hours before</string>
+    <string name="reminder_1_day">1 day before</string>
 </resources>

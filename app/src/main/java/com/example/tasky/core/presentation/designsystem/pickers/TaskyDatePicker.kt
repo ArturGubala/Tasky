@@ -17,11 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,17 +38,18 @@ import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
-import java.util.Locale
+import java.time.ZonedDateTime
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun TaskyDatePicker(
     selectedDate: String,
-    datePickerState: DatePickerState,
+    onValueChange: (dateMillis: Long) -> Unit,
     modifier: Modifier = Modifier,
     isReadOnly: Boolean = false,
 ) {
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     Box(
         modifier = modifier
@@ -91,6 +92,7 @@ fun TaskyDatePicker(
                 TaskyTextButton(
                     onClick = {
                         showDatePicker = false
+                        onValueChange(datePickerState.selectedDateMillis ?: ZonedDateTime.now().toEpochSecond())
                     },
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -131,7 +133,7 @@ fun TaskyDatePickerPreview() {
     TaskyTheme {
         TaskyDatePicker(
             selectedDate = "Jul 21, 2022",
-            datePickerState = DatePickerState(locale = Locale.getDefault(), initialSelectedDateMillis = System.currentTimeMillis()),
+            onValueChange = {},
             isReadOnly = false,
             modifier = Modifier
                 .width(150.dp)

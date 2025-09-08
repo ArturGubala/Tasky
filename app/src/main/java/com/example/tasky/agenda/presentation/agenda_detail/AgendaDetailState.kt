@@ -2,23 +2,18 @@
 
 package com.example.tasky.agenda.presentation.agenda_detail
 
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TimePickerState
+import com.example.tasky.agenda.presentation.util.AgendaItemInterval
+import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.Locale
+import java.time.temporal.ChronoUnit
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
-    val timeFromState: TimePickerState =
-        TimePickerState( initialHour = 0, initialMinute = 0, is24Hour = true),
-    val dateFromState: DatePickerState =
-        DatePickerState(locale = Locale.getDefault(), initialSelectedDateMillis = ZonedDateTime.now(
-            ZoneId.of("UTC")).toEpochSecond()),
-    val timeToState: TimePickerState =
-        TimePickerState( initialHour = 0, initialMinute = 0, is24Hour = true),
-    val dateToState: DatePickerState =
-        DatePickerState(locale = Locale.getDefault(), initialSelectedDateMillis = ZonedDateTime.now(
-            ZoneId.of("UTC")).toEpochSecond()),
-)
+    val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
+    val timestamp: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS)
+) {
+    val localTimestamp: ZonedDateTime
+        get() = timestamp.withZoneSameInstant(ZoneId.systemDefault())
+}

@@ -1,6 +1,5 @@
 package com.example.tasky.agenda.presentation.util
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme
@@ -8,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.util.DateTimeFormatter
 import java.time.LocalDateTime
-import java.time.format.TextStyle
-import java.util.Locale
+import java.time.ZoneOffset
 
-object AgendaTypeConfigProvider {
+object AgendaDetailConfigProvider {
     fun getConfig(type: AgendaItemType): AgendaTypeConfig {
         return when (type) {
             AgendaItemType.TASK -> createTaskConfig()
@@ -65,18 +64,10 @@ data class AgendaTypeConfig(
         return when (mode) {
             AgendaDetailView.READ_ONLY -> {
                 itemDate?.let { date ->
-                    formatDateForTitle(date, context)
+                    DateTimeFormatter.formatTaskyDetailTitleDate(date.toEpochSecond(ZoneOffset.UTC))
                 } ?: context.getString(R.string.no_date)
             }
             AgendaDetailView.EDIT -> context.getString(editTitleTemplateRes, displayName)
         }
-    }
-
-    @SuppressLint("DefaultLocale")
-    private fun formatDateForTitle(date: LocalDateTime, context: Context): String {
-        val day = String.format("%02d", date.dayOfMonth)
-        val month = date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
-        val year = date.year
-        return "$day $month $year"
     }
 }

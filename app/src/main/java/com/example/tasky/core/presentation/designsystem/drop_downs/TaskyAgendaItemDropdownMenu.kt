@@ -94,53 +94,54 @@ fun TaskyAgendaItemDropdownMenu(
                 }
             )
         }
-    }
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.requiredWidth(240.dp),
-        offset = DpOffset(
-            x = dropdownWidth - 240.dp,
-            y = 0.dp
-        ),
-        shape = RoundedCornerShape(8.dp),
-        containerColor = MaterialTheme.colorScheme.surface
-    ) {
-        availableIntervals.forEach { interval ->
-            val isOptionSelected = interval == selectedReminder
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = interval.toUiText().asString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                onClick = {
-                    onReminderSelected(interval)
-                    expanded = false
-                },
-                modifier = if (isOptionSelected) {
-                    Modifier.background(MaterialTheme.colorScheme.extended.surfaceHigher)
-                } else {
-                    Modifier
-                },
-                trailingIcon = {
-                    if (isOptionSelected) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Selected",
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.extended.success
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.requiredWidth(240.dp),
+            offset = DpOffset(
+                x = dropdownWidth - 240.dp,
+                y = 0.dp
+            ),
+            shape = RoundedCornerShape(8.dp),
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            availableIntervals.forEach { interval ->
+                val isOptionSelected = interval == selectedReminder
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = interval.toUiText().asString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                    }
-                },
-                colors = MenuDefaults.itemColors(
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    trailingIconColor = MaterialTheme.colorScheme.primary
-                ),
-            )
+                    },
+                    onClick = {
+                        onReminderSelected(interval)
+                        expanded = false
+                    },
+                    modifier = if (isOptionSelected) {
+                        Modifier.background(MaterialTheme.colorScheme.extended.surfaceHigher)
+                    } else {
+                        Modifier
+                    },
+                    trailingIcon = {
+                        if (isOptionSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.extended.success
+                            )
+                        }
+                    },
+                    colors = MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                        trailingIconColor = MaterialTheme.colorScheme.primary
+                    ),
+                )
+            }
         }
     }
 }

@@ -1,9 +1,10 @@
 package com.example.tasky.core.presentation.util
 
 import android.annotation.SuppressLint
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 @SuppressLint("DefaultLocale")
 object DateTimeFormatter {
@@ -13,15 +14,23 @@ object DateTimeFormatter {
     }
 
     @SuppressLint("ConstantLocale")
-    private val taskyDetailPickerDateFormat = SimpleDateFormat(DateTimeFormats.TASKY_DETAIL_PICKER_DATE, Locale.getDefault())
+    private val taskyDetailPickerDateFormat =
+        DateTimeFormatter.ofPattern(DateTimeFormats.TASKY_DETAIL_PICKER_DATE)
     fun formatTaskyDetailPickerDate(dateMillis: Long): String {
-        return taskyDetailPickerDateFormat.format(Date(dateMillis))
+        return taskyDetailPickerDateFormat.format(ZonedDateTime.ofInstant(
+            Instant.ofEpochMilli(dateMillis),
+            ZoneId.systemDefault())
+        )
     }
 
     @SuppressLint("ConstantLocale")
-    private val taskyDetailTitleDateFormat = SimpleDateFormat(DateTimeFormats.TASKY_DETAIL_TITLE_DATE, Locale.getDefault())
+    private val taskyDetailTitleDateFormat =
+        DateTimeFormatter.ofPattern(DateTimeFormats.TASKY_DETAIL_TITLE_DATE)
     fun formatTaskyDetailTitleDate(dateMillis: Long): String {
-        return taskyDetailTitleDateFormat.format(Date(dateMillis))
+        return taskyDetailTitleDateFormat.format(ZonedDateTime.ofInstant(
+            Instant.ofEpochMilli(dateMillis),
+            ZoneId.systemDefault())
+        )
     }
 }
 

@@ -54,7 +54,7 @@ class AgendaDetailViewModel(
            )
            is AgendaDetailAction.OnTimeFromPick -> {
                val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.timestamp,
-                   hour = action.hour, minute = action.minute)
+                   hour = action.hour, minutes = action.minute)
                _state.update {
                    it.copy(
                        timestamp = updatedTimestamp
@@ -79,19 +79,17 @@ class AgendaDetailViewModel(
         }
     }
 
-    private fun updateUtcTime(currentTimestamp: ZonedDateTime, hour: Int, minute: Int): ZonedDateTime {
-        val localTime = LocalTime.of(hour, minute)
+    private fun updateUtcTime(currentTimestamp: ZonedDateTime, hour: Int, minutes: Int): ZonedDateTime {
+        val localTime = LocalTime.of(hour, minutes)
         val localDate = currentTimestamp.toLocalDate()
         val localDateTime = ZonedDateTime.of(localDate, localTime, ZoneId.systemDefault())
-        val utcDateTime = localDateTime.withZoneSameInstant(ZoneId.of("UTC"))
-        return utcDateTime
+        return localDateTime.withZoneSameInstant(ZoneId.of("UTC"))
     }
 
     private fun updateUtcDate(currentTimestamp: ZonedDateTime, dateMillis: Long): ZonedDateTime {
         val localTime = LocalTime.of(currentTimestamp.hour, currentTimestamp.minute)
         val localDate = epochMillisToLocalDate(dateMillis)
-        val localDateTime = ZonedDateTime.of(localDate, localTime, ZoneId.of("UTC"))
-        return localDateTime
+        return ZonedDateTime.of(localDate, localTime, ZoneId.of("UTC"))
     }
 
     private fun epochMillisToLocalDate(epochMillis: Long): LocalDate {

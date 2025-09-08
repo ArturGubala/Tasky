@@ -6,7 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.presentation.agenda_list.AgendaEvent
-import com.example.tasky.agenda.presentation.util.AgendaReminderInterval
+import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,7 +49,7 @@ class AgendaDetailViewModel(
 
     fun onAction(action: AgendaDetailAction) {
         when(action) {
-           is AgendaDetailAction.OnAgendaReminderIntervalSelect -> onAgendaReminderIntervalSelect(
+           is AgendaDetailAction.OnAgendaItemIntervalSelect -> onAgendaItemIntervalSelect(
                reminder = action.reminder
            )
            is AgendaDetailAction.OnTimeFromPick -> {
@@ -73,7 +73,7 @@ class AgendaDetailViewModel(
         }
     }
 
-    private fun onAgendaReminderIntervalSelect(reminder: AgendaReminderInterval) {
+    private fun onAgendaItemIntervalSelect(reminder: AgendaItemInterval) {
         _state.update {
             it.copy(selectedAgendaReminderInterval = reminder)
         }

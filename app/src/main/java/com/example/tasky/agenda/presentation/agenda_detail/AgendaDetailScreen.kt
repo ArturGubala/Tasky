@@ -38,10 +38,11 @@ import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
+import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
-import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyNotificationReminderDropdown
+import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyAgendaItemDropdownMenu
 import com.example.tasky.core.presentation.designsystem.icons.TaskyCircle
 import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
 import com.example.tasky.core.presentation.designsystem.labels.TaskyLabel
@@ -305,12 +306,12 @@ fun AgendaDetailScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TaskyNotificationReminderDropdown(
+                        TaskyAgendaItemDropdownMenu(
                             selectedReminder = state.selectedAgendaReminderInterval,
-                            availableIntervals = AgendaDetailConfigProvider.getDefaultReminderIntervals(),
+                            availableIntervals = defaultAgendaItemIntervals(),
                             onReminderSelected = {
                                 onAction(
-                                    AgendaDetailAction.OnAgendaReminderIntervalSelect(reminder = it)
+                                    AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
                                 )
                             }
                         )

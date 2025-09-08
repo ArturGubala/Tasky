@@ -35,16 +35,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
-import com.example.tasky.agenda.presentation.util.AgendaReminderInterval
+import com.example.tasky.agenda.presentation.util.AgendaItemInterval
+import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
+import com.example.tasky.agenda.presentation.util.toUiText
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
-fun TaskyNotificationReminderDropdown(
-    selectedReminder: AgendaReminderInterval,
-    availableIntervals: List<AgendaReminderInterval>,
-    onReminderSelected: (AgendaReminderInterval) -> Unit,
+fun TaskyAgendaItemDropdownMenu(
+    selectedReminder: AgendaItemInterval,
+    availableIntervals: List<AgendaItemInterval>,
+    onReminderSelected: (AgendaItemInterval) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
@@ -71,7 +72,7 @@ fun TaskyNotificationReminderDropdown(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selectedReminder.displayLabel,
+                text = selectedReminder.toUiText().asString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (enabled) {
                     MaterialTheme.colorScheme.onSurface
@@ -107,11 +108,11 @@ fun TaskyNotificationReminderDropdown(
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         availableIntervals.forEach { interval ->
-            val isOptionSelected = interval.timeInMillis == selectedReminder.timeInMillis
+            val isOptionSelected = interval == selectedReminder
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = interval.displayLabel,
+                        text = interval.toUiText().asString(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -150,7 +151,7 @@ fun TaskyNotificationReminderDropdown(
 private fun NotificationReminderDropdownPreview() {
     TaskyTheme {
         var selectedReminder by remember {
-            mutableStateOf(AgendaReminderInterval(1800000L, "30 minutes before"))
+            mutableStateOf<AgendaItemInterval>(AgendaItemInterval.TenMinutesFromNow)
         }
 
         Text(
@@ -158,10 +159,9 @@ private fun NotificationReminderDropdownPreview() {
             style = MaterialTheme.typography.headlineSmall
         )
 
-        TaskyNotificationReminderDropdown(
+        TaskyAgendaItemDropdownMenu(
             selectedReminder = selectedReminder,
-            availableIntervals = AgendaDetailConfigProvider
-                .getDefaultReminderIntervals(),
+            availableIntervals = defaultAgendaItemIntervals(),
             onReminderSelected = { reminder ->
                 selectedReminder = reminder
             },

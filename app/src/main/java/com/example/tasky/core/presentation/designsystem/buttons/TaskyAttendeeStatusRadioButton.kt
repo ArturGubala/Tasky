@@ -28,11 +28,12 @@ import com.example.tasky.core.presentation.designsystem.theme.headlineXSmall
 fun TaskyAttendeeStatusRadioButton(
     options: List<AgendaItemAttendeesStatus>,
     onOptionSelect: (AgendaItemAttendeesStatus) -> Unit,
+    modifier: Modifier = Modifier,
     selectedOption: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL
 ) {
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(16.dp)
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
     ) {
         items(options) { option ->
             val isOptionSelected = selectedOption == option

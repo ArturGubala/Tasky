@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,10 +37,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
+import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyAgendaItemDropdownMenu
@@ -320,6 +323,54 @@ fun AgendaDetailScreen(
                         thickness = 1.dp,
                         color = MaterialTheme.colorScheme.extended.surfaceHigher
                     )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 28.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Visitors",
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            TaskyTextButton(
+                                onClick = {}
+                            ) {
+                                TaskySquare(
+                                    size = 32.dp,
+                                    color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Close icon",
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            TaskyAttendeeStatusRadioButton(
+                                options = AgendaItemAttendeesStatus.entries,
+                                onOptionSelect = {
+                                    onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
+                                },
+                                selectedOption = state.selectedAttendeeStatus,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.weight(1f))
                     HorizontalDivider(
                         thickness = 1.dp,

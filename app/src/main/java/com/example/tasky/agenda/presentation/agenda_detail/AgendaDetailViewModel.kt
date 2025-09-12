@@ -6,6 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.presentation.agenda_list.AgendaEvent
+import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import kotlinx.coroutines.channels.Channel
@@ -70,6 +71,7 @@ class AgendaDetailViewModel(
                     )
                 }
             }
+            is AgendaDetailAction.OnAttendeeStatusClick -> changeAttendeeStatus(action.status)
         }
     }
 
@@ -96,5 +98,11 @@ class AgendaDetailViewModel(
         return Instant.ofEpochMilli(epochMillis)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
+    }
+
+    private fun changeAttendeeStatus(status: AgendaItemAttendeesStatus) {
+        _state.update {
+            it.copy(selectedAttendeeStatus = status)
+        }
     }
 }

@@ -38,6 +38,9 @@ fun TaskyProfileButtonMenu(
     Box(modifier = modifier) {
         TaskyProfileIcon(
             text = text,
+            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            textStyle = MaterialTheme.typography.labelSmall,
+            backgroundColor = MaterialTheme.colorScheme.extended.surfaceHigher,
             modifier = Modifier
                 .size(36.dp)
                 .clickable { onClick.invoke() }

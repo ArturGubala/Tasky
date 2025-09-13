@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -44,6 +46,7 @@ import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
+import com.example.tasky.core.presentation.designsystem.cards.TaskyAttendeeCard
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyAgendaItemDropdownMenu
 import com.example.tasky.core.presentation.designsystem.icons.TaskyCircle
@@ -186,9 +189,16 @@ fun AgendaDetailScreen(
             contentAlignment = Alignment.TopStart
         ) {
             Column (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                modifier = if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .verticalScroll(rememberScrollState())
+                } else {
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                },
                 verticalArrangement = Arrangement.spacedBy(28.dp)
             ) {
                 Row(
@@ -324,50 +334,90 @@ fun AgendaDetailScreen(
                         color = MaterialTheme.colorScheme.extended.surfaceHigher
                     )
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 28.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Row(
+                    if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                                .fillMaxWidth()
+                                .padding(vertical = 28.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text(
-                                text = "Visitors",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.headlineMedium
-                            )
-                            TaskyTextButton(
-                                onClick = {}
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                TaskySquare(
-                                    size = 32.dp,
-                                    color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                Text(
+                                    text = "Visitors",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                                TaskyTextButton(
+                                    onClick = {}
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Add,
-                                        contentDescription = "Close icon",
-                                        tint = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    TaskySquare(
+                                        size = 32.dp,
+                                        color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Add,
+                                            contentDescription = "Close icon",
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            TaskyAttendeeStatusRadioButton(
-                                options = AgendaItemAttendeesStatus.entries,
-                                onOptionSelect = {
-                                    onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
-                                },
-                                selectedOption = state.selectedAttendeeStatus,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                            ) {
+                                TaskyAttendeeStatusRadioButton(
+                                    options = AgendaItemAttendeesStatus.entries,
+                                    onOptionSelect = {
+                                        onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
+                                    },
+                                    selectedOption = state.selectedAttendeeStatus,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            val goingAttendees = state.sampleAttendees.filter { it.isGoing }
+                            if (goingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
+                                Text(
+                                    text = "Going",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    goingAttendees.forEach { attendee ->
+                                        TaskyAttendeeCard(
+                                            attendeeName = attendee.username,
+                                            isCreator = attendee.isCreator
+                                        )
+                                    }
+                                }
+                            }
+
+                            val notGoingAttendees = state.sampleAttendees.filter { !it.isGoing }
+                            if (notGoingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
+                                Text(
+                                    text = "Not going",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+
+                                Column{
+                                    notGoingAttendees.forEach { attendee ->
+                                        TaskyAttendeeCard(
+                                            attendeeName = attendee.username,
+                                            isCreator = attendee.isCreator
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
 

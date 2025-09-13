@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.presentation.agenda_list.AgendaEvent
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
+import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ import java.time.ZonedDateTime
 
 class AgendaDetailViewModel(
     private val agendaId: String,
+    private val agendaItemType: AgendaItemType,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
@@ -37,6 +39,11 @@ class AgendaDetailViewModel(
             _state.update { it.copy(loadingInitialData = true) }
             if (agendaId.isNotEmpty()) {
                 // TODO: Get agenda details from db by provided id
+            }
+            when(agendaItemType) {
+                AgendaItemType.TASK -> _state.update { it.copy(details = AgendaItemDetails.Task()) }
+                AgendaItemType.EVENT -> _state.update { it.copy(details = AgendaItemDetails.Event()) }
+                AgendaItemType.REMINDER -> _state.update { it.copy(details = AgendaItemDetails.Reminder) }
             }
             _state.update { it.copy(loadingInitialData = false) }
         }
@@ -54,20 +61,20 @@ class AgendaDetailViewModel(
                reminder = action.reminder
            )
            is AgendaDetailAction.OnTimeFromPick -> {
-               val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.timestamp,
+               val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.fromTime,
                    hour = action.hour, minutes = action.minute)
                _state.update {
                    it.copy(
-                       timestamp = updatedTimestamp
+                       fromTime = updatedTimestamp
                    )
                }
            }
             is AgendaDetailAction.OnDateFromPick -> {
-                val updatedTimestamp = updateUtcDate(currentTimestamp = _state.value.timestamp,
+                val updatedTimestamp = updateUtcDate(currentTimestamp = _state.value.fromTime,
                     dateMillis = action.dateMillis)
                 _state.update {
                     it.copy(
-                        timestamp = updatedTimestamp
+                        fromTime = updatedTimestamp
                     )
                 }
             }

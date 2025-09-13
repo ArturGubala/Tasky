@@ -10,21 +10,47 @@ import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import kotlin.collections.List
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
-    val timestamp: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
+    val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
-    // List for tests
-    val sampleAttendees: List<Attendee> = listOf(
-        Attendee("wade1@example.com", "Wade Warren", "1", "event1", true, "2024-01-15T09:30:00Z", true),
-        Attendee("wade2@example.com", "Wade Warren", "2", "event1", true, "2024-01-15T09:30:00Z", false),
-        Attendee("wade3@example.com", "Wade Warren", "3", "event1", true, "2024-01-15T09:30:00Z", false),
-        Attendee("wade4@example.com", "Wade Warren", "4", "event1", false, "2024-01-15T09:30:00Z", false),
-        Attendee("wade5@example.com", "Wade Warren", "5", "event1", false, "2024-01-15T09:30:00Z", false)
-    )
+    val details: AgendaItemDetails? = AgendaItemDetails.Event()
 ) {
-    val localTimestamp: ZonedDateTime
-        get() = timestamp.withZoneSameInstant(ZoneId.systemDefault())
+    val localFromTime: ZonedDateTime
+        get() = fromTime.withZoneSameInstant(ZoneId.systemDefault())
+}
+
+sealed interface AgendaItemDetails {
+    data class Event(
+        val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
+        val attendees: List<Attendee> = listOf(
+            Attendee("wade1@example.com", "Wade Warren", "1", "event1", true, "2024-01-15T09:30:00Z", true),
+            Attendee("wade2@example.com", "Wade Warren", "2", "event1", true, "2024-01-15T09:30:00Z", false),
+            Attendee("wade3@example.com", "Wade Warren", "3", "event1", true, "2024-01-15T09:30:00Z", false),
+            Attendee("wade4@example.com", "Wade Warren", "4", "event1", false, "2024-01-15T09:30:00Z", false),
+            Attendee("wade5@example.com", "Wade Warren", "5", "event1", false, "2024-01-15T09:30:00Z", false)
+        ),
+//        val photos: List<Photo>
+    ): AgendaItemDetails
+
+    data class Task(
+        val isDone: Boolean = false
+    ): AgendaItemDetails
+
+    data object Reminder: AgendaItemDetails
+}
+
+fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event? {
+    return details as? AgendaItemDetails.Event
+}
+
+fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task? {
+    return details as? AgendaItemDetails.Task
+}
+
+fun AgendaDetailState.isReminder(): Boolean {
+    return details is AgendaItemDetails.Reminder
 }

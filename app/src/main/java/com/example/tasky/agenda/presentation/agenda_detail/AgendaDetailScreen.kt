@@ -69,7 +69,7 @@ fun AgendaDetailScreenRoot(
     agendaId: String = "",
     onBackClick: () -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
-        parameters = { parametersOf(agendaId) }
+        parameters = { parametersOf(agendaId, agendaItemType) }
     )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -285,8 +285,8 @@ fun AgendaDetailScreen(
                                 ) {
                                     TaskyTimePicker(
                                         selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                            hour = state.localTimestamp.hour,
-                                            minute = state.localTimestamp.minute,
+                                            hour = state.localFromTime.hour,
+                                            minute = state.localFromTime.minute,
                                         ),
                                         onValueChange = { hour, minute ->
                                             onAction(
@@ -298,7 +298,7 @@ fun AgendaDetailScreen(
                                     )
                                     TaskyDatePicker(
                                         selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                            dateMillis = state.timestamp.toInstant().toEpochMilli()
+                                            dateMillis = state.fromTime.toInstant().toEpochMilli()
                                         ),
                                         onValueChange = { dateMillis ->
                                             onAction(
@@ -383,8 +383,8 @@ fun AgendaDetailScreen(
                                         )
                                     }
 
-                                    val goingAttendees = state.sampleAttendees.filter { it.isGoing }
-                                    if (goingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
+                                    val goingAttendees = state.detailsAsEvent()?.attendees?.filter { it.isGoing }
+                                    if (goingAttendees?.isNotEmpty() ?: false && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
                                         Text(
                                             text = "Going",
                                             color = MaterialTheme.colorScheme.onSurface,
@@ -403,8 +403,8 @@ fun AgendaDetailScreen(
                                         }
                                     }
 
-                                    val notGoingAttendees = state.sampleAttendees.filter { !it.isGoing }
-                                    if (notGoingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
+                                    val notGoingAttendees = state.detailsAsEvent()?.attendees?.filter { !it.isGoing }
+                                    if (notGoingAttendees?.isNotEmpty() ?: false && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
                                         Text(
                                             text = "Not going",
                                             color = MaterialTheme.colorScheme.onSurface,

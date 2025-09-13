@@ -4,11 +4,12 @@ package com.example.tasky.agenda.presentation.agenda_detail
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.rememberScrollState
@@ -188,261 +189,264 @@ fun AgendaDetailScreen(
                 .padding(padding),
             contentAlignment = Alignment.TopStart
         ) {
-            Column (
-                modifier = if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                        .verticalScroll(rememberScrollState())
-                } else {
-                    Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                },
-                verticalArrangement = Arrangement.spacedBy(28.dp)
-            ) {
-                Row(
+            BoxWithConstraints {
+                val screenHeight = maxHeight
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                            .fillMaxWidth()
+                            .heightIn(min = screenHeight)
+                            .padding(horizontal = 16.dp, vertical = 24.dp)
+                            .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TaskyLabel(
-                        text = agendaItemTypeConfiguration.displayName.uppercase(),
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier,
-                        labelLeadingIcon = {
-                            TaskySquare(
-                                size = 20.dp,
-                                color = agendaItemTypeConfiguration.getColor(),
-                                modifier = Modifier
-                                    .then(
-                                        agendaItemTypeConfiguration.getStrokeColor()?.let { strokeColor ->
-                                            Modifier.border(
-                                                width = 1.dp,
-                                                color = strokeColor,
-                                                shape = RoundedCornerShape(4.dp))
-                                        } ?: Modifier
-                                    )
-                            )
-                        }
-                    )
-                }
-
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
-                        TaskyLabel(
-                            text = "Project X",
-                            textStyle = MaterialTheme.typography.headlineLarge,
-                            modifier = Modifier,
-                            labelLeadingIcon = {
-                                TaskyCircle(
-                                    size = 20.dp,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier
-                                )
-                            }
-                        )
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp)
-                    ) {
-                        Text(
-                            text = "Weekly plan\n" +
-                                    "Role distribution",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.at),
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            TaskyTimePicker(
-                                selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                    hour = state.localTimestamp.hour,
-                                    minute = state.localTimestamp.minute,
-                                ),
-                                onValueChange = { hour, minute ->
-                                    onAction(
-                                        AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
-                                    )
-                                },
-                                modifier = Modifier.requiredWidth(120.dp),
-                                isReadOnly = isReadOnly
-                            )
-                            TaskyDatePicker(
-                                selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                    dateMillis = state.timestamp.toInstant().toEpochMilli()
-                                ),
-                                onValueChange = { dateMillis ->
-                                    onAction(
-                                        AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
-                                    )
-                                },
-                                modifier = Modifier.requiredWidth(156.dp),
-                                isReadOnly = isReadOnly
-                            )
-                        }
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TaskyAgendaItemDropdownMenu(
-                            selectedReminder = state.selectedAgendaReminderInterval,
-                            availableIntervals = defaultAgendaItemIntervals(),
-                            onReminderSelected = {
-                                onAction(
-                                    AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
-                                )
-                            }
-                        )
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-
-                    if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
-                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 28.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            TaskyLabel(
+                                text = agendaItemTypeConfiguration.displayName.uppercase(),
+                                textStyle = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier,
+                                labelLeadingIcon = {
+                                    TaskySquare(
+                                        size = 20.dp,
+                                        color = agendaItemTypeConfiguration.getColor(),
+                                        modifier = Modifier
+                                            .then(
+                                                agendaItemTypeConfiguration.getStrokeColor()?.let { strokeColor ->
+                                                    Modifier.border(
+                                                        width = 1.dp,
+                                                        color = strokeColor,
+                                                        shape = RoundedCornerShape(4.dp))
+                                                } ?: Modifier
+                                            )
+                                    )
+                                }
+                            )
+                        }
+
+                        Column {
                             Row(
                                 modifier = Modifier
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .padding(bottom = 24.dp)
+                            ) {
+                                TaskyLabel(
+                                    text = "Project X",
+                                    textStyle = MaterialTheme.typography.headlineLarge,
+                                    modifier = Modifier,
+                                    labelLeadingIcon = {
+                                        TaskyCircle(
+                                            size = 20.dp,
+                                            color = MaterialTheme.colorScheme.onBackground,
+                                            modifier = Modifier
+                                        )
+                                    }
+                                )
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp)
+                            ) {
+                                Text(
+                                    text = "Weekly plan\n" +
+                                            "Role distribution",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Visitors",
+                                    text = stringResource(R.string.at),
                                     color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.headlineMedium
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
-                                TaskyTextButton(
-                                    onClick = {}
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    TaskySquare(
-                                        size = 32.dp,
-                                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Add,
-                                            contentDescription = "Close icon",
-                                            tint = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
+                                    TaskyTimePicker(
+                                        selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                            hour = state.localTimestamp.hour,
+                                            minute = state.localTimestamp.minute,
+                                        ),
+                                        onValueChange = { hour, minute ->
+                                            onAction(
+                                                AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
+                                            )
+                                        },
+                                        modifier = Modifier.requiredWidth(120.dp),
+                                        isReadOnly = isReadOnly
+                                    )
+                                    TaskyDatePicker(
+                                        selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                            dateMillis = state.timestamp.toInstant().toEpochMilli()
+                                        ),
+                                        onValueChange = { dateMillis ->
+                                            onAction(
+                                                AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
+                                            )
+                                        },
+                                        modifier = Modifier.requiredWidth(156.dp),
+                                        isReadOnly = isReadOnly
+                                    )
                                 }
                             }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
                             Row(
                                 modifier = Modifier
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                TaskyAttendeeStatusRadioButton(
-                                    options = AgendaItemAttendeesStatus.entries,
-                                    onOptionSelect = {
-                                        onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
-                                    },
-                                    selectedOption = state.selectedAttendeeStatus,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            val goingAttendees = state.sampleAttendees.filter { it.isGoing }
-                            if (goingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
-                                Text(
-                                    text = "Going",
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.headlineSmall
-                                )
-
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    goingAttendees.forEach { attendee ->
-                                        TaskyAttendeeCard(
-                                            attendeeName = attendee.username,
-                                            isCreator = attendee.isCreator
+                                TaskyAgendaItemDropdownMenu(
+                                    selectedReminder = state.selectedAgendaReminderInterval,
+                                    availableIntervals = defaultAgendaItemIntervals(),
+                                    onReminderSelected = {
+                                        onAction(
+                                            AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
                                         )
                                     }
-                                }
-                            }
-
-                            val notGoingAttendees = state.sampleAttendees.filter { !it.isGoing }
-                            if (notGoingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
-                                Text(
-                                    text = "Not going",
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.headlineSmall
                                 )
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
 
-                                Column{
-                                    notGoingAttendees.forEach { attendee ->
-                                        TaskyAttendeeCard(
-                                            attendeeName = attendee.username,
-                                            isCreator = attendee.isCreator
+                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 28.dp),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Visitors",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.headlineMedium
                                         )
+                                        TaskyTextButton(
+                                            onClick = {}
+                                        ) {
+                                            TaskySquare(
+                                                size = 32.dp,
+                                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Add,
+                                                    contentDescription = "Close icon",
+                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                    ) {
+                                        TaskyAttendeeStatusRadioButton(
+                                            options = AgendaItemAttendeesStatus.entries,
+                                            onOptionSelect = {
+                                                onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
+                                            },
+                                            selectedOption = state.selectedAttendeeStatus,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    val goingAttendees = state.sampleAttendees.filter { it.isGoing }
+                                    if (goingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
+                                        Text(
+                                            text = "Going",
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            style = MaterialTheme.typography.headlineSmall
+                                        )
+
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            goingAttendees.forEach { attendee ->
+                                                TaskyAttendeeCard(
+                                                    attendeeName = attendee.username,
+                                                    isCreator = attendee.isCreator
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    val notGoingAttendees = state.sampleAttendees.filter { !it.isGoing }
+                                    if (notGoingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
+                                        Text(
+                                            text = "Not going",
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            style = MaterialTheme.typography.headlineSmall
+                                        )
+
+                                        Column {
+                                            notGoingAttendees.forEach { attendee ->
+                                                TaskyAttendeeCard(
+                                                    attendeeName = attendee.username,
+                                                    isCreator = attendee.isCreator
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.weight(1f))
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        TaskyTextButton(
-                            onClick = {}
+                    Column {
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.extended.surfaceHigher
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.Center,
                         ) {
-                            Text(
-                                text = stringResource(
-                                    R.string.delete_context,
-                                    agendaItemTypeConfiguration.displayName.uppercase()
-                                ),
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.labelSmall
-                            )
+                            TaskyTextButton(
+                                onClick = {}
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.delete_context,
+                                        agendaItemTypeConfiguration.displayName.uppercase()
+                                    ),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
                         }
                     }
                 }

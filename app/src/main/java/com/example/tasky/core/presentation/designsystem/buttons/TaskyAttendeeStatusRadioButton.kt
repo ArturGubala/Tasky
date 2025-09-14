@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
@@ -53,7 +54,7 @@ fun TaskyAttendeeStatusRadioButton(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = option.displayName,
+                    text = option.getDisplayName(LocalContext.current),
                     color = if (isOptionSelected) {
                         MaterialTheme.colorScheme.onPrimary
                     } else {

@@ -43,7 +43,7 @@ import com.example.tasky.core.presentation.designsystem.buttons.TaskyPrimaryButt
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyPasswordTextField
-import com.example.tasky.core.presentation.designsystem.text_fields.TaskyTextField
+import com.example.tasky.core.presentation.designsystem.text_fields.TaskyTextFieldPrimary
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
@@ -217,7 +217,7 @@ private fun LoginFormSection(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TaskyTextField(
+            TaskyTextFieldPrimary(
                 text = state.email,
                 onValueChange = { onAction(LoginAction.OnEmailValueChanged(it)) },
                 onFocusChanged = { hasFocus ->

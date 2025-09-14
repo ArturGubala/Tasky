@@ -4,15 +4,19 @@ package com.example.tasky.agenda.presentation.agenda_detail
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,11 +40,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
+import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
+import com.example.tasky.core.presentation.designsystem.cards.TaskyAttendeeCard
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyAgendaItemDropdownMenu
 import com.example.tasky.core.presentation.designsystem.icons.TaskyCircle
@@ -62,7 +69,7 @@ fun AgendaDetailScreenRoot(
     agendaId: String = "",
     onBackClick: () -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
-        parameters = { parametersOf(agendaId) }
+        parameters = { parametersOf(agendaId, agendaItemType) }
     )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -182,166 +189,264 @@ fun AgendaDetailScreen(
                 .padding(padding),
             contentAlignment = Alignment.TopStart
         ) {
-            Column (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(28.dp)
-            ) {
-                Row(
+            BoxWithConstraints {
+                val screenHeight = maxHeight
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                            .fillMaxWidth()
+                            .heightIn(min = screenHeight)
+                            .padding(horizontal = 16.dp, vertical = 24.dp)
+                            .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TaskyLabel(
-                        text = agendaItemTypeConfiguration.displayName.uppercase(),
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier,
-                        labelLeadingIcon = {
-                            TaskySquare(
-                                size = 20.dp,
-                                color = agendaItemTypeConfiguration.getColor(),
-                                modifier = Modifier
-                                    .then(
-                                        agendaItemTypeConfiguration.getStrokeColor()?.let { strokeColor ->
-                                            Modifier.border(
-                                                width = 1.dp,
-                                                color = strokeColor,
-                                                shape = RoundedCornerShape(4.dp))
-                                        } ?: Modifier
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(28.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            TaskyLabel(
+                                text = agendaItemTypeConfiguration.displayName.uppercase(),
+                                textStyle = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier,
+                                labelLeadingIcon = {
+                                    TaskySquare(
+                                        size = 20.dp,
+                                        color = agendaItemTypeConfiguration.getColor(),
+                                        modifier = Modifier
+                                            .then(
+                                                agendaItemTypeConfiguration.getStrokeColor()?.let { strokeColor ->
+                                                    Modifier.border(
+                                                        width = 1.dp,
+                                                        color = strokeColor,
+                                                        shape = RoundedCornerShape(4.dp))
+                                                } ?: Modifier
+                                            )
                                     )
+                                }
                             )
                         }
-                    )
-                }
 
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp)
-                    ) {
-                        TaskyLabel(
-                            text = "Project X",
-                            textStyle = MaterialTheme.typography.headlineLarge,
-                            modifier = Modifier,
-                            labelLeadingIcon = {
-                                TaskyCircle(
-                                    size = 20.dp,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 24.dp)
+                            ) {
+                                TaskyLabel(
+                                    text = "Project X",
+                                    textStyle = MaterialTheme.typography.headlineLarge,
+                                    modifier = Modifier,
+                                    labelLeadingIcon = {
+                                        TaskyCircle(
+                                            size = 20.dp,
+                                            color = MaterialTheme.colorScheme.onBackground,
+                                            modifier = Modifier
+                                        )
+                                    }
                                 )
                             }
-                        )
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp)
+                            ) {
+                                Text(
+                                    text = "Weekly plan\n" +
+                                            "Role distribution",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.at),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    TaskyTimePicker(
+                                        selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                            hour = state.localFromTime.hour,
+                                            minute = state.localFromTime.minute,
+                                        ),
+                                        onValueChange = { hour, minute ->
+                                            onAction(
+                                                AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
+                                            )
+                                        },
+                                        modifier = Modifier.requiredWidth(120.dp),
+                                        isReadOnly = isReadOnly
+                                    )
+                                    TaskyDatePicker(
+                                        selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                            dateMillis = state.fromTime.toInstant().toEpochMilli()
+                                        ),
+                                        onValueChange = { dateMillis ->
+                                            onAction(
+                                                AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
+                                            )
+                                        },
+                                        modifier = Modifier.requiredWidth(156.dp),
+                                        isReadOnly = isReadOnly
+                                    )
+                                }
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TaskyAgendaItemDropdownMenu(
+                                    selectedReminder = state.selectedAgendaReminderInterval,
+                                    availableIntervals = defaultAgendaItemIntervals(),
+                                    onReminderSelected = {
+                                        onAction(
+                                            AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
+                                        )
+                                    }
+                                )
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+
+                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 28.dp),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Visitors",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.headlineMedium
+                                        )
+                                        TaskyTextButton(
+                                            onClick = {}
+                                        ) {
+                                            TaskySquare(
+                                                size = 32.dp,
+                                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Add,
+                                                    contentDescription = "Close icon",
+                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                    ) {
+                                        TaskyAttendeeStatusRadioButton(
+                                            options = AgendaItemAttendeesStatus.entries,
+                                            onOptionSelect = {
+                                                onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
+                                            },
+                                            selectedOption = state.selectedAttendeeStatus,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    val goingAttendees = state.detailsAsEvent()?.attendees?.filter { it.isGoing }
+                                    if (goingAttendees?.isNotEmpty() ?: false && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
+                                        Text(
+                                            text = "Going",
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            style = MaterialTheme.typography.headlineSmall
+                                        )
+
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            goingAttendees.forEach { attendee ->
+                                                TaskyAttendeeCard(
+                                                    attendeeName = attendee.username,
+                                                    isCreator = attendee.isCreator
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    val notGoingAttendees = state.detailsAsEvent()?.attendees?.filter { !it.isGoing }
+                                    if (notGoingAttendees?.isNotEmpty() ?: false && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
+                                        Text(
+                                            text = "Not going",
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            style = MaterialTheme.typography.headlineSmall
+                                        )
+
+                                        Column {
+                                            notGoingAttendees.forEach { attendee ->
+                                                TaskyAttendeeCard(
+                                                    attendeeName = attendee.username,
+                                                    isCreator = attendee.isCreator
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp)
-                    ) {
-                        Text(
-                            text = "Weekly plan\n" +
-                                    "Role distribution",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.at),
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium
+                    Column {
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.extended.surfaceHigher
                         )
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.Center,
                         ) {
-                            TaskyTimePicker(
-                                selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                    hour = state.localTimestamp.hour,
-                                    minute = state.localTimestamp.minute,
-                                ),
-                                onValueChange = { hour, minute ->
-                                    onAction(
-                                        AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
-                                    )
-                                },
-                                modifier = Modifier.requiredWidth(120.dp),
-                                isReadOnly = isReadOnly
-                            )
-                            TaskyDatePicker(
-                                selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                    dateMillis = state.timestamp.toInstant().toEpochMilli()
-                                ),
-                                onValueChange = { dateMillis ->
-                                    onAction(
-                                        AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
-                                    )
-                                },
-                                modifier = Modifier.requiredWidth(156.dp),
-                                isReadOnly = isReadOnly
-                            )
-                        }
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TaskyAgendaItemDropdownMenu(
-                            selectedReminder = state.selectedAgendaReminderInterval,
-                            availableIntervals = defaultAgendaItemIntervals(),
-                            onReminderSelected = {
-                                onAction(
-                                    AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
+                            TaskyTextButton(
+                                onClick = {}
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.delete_context,
+                                        agendaItemTypeConfiguration.displayName.uppercase()
+                                    ),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.labelSmall
                                 )
                             }
-                        )
-                    }
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.extended.surfaceHigher
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        TaskyTextButton(
-                            onClick = {}
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    R.string.delete_context,
-                                    agendaItemTypeConfiguration.displayName.uppercase()
-                                ),
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.labelSmall
-                            )
                         }
                     }
                 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -14,13 +15,15 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 fun TaskyTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
     content: @Composable (() -> Unit),
 ) {
     Box(
         modifier = modifier
             .clickable(
                 onClick = onClick
-            )
+            ),
+        contentAlignment = contentAlignment
     ) {
         content.invoke()
     }

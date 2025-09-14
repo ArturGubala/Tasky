@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -50,6 +52,10 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -101,4 +107,9 @@ dependencies {
 
     // Adaptive
     implementation(libs.androidx.compose.material3.adaptive)
+
+    // Database - Room
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
 }

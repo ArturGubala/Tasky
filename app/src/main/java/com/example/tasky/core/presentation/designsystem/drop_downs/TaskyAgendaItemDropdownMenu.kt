@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.agenda.presentation.util.toUiText
+import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 
@@ -66,11 +69,20 @@ fun TaskyAgendaItemDropdownMenu(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            TaskySquare(
+                size = 32.dp,
+                color = MaterialTheme.colorScheme.extended.surfaceHigher
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "Notifications icon",
+                    tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                )
+            }
             Text(
                 text = selectedReminder.toUiText().asString(),
                 style = MaterialTheme.typography.bodyMedium,
@@ -80,7 +92,7 @@ fun TaskyAgendaItemDropdownMenu(
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 }
             )
-
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "Dropdown arrow",

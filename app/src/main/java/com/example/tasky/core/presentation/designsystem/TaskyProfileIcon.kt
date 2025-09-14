@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
@@ -17,20 +19,23 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 @Composable
 fun TaskyProfileIcon(
     text: String,
+    textColor: Color,
+    textStyle: TextStyle,
+    backgroundColor: Color,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.extended.surfaceHigher,
+                color = backgroundColor,
                 shape = CircleShape
             ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+            style = textStyle,
 
         )
     }
@@ -42,6 +47,9 @@ private fun TaskyProfileIconPreview() {
     TaskyTheme {
         TaskyProfileIcon(
             text = "AG",
+            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            textStyle = MaterialTheme.typography.labelSmall,
+            backgroundColor = MaterialTheme.colorScheme.extended.surfaceHigher,
             modifier = Modifier
                 .size(36.dp)
         )

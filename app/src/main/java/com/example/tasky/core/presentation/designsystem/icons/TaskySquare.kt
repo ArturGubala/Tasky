@@ -2,10 +2,12 @@ package com.example.tasky.core.presentation.designsystem.icons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -17,7 +19,9 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 fun TaskySquare(
     size: Dp,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.Center,
+    content: @Composable (BoxScope.() -> Unit) = {}
 ) {
     Box(
         modifier = modifier
@@ -25,8 +29,11 @@ fun TaskySquare(
             .background(
                 color = color,
                 shape = RoundedCornerShape(4.dp)
-            )
-    )
+            ),
+        contentAlignment = contentAlignment
+    ) {
+        content()
+    }
 }
 
 @PreviewLightDark
@@ -36,7 +43,8 @@ private fun TaskySquarePreview() {
         TaskySquare(
             size = 20.dp,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
+            modifier = Modifier,
+            content = {}
         )
     }
 }

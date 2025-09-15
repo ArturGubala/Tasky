@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -74,9 +75,11 @@ fun AgendaDetailScreenRoot(
     agendaDetailView: AgendaDetailView,
     agendaId: String = "",
     returnedText: String? = null,
-    onBackClick: () -> Unit,
-    onEditTextClick: ( fieldType: AgendaEditTextFieldType,
-                       text: String) -> Unit,
+    onNavigateBack: () -> Unit,
+    onSwitchToReadOnly: () -> Unit,
+    onNavigateToEdit: () -> Unit,
+    onNavigateToEditText: (fieldType: AgendaEditTextFieldType,
+                           text: String) -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaItemType) }
     )
@@ -86,6 +89,7 @@ fun AgendaDetailScreenRoot(
     val agendaItemTypeConfiguration by remember(agendaItemType) {
         mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
     }
+    val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
 
     LaunchedEffect(returnedText) {
         when(state.editingFieldType) {
@@ -104,26 +108,43 @@ fun AgendaDetailScreenRoot(
     }
 
     ObserveAsEvents(viewModel.events) { event ->
-        when (event) {
-            is AgendaDetailEvent.OnReadyAfterEditTextClick -> {
-                onEditTextClick(
-                    event.fieldType,
-                    event.text
-                )
-            }
-        }
+        when (event) { }
     }
 
     AgendaDetailScreen(
         state = state,
-        viewModel::onAction,
+        onAction = { action ->
+            when (action) {
+                is AgendaDetailAction.OnEditTitleClick -> {
+                    onNavigateToEditText(AgendaEditTextFieldType.TITLE, action.title)
+                }
+                is AgendaDetailAction.OnEditDescriptionClick -> {
+                    onNavigateToEditText(AgendaEditTextFieldType.DESCRIPTION, action.description)
+                }
+                AgendaDetailAction.OnCancelClick -> {
+                    if (isReadOnly) {
+                        onSwitchToReadOnly()
+                    } else {
+                        onNavigateBack()
+                    }
+                }
+                AgendaDetailAction.OnCloseClick -> {
+                    onNavigateBack()
+                }
+                AgendaDetailAction.OnEditClick -> {
+                    onNavigateToEdit()
+                }
+                else -> viewModel.onAction(action)
+            }
+        },
         appBarTitle = agendaItemTypeConfiguration.getAppBarTitle(
             mode = agendaDetailView,
             context = context,
             itemDate = null
         ),
         agendaDetailView = agendaDetailView,
-        agendaItemTypeConfiguration = agendaItemTypeConfiguration
+        agendaItemTypeConfiguration = agendaItemTypeConfiguration,
+        isReadOnly = isReadOnly
     )
 }
 
@@ -134,9 +155,8 @@ fun AgendaDetailScreen(
     appBarTitle: String,
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig,
+    isReadOnly: Boolean
 ) {
-    val isReadOnly = agendaDetailView == AgendaDetailView.READ_ONLY
-
     TaskyScaffold(
         topBar = {
             when(agendaDetailView) {
@@ -144,7 +164,7 @@ fun AgendaDetailScreen(
                     TaskyTopAppBar(
                         leftActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick =  { onAction(AgendaDetailAction.OnCloseClick) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
@@ -155,7 +175,7 @@ fun AgendaDetailScreen(
                         },
                         rightActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick =  { onAction(AgendaDetailAction.OnEditClick) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,
@@ -184,7 +204,7 @@ fun AgendaDetailScreen(
                     TaskyTopAppBar(
                         leftActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick = { onAction(AgendaDetailAction.OnCancelClick) }
                             ) {
                                 Text(
                                     text = stringResource(R.string.cancel),
@@ -533,7 +553,8 @@ private fun AgendaDetailScreenPreview() {
             onAction = {},
             appBarTitle = "Title",
             agendaDetailView = AgendaDetailView.EDIT,
-            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK)
+            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK),
+            isReadOnly = true
         )
     }
 }

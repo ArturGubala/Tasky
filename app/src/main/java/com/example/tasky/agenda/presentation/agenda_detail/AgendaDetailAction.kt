@@ -12,4 +12,7 @@ interface AgendaDetailAction {
     data class OnEditDescriptionClick(val description: String): AgendaDetailAction
     data class OnTitleChange(val title: String): AgendaDetailAction
     data class OnDescriptionChange(val description: String): AgendaDetailAction
+    data object OnCancelClick: AgendaDetailAction
+    data object OnCloseClick: AgendaDetailAction
+    data object OnEditClick: AgendaDetailAction
 }

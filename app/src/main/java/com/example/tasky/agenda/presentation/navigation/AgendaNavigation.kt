@@ -62,8 +62,38 @@ fun NavGraphBuilder.agendaDetailScreen(
             agendaDetailView = args.agendaDetailView,
             agendaId = args.agendaId,
             returnedText = text,
-            onBackClick = {},
-            onEditTextClick =  { fieldType, text ->
+            onNavigateBack = {
+                navController.popBackStack()
+            },
+            onSwitchToReadOnly = {
+                navController.navigate(
+                    AgendaDetailScreen(
+                        agendaItemType = args.agendaItemType,
+                        agendaDetailView = AgendaDetailView.READ_ONLY,
+                        agendaId = args.agendaId
+                    )
+                ) {
+                    popUpTo(
+                        AgendaDetailScreen(
+                            agendaItemType = args.agendaItemType,
+                            agendaDetailView = args.agendaDetailView,
+                            agendaId = args.agendaId
+                        )
+                    ) {
+                        inclusive = true
+                    }
+                }
+            },
+            onNavigateToEdit = {
+                navController.navigate(
+                    AgendaDetailScreen(
+                        agendaItemType = args.agendaItemType,
+                        agendaDetailView = AgendaDetailView.EDIT,
+                        agendaId = args.agendaId
+                    )
+                )
+            },
+            onNavigateToEditText =  { fieldType, text ->
                 navController.navigateToAgendaEditTextScreen(
                     editTextFieldType = fieldType,
                     text = text

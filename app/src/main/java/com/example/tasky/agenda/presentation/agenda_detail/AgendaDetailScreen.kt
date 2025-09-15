@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -26,9 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,8 +41,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
+import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
@@ -58,6 +64,7 @@ import com.example.tasky.core.presentation.designsystem.pickers.TaskyDatePicker
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -67,7 +74,13 @@ fun AgendaDetailScreenRoot(
     agendaItemType: AgendaItemType,
     agendaDetailView: AgendaDetailView,
     agendaId: String = "",
-    onBackClick: () -> Unit,
+    returnedText: String? = null,
+    editedFieldType: AgendaEditTextFieldType? = null,
+    onNavigateBack: () -> Unit,
+    onSwitchToReadOnly: () -> Unit,
+    onNavigateToEdit: () -> Unit,
+    onNavigateToEditText: (fieldType: AgendaEditTextFieldType,
+                           text: String) -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaItemType) }
     )
@@ -77,17 +90,59 @@ fun AgendaDetailScreenRoot(
     val agendaItemTypeConfiguration by remember(agendaItemType) {
         mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
     }
+    val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
+
+    LaunchedEffect(returnedText) {
+        editedFieldType?.let {
+            when(editedFieldType) {
+                AgendaEditTextFieldType.TITLE -> {
+                    returnedText?.let { viewModel.onAction(OnTitleChange(title = it)) }
+                }
+                AgendaEditTextFieldType.DESCRIPTION -> {
+                    returnedText?.let { viewModel.onAction(OnDescriptionChange(description = it)) }
+                }
+            }
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) { }
+    }
 
     AgendaDetailScreen(
         state = state,
-        viewModel::onAction,
+        onAction = { action ->
+            when (action) {
+                is AgendaDetailAction.OnEditTitleClick -> {
+                    onNavigateToEditText(AgendaEditTextFieldType.TITLE, action.title)
+                }
+                is AgendaDetailAction.OnEditDescriptionClick -> {
+                    onNavigateToEditText(AgendaEditTextFieldType.DESCRIPTION, action.description)
+                }
+                AgendaDetailAction.OnCancelClick -> {
+                    if (isReadOnly) {
+                        onSwitchToReadOnly()
+                    } else {
+                        onNavigateBack()
+                    }
+                }
+                AgendaDetailAction.OnCloseClick -> {
+                    onNavigateBack()
+                }
+                AgendaDetailAction.OnEditClick -> {
+                    onNavigateToEdit()
+                }
+                else -> viewModel.onAction(action)
+            }
+        },
         appBarTitle = agendaItemTypeConfiguration.getAppBarTitle(
             mode = agendaDetailView,
             context = context,
             itemDate = null
         ),
         agendaDetailView = agendaDetailView,
-        agendaItemTypeConfiguration = agendaItemTypeConfiguration
+        agendaItemTypeConfiguration = agendaItemTypeConfiguration,
+        isReadOnly = isReadOnly
     )
 }
 
@@ -98,9 +153,8 @@ fun AgendaDetailScreen(
     appBarTitle: String,
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig,
+    isReadOnly: Boolean
 ) {
-    val isReadOnly = agendaDetailView == AgendaDetailView.READ_ONLY
-
     TaskyScaffold(
         topBar = {
             when(agendaDetailView) {
@@ -108,7 +162,7 @@ fun AgendaDetailScreen(
                     TaskyTopAppBar(
                         leftActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick =  { onAction(AgendaDetailAction.OnCloseClick) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
@@ -119,7 +173,7 @@ fun AgendaDetailScreen(
                         },
                         rightActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick =  { onAction(AgendaDetailAction.OnEditClick) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,
@@ -148,7 +202,7 @@ fun AgendaDetailScreen(
                     TaskyTopAppBar(
                         leftActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick = { onAction(AgendaDetailAction.OnCancelClick) }
                             ) {
                                 Text(
                                     text = stringResource(R.string.cancel),
@@ -194,10 +248,10 @@ fun AgendaDetailScreen(
 
                 Column(
                     modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = screenHeight)
-                            .padding(horizontal = 16.dp, vertical = 24.dp)
-                            .verticalScroll(rememberScrollState()),
+                        .fillMaxWidth()
+                        .heightIn(min = screenHeight)
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(
@@ -231,12 +285,14 @@ fun AgendaDetailScreen(
 
                         Column {
                             Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = 24.dp)
                             ) {
                                 TaskyLabel(
-                                    text = "Project X",
+                                    text = state.title,
                                     textStyle = MaterialTheme.typography.headlineLarge,
                                     modifier = Modifier,
                                     labelLeadingIcon = {
@@ -247,22 +303,53 @@ fun AgendaDetailScreen(
                                         )
                                     }
                                 )
+                                TaskyTextButton(
+                                    onClick = {
+                                        onAction(
+                                            AgendaDetailAction.OnEditTitleClick(
+                                                title = state.title
+                                            )
+                                        )
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                                        contentDescription = "Arrow right",
+                                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                                    )
+                                }
                             }
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
                             Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 20.dp)
                             ) {
                                 Text(
-                                    text = "Weekly plan\n" +
-                                            "Role distribution",
+                                    text = state.description,
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
+                                TaskyTextButton(
+                                    onClick = {
+                                        onAction(
+                                            AgendaDetailAction.OnEditDescriptionClick(
+                                                description = state.description
+                                            )
+                                        )
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                                        contentDescription = "Arrow right",
+                                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                                    )
+                                }
                             }
                             HorizontalDivider(
                                 thickness = 1.dp,
@@ -464,7 +551,8 @@ private fun AgendaDetailScreenPreview() {
             onAction = {},
             appBarTitle = "Title",
             agendaDetailView = AgendaDetailView.EDIT,
-            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK)
+            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK),
+            isReadOnly = true
         )
     }
 }

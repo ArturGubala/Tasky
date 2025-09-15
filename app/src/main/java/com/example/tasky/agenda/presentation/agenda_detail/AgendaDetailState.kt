@@ -10,10 +10,11 @@ import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import kotlin.collections.List
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
+    val title: String = "Project X",
+    val description: String = "Weekly plan\n Role distribution",
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,

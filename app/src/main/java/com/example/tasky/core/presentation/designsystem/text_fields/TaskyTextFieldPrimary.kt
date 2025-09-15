@@ -41,7 +41,7 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.UiText
 
 @Composable
-fun TaskyTextField(
+fun TaskyTextFieldPrimary(
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -164,20 +164,20 @@ private fun TaskyTextFieldPreview() {
         Column(
             verticalArrangement = Arrangement.spacedBy(space = 5.dp)
         ) {
-            TaskyTextField(
+            TaskyTextFieldPrimary(
                 text = "",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
                 hintText = "Email address"
             )
-            TaskyTextField(
+            TaskyTextFieldPrimary(
                 text = "",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
                 hintText = "Email address",
                 isFocused = true
             )
-            TaskyTextField(
+            TaskyTextFieldPrimary(
                 text = "propermail@gmail.com",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),
@@ -196,7 +196,7 @@ private fun TaskyTextFieldPreview() {
                     )
                 )
             )
-            TaskyTextField(
+            TaskyTextFieldPrimary(
                 text = "somemail@gmail.pl",
                 onValueChange = {},
                 modifier = Modifier.width(328.dp),

@@ -4,6 +4,7 @@ package com.example.tasky.agenda.presentation.agenda_detail
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.tasky.agenda.domain.Attendee
+import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
@@ -14,6 +15,9 @@ import kotlin.collections.List
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
+    val title: String = "Project X",
+    val description: String = "Weekly plan\n Role distribution",
+    val editingFieldType: AgendaEditTextFieldType? = null,
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,

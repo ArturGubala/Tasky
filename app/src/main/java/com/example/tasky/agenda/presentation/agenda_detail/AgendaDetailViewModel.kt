@@ -5,7 +5,7 @@ package com.example.tasky.agenda.presentation.agenda_detail
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasky.agenda.presentation.agenda_list.AgendaEvent
+import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.AgendaItemType
@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -52,7 +53,7 @@ class AgendaDetailViewModel(
             SharingStarted.WhileSubscribed(5000L),
             AgendaDetailState(),
         )
-    private val eventChannel = Channel<AgendaEvent>()
+    private val eventChannel = Channel<AgendaDetailEvent>()
     val events = eventChannel.receiveAsFlow()
 
     fun onAction(action: AgendaDetailAction) {
@@ -79,6 +80,46 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnAttendeeStatusClick -> changeAttendeeStatus(action.status)
+            is AgendaDetailAction.OnEditTitleClick -> {
+                _state.update {
+                    it.copy(editingFieldType = AgendaEditTextFieldType.TITLE)
+                }
+                viewModelScope.launch {
+                    eventChannel.send(
+                        AgendaDetailEvent.OnReadyAfterEditTextClick(
+                            fieldType = _state.value.editingFieldType!!,
+                            text = action.title
+                        )
+                    )
+                }
+            }
+            is AgendaDetailAction.OnEditDescriptionClick -> {
+                _state.update {
+                    it.copy(editingFieldType = AgendaEditTextFieldType.DESCRIPTION)
+                }
+                viewModelScope.launch {
+                    eventChannel.send(
+                        AgendaDetailEvent.OnReadyAfterEditTextClick(
+                            fieldType = _state.value.editingFieldType!!,
+                            text = action.description
+                        )
+                    )
+                }
+            }
+            is AgendaDetailAction.OnTitleChange -> {
+                _state.update {
+                    it.copy(
+                        title = action.title
+                    )
+                }
+            }
+            is AgendaDetailAction.OnDescriptionChange -> {
+                _state.update {
+                    it.copy(
+                        description = action.description
+                    )
+                }
+            }
         }
     }
 

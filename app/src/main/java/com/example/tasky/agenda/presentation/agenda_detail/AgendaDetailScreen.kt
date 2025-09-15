@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -26,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,8 +40,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
+import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
+import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
@@ -58,6 +63,7 @@ import com.example.tasky.core.presentation.designsystem.pickers.TaskyDatePicker
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -67,7 +73,10 @@ fun AgendaDetailScreenRoot(
     agendaItemType: AgendaItemType,
     agendaDetailView: AgendaDetailView,
     agendaId: String = "",
+    returnedText: String? = null,
     onBackClick: () -> Unit,
+    onEditTextClick: ( fieldType: AgendaEditTextFieldType,
+                       text: String) -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaItemType) }
     )
@@ -76,6 +85,33 @@ fun AgendaDetailScreenRoot(
     val context = LocalContext.current
     val agendaItemTypeConfiguration by remember(agendaItemType) {
         mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
+    }
+
+    LaunchedEffect(returnedText) {
+        when(state.editingFieldType) {
+            AgendaEditTextFieldType.TITLE -> {
+                if (returnedText != null && returnedText != state.title) {
+                    viewModel.onAction(OnTitleChange(title = returnedText))
+                }
+            }
+            AgendaEditTextFieldType.DESCRIPTION -> {
+                if (returnedText != null && returnedText != state.description) {
+                    viewModel.onAction(OnDescriptionChange(description = returnedText))
+                }
+            }
+            null -> Unit
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is AgendaDetailEvent.OnReadyAfterEditTextClick -> {
+                onEditTextClick(
+                    event.fieldType,
+                    event.text
+                )
+            }
+        }
     }
 
     AgendaDetailScreen(
@@ -194,10 +230,10 @@ fun AgendaDetailScreen(
 
                 Column(
                     modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = screenHeight)
-                            .padding(horizontal = 16.dp, vertical = 24.dp)
-                            .verticalScroll(rememberScrollState()),
+                        .fillMaxWidth()
+                        .heightIn(min = screenHeight)
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(
@@ -231,12 +267,14 @@ fun AgendaDetailScreen(
 
                         Column {
                             Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = 24.dp)
                             ) {
                                 TaskyLabel(
-                                    text = "Project X",
+                                    text = state.title,
                                     textStyle = MaterialTheme.typography.headlineLarge,
                                     modifier = Modifier,
                                     labelLeadingIcon = {
@@ -247,22 +285,53 @@ fun AgendaDetailScreen(
                                         )
                                     }
                                 )
+                                TaskyTextButton(
+                                    onClick = {
+                                        onAction(
+                                            AgendaDetailAction.OnEditTitleClick(
+                                                title = state.title
+                                            )
+                                        )
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                                        contentDescription = "Arrow right",
+                                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                                    )
+                                }
                             }
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
                             Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 20.dp)
                             ) {
                                 Text(
-                                    text = "Weekly plan\n" +
-                                            "Role distribution",
+                                    text = state.description,
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
+                                TaskyTextButton(
+                                    onClick = {
+                                        onAction(
+                                            AgendaDetailAction.OnEditDescriptionClick(
+                                                description = state.description
+                                            )
+                                        )
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                                        contentDescription = "Arrow right",
+                                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                                    )
+                                }
                             }
                             HorizontalDivider(
                                 thickness = 1.dp,

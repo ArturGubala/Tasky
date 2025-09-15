@@ -8,4 +8,8 @@ interface AgendaDetailAction {
     data class OnTimeFromPick(val hour: Int, val minute: Int): AgendaDetailAction
     data class OnDateFromPick(val dateMillis: Long): AgendaDetailAction
     data class OnAttendeeStatusClick(val status: AgendaItemAttendeesStatus): AgendaDetailAction
+    data class OnEditTitleClick(val title: String): AgendaDetailAction
+    data class OnEditDescriptionClick(val description: String): AgendaDetailAction
+    data class OnTitleChange(val title: String): AgendaDetailAction
+    data class OnDescriptionChange(val description: String): AgendaDetailAction
 }

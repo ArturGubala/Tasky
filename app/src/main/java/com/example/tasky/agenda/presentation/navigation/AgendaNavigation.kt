@@ -57,11 +57,13 @@ fun NavGraphBuilder.agendaDetailScreen(
     composable<AgendaDetailScreen> { entry ->
         val args = entry.toRoute<AgendaDetailScreen>()
         val text = entry.savedStateHandle.get<String>("text")
+        val savedFieldType = entry.savedStateHandle.get<AgendaEditTextFieldType>("fieldType")
         AgendaDetailScreenRoot(
             agendaItemType = args.agendaItemType,
             agendaDetailView = args.agendaDetailView,
             agendaId = args.agendaId,
             returnedText = text,
+            editedFieldType = savedFieldType,
             onNavigateBack = {
                 navController.popBackStack()
             },
@@ -123,9 +125,11 @@ fun NavGraphBuilder.agendaEditTextScreen(
             },
             onSaveClick = { text ->
                 navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("text", text)
-                navController.popBackStack()
+                    ?.savedStateHandle?.apply {
+                        set("text", text.trim())
+                        set("fieldType", args.editTextFieldType)
+                    }
+                navController.navigateUp()
             },
         )
     }

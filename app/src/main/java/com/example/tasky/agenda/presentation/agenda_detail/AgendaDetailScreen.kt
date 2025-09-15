@@ -75,6 +75,7 @@ fun AgendaDetailScreenRoot(
     agendaDetailView: AgendaDetailView,
     agendaId: String = "",
     returnedText: String? = null,
+    editedFieldType: AgendaEditTextFieldType? = null,
     onNavigateBack: () -> Unit,
     onSwitchToReadOnly: () -> Unit,
     onNavigateToEdit: () -> Unit,
@@ -92,18 +93,15 @@ fun AgendaDetailScreenRoot(
     val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
 
     LaunchedEffect(returnedText) {
-        when(state.editingFieldType) {
-            AgendaEditTextFieldType.TITLE -> {
-                if (returnedText != null && returnedText != state.title) {
-                    viewModel.onAction(OnTitleChange(title = returnedText))
+        editedFieldType?.let {
+            when(editedFieldType) {
+                AgendaEditTextFieldType.TITLE -> {
+                    returnedText?.let { viewModel.onAction(OnTitleChange(title = it)) }
+                }
+                AgendaEditTextFieldType.DESCRIPTION -> {
+                    returnedText?.let { viewModel.onAction(OnDescriptionChange(description = it)) }
                 }
             }
-            AgendaEditTextFieldType.DESCRIPTION -> {
-                if (returnedText != null && returnedText != state.description) {
-                    viewModel.onAction(OnDescriptionChange(description = returnedText))
-                }
-            }
-            null -> Unit
         }
     }
 

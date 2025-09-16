@@ -58,4 +58,6 @@
     <string name="not_going">Not going</string>
     <string name="title">title</string>
     <string name="description">description</string>
+    <string name="skip_x_photos">Photo was skipped because it\'s too large</string>
+    <string name="max_number_of_photo_reach">You\'ve reached the maximum number of photos</string>
 </resources>

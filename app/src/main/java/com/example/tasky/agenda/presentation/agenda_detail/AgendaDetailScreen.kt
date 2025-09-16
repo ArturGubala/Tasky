@@ -21,7 +21,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,6 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -66,6 +68,7 @@ import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
 import com.example.tasky.core.presentation.designsystem.labels.TaskyLabel
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyDatePicker
+import com.example.tasky.core.presentation.designsystem.pickers.TaskyPhotoPicker
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
@@ -278,6 +281,7 @@ fun AgendaDetailScreen(
         ) {
             BoxWithConstraints {
                 val screenHeight = maxHeight
+                val photoSectionBackgroundColor = MaterialTheme.colorScheme.extended.surfaceHigher
 
                 Column(
                     modifier = Modifier
@@ -287,16 +291,6 @@ fun AgendaDetailScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-
-                    Button(
-                        onClick = {
-                            onAction(AgendaDetailAction.OnAddPhotoClick)
-                        }
-                    ) {
-                        Text(
-                            text = "Add photo"
-                        )
-                    }
                     Column(
                         verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
@@ -394,6 +388,32 @@ fun AgendaDetailScreen(
                                     )
                                 }
                             }
+
+                            // Photo picker
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .drawBehind {
+                                        drawRect(
+                                            color = photoSectionBackgroundColor,
+                                            topLeft =
+                                                Offset(-16.dp.toPx(), 0f),
+                                            size = Size(
+                                                width = size.width + 32.dp.toPx(), // Add back the horizontal padding
+                                                height = size.height
+                                            )
+                                        )
+                                    }
+                                    .padding(vertical = 20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TaskyPhotoPicker(
+                                    photos = state.detailsAsEvent()?.photos ?: listOf(),
+                                    onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) }
+                                )
+                            }
+
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher

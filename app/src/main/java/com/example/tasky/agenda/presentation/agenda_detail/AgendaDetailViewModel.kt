@@ -92,6 +92,16 @@ class AgendaDetailViewModel(
                     )
                 }
             }
+            is AgendaDetailAction.OnPhotoSelected -> {
+                _state.update { it ->
+                    it.detailsAsEvent()?.let { eventDetails ->
+                        val updatedDetails = eventDetails.copy(
+                            photos = eventDetails.photos + action.photo
+                        )
+                        it.copy(details = updatedDetails)
+                    } ?: it
+                }
+            }
         }
     }
 

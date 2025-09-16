@@ -2,6 +2,7 @@
 
 package com.example.tasky.agenda.presentation.agenda_detail
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,6 +43,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.agenda.domain.util.MAX_NUMBER_OF_PHOTOS
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
@@ -49,6 +53,7 @@ import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
+import com.example.tasky.agenda.presentation.util.agendaPhotosPicker
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
@@ -65,9 +70,11 @@ import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
+import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.util.UUID
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -91,6 +98,19 @@ fun AgendaDetailScreenRoot(
         mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
     }
     val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
+
+    val launchPhotoPicker = agendaPhotosPicker(
+        onPhotoSelected = { photoUri ->
+            viewModel.onAction(
+        AgendaDetailAction.OnPhotoSelected(
+                    Photo(
+                        id = UUID.randomUUID().toString(),
+                        uri = photoUri
+                    )
+                )
+            )
+        }
+    )
 
     LaunchedEffect(returnedText) {
         editedFieldType?.let {
@@ -131,6 +151,19 @@ fun AgendaDetailScreenRoot(
                 }
                 AgendaDetailAction.OnEditClick -> {
                     onNavigateToEdit()
+                }
+                AgendaDetailAction.OnAddPhotoClick -> {
+                    if ((state.detailsAsEvent()?.photos?.size ?: 0) == MAX_NUMBER_OF_PHOTOS) {
+                        Toast.makeText(
+                            context,
+                            UiText.StringResource(
+                                id = R.string.max_number_of_photo_reach
+                            ).asString(context),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        launchPhotoPicker()
+                    }
                 }
                 else -> viewModel.onAction(action)
             }
@@ -254,6 +287,16 @@ fun AgendaDetailScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
+
+                    Button(
+                        onClick = {
+                            onAction(AgendaDetailAction.OnAddPhotoClick)
+                        }
+                    ) {
+                        Text(
+                            text = "Add photo"
+                        )
+                    }
                     Column(
                         verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {

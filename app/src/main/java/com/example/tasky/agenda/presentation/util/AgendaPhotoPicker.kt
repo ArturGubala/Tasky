@@ -19,7 +19,7 @@ import java.io.ByteArrayOutputStream
 
 @Composable
 fun agendaPhotosPicker(
-    onPhotosSelected: (List<Uri>) -> Unit,
+    onPhotoSelected: (Uri) -> Unit,
     maxSizeBytes: Int = MAX_SIZE_BYTES
 ): () -> Unit {
     val context = LocalContext.current
@@ -38,7 +38,7 @@ fun agendaPhotosPicker(
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    onPhotosSelected(listOf(uri))
+                    onPhotoSelected(uri)
                 }
             }
         }
@@ -49,45 +49,6 @@ fun agendaPhotosPicker(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
         )
     }
-
-//    val multiplePhotosLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.PickMultipleVisualMedia(maxPhotos),
-//        onResult = { photoUris ->
-//            if (photoUris.isNotEmpty()) {
-//                var tooLargeCount = 0
-//                val validUris = mutableListOf<Uri>()
-//
-//                photoUris.forEach { uri ->
-//                    if (uri.isImageSizeTooLargeToUpload(context, maxSizeBytes)) {
-//                        tooLargeCount++
-//                    } else {
-//                        validUris.add(uri)
-//                    }
-//                }
-//
-//                if (tooLargeCount > 0) {
-//                    Toast.makeText(
-//                        context,
-//                        UiText.StringResource(
-//                            id = R.string.skip_x_photos,
-//                            args = arrayOf(tooLargeCount)
-//                        ).asString(context),
-//                        Toast.LENGTH_LONG
-//                    ).show()
-//                }
-//
-//                if (validUris.isNotEmpty()) {
-//                    onPhotosSelected(validUris)
-//                }
-//            }
-//        }
-//    )
-//
-//    return {
-//        multiplePhotosLauncher.launch(
-//            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-//        )
-//    }
 }
 
 fun Uri.isImageSizeTooLargeToUpload(

@@ -1,6 +1,5 @@
 package com.example.tasky.agenda.presentation.agenda_detail
 
-import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 
@@ -17,5 +16,5 @@ interface AgendaDetailAction {
     data object OnCloseClick: AgendaDetailAction
     data object OnEditClick: AgendaDetailAction
     data object OnAddPhotoClick: AgendaDetailAction
-    data class OnPhotoSelected(val photo: Photo): AgendaDetailAction
+    data class OnPhotoSelected(val uriString: String, val maxBytes: Int): AgendaDetailAction
 }

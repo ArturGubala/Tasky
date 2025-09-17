@@ -32,17 +32,18 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.example.tasky.R
-import com.example.tasky.agenda.domain.model.Photo
-import com.example.tasky.agenda.domain.util.MAX_NUMBER_OF_PHOTOS
+import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
+import com.example.tasky.agenda.presentation.agenda_detail.PhotoUi
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
 fun TaskyPhotoPicker(
-    photos: List<Photo>,
+    photos: List<PhotoUi>,
+    imageLoading: Boolean,
     modifier: Modifier = Modifier,
-    onPhotoClick: (Photo) -> Unit = {},
+    onPhotoClick: (PhotoUi) -> Unit = {},
     onAddClick: () -> Unit = {},
     isReadOnly: Boolean = false,
 ) {
@@ -75,7 +76,8 @@ fun TaskyPhotoPicker(
                 if (!isReadOnly && photos.size < MAX_NUMBER_OF_PHOTOS) {
                     AddPhotoThumbnail(
                         onClick = onAddClick,
-                        modifier = Modifier.size(thumbnailSize)
+                        modifier = Modifier.size(thumbnailSize),
+                        imageLoading = imageLoading
                     )
                 }
             }
@@ -87,23 +89,30 @@ fun TaskyPhotoPicker(
                 .padding(vertical = 48.dp),
             contentAlignment = Alignment.Center
         ) {
-            TaskyTextButton(
-                onClick = onAddClick
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            if (imageLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+            } else {
+                TaskyTextButton(
+                    onClick = onAddClick
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.add_icon),
-                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
-                    )
-                    Text(
-                        text = stringResource(R.string.add_photos),
-                        color = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add_icon),
+                            tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                        )
+                        Text(
+                            text = stringResource(R.string.add_photos),
+                            color = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
                 }
             }
         }
@@ -113,7 +122,7 @@ fun TaskyPhotoPicker(
 
 @Composable
 fun PhotoItem(
-    photo: Photo,
+    photo: PhotoUi,
     onPhotoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -138,11 +147,12 @@ fun PhotoItem(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.outline),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 }
@@ -173,25 +183,44 @@ fun PhotoItem(
 @Composable
 fun AddPhotoThumbnail(
     onClick: () -> Unit,
+    imageLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .background(Color.Transparent)
-            .border(
-                2.dp,
-                MaterialTheme.colorScheme.outline,
-                RoundedCornerShape(5.dp)
+    if (imageLoading) {
+        Box(
+            modifier = modifier
+                .background(Color.Transparent)
+                .border(
+                    2.dp,
+                    MaterialTheme.colorScheme.outline,
+                    RoundedCornerShape(5.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = MaterialTheme.colorScheme.outline
             )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = stringResource(R.string.add_photo),
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(24.dp)
-        )
+        }
+    } else {
+        Box(
+            modifier = modifier
+                .background(Color.Transparent)
+                .border(
+                    2.dp,
+                    MaterialTheme.colorScheme.outline,
+                    RoundedCornerShape(5.dp)
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = stringResource(R.string.add_photo),
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
@@ -200,7 +229,8 @@ fun AddPhotoThumbnail(
 fun TaskyPhotoPickerPreview() {
     TaskyTheme {
         TaskyPhotoPicker(
-            photos = emptyList()
+            photos = emptyList(),
+            imageLoading = false
         )
     }
 }

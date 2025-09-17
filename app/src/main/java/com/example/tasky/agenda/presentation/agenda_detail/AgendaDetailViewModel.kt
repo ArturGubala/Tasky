@@ -5,10 +5,17 @@ package com.example.tasky.agenda.presentation.agenda_detail
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.core.domain.util.ConnectivityObserver
+import com.example.tasky.core.domain.util.DataError
+import com.example.tasky.core.domain.util.ImageCompressor
+import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.presentation.ui.asUiText
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,16 +23,20 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 
 class AgendaDetailViewModel(
     private val agendaId: String,
     private val agendaItemType: AgendaItemType,
-    private val connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver,
+    private val compressor: ImageCompressor,
+    private val io: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState())
@@ -93,13 +104,44 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnPhotoSelected -> {
-                _state.update { it ->
-                    it.detailsAsEvent()?.let { eventDetails ->
-                        val updatedDetails = eventDetails.copy(
-                            photos = eventDetails.photos + action.photo
-                        )
-                        it.copy(details = updatedDetails)
-                    } ?: it
+                viewModelScope.launch(io) {
+                _state.update { it.copy(imageLoading = true) }
+                    when (val result = compressor.compressFromUriString(
+                       uriString = action.uriString, maxBytes = action.maxBytes)) {
+                        is Result.Success -> {
+                            val bytes = result.data
+                            val photo = Photo(
+                                id = UUID.randomUUID().toString(),
+                                uri = action.uriString,
+                                compressedBytes = bytes
+                            )
+
+                            _state.update { it ->
+                                it.detailsAsEvent()?.let { eventDetails ->
+                                    val updatedDetails = eventDetails.copy(
+                                        photos = eventDetails.photos + photo
+                                    )
+                                    it.copy(details = updatedDetails)
+                                } ?: it
+                            }
+                        }
+                        is Result.Error -> {
+                            when (result.error as DataError.Local) {
+                                DataError.Local.COMPRESSION_FAILURE -> {
+                                    eventChannel.send(AgendaDetailEvent.ImageCompressFailure(
+                                        error = result.error.asUiText()
+                                    ))
+                                }
+                                DataError.Local.IMAGE_TOO_LARGE -> {
+                                    eventChannel.send(AgendaDetailEvent.ImageTooLarge(
+                                            error = result.error.asUiText()
+                                    ))
+                                }
+                                else -> Unit
+                            }
+                        }
+                    }
+                _state.update { it.copy(imageLoading = false) }
                 }
             }
         }

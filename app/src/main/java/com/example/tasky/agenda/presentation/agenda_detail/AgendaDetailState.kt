@@ -19,7 +19,8 @@ data class AgendaDetailState(
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
-    val details: AgendaItemDetails? = AgendaItemDetails.Event()
+    val details: AgendaItemDetails? = AgendaItemDetails.Event(),
+    val imageLoading: Boolean = false
 ) {
     val localFromTime: ZonedDateTime
         get() = fromTime.withZoneSameInstant(ZoneId.systemDefault())

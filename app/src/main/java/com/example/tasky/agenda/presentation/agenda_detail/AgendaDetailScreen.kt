@@ -45,8 +45,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.agenda.domain.model.Photo
-import com.example.tasky.agenda.domain.util.MAX_NUMBER_OF_PHOTOS
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
@@ -55,8 +53,10 @@ import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
-import com.example.tasky.agenda.presentation.util.agendaPhotosPicker
+import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
+import com.example.tasky.agenda.presentation.util.rememberAgendaPhotoPickerLauncher
+import com.example.tasky.core.data.util.AndroidImageCompressor.Companion.MAX_SIZE_BYTES
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
@@ -77,7 +77,6 @@ import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.util.UUID
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -102,15 +101,11 @@ fun AgendaDetailScreenRoot(
     }
     val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
 
-    val launchPhotoPicker = agendaPhotosPicker(
-        onPhotoSelected = { photoUri ->
+    val launchPhotoPicker = rememberAgendaPhotoPickerLauncher(
+        onPhotoSelected = { uri ->
             viewModel.onAction(
         AgendaDetailAction.OnPhotoSelected(
-                    Photo(
-                        id = UUID.randomUUID().toString(),
-                        uri = photoUri
-                    )
-                )
+                uriString = uri.toString(), maxBytes = MAX_SIZE_BYTES)
             )
         }
     )
@@ -129,7 +124,22 @@ fun AgendaDetailScreenRoot(
     }
 
     ObserveAsEvents(viewModel.events) { event ->
-        when (event) { }
+        when (event) {
+            is AgendaDetailEvent.ImageCompressFailure -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            is AgendaDetailEvent.ImageTooLarge -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     AgendaDetailScreen(
@@ -409,8 +419,11 @@ fun AgendaDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 TaskyPhotoPicker(
-                                    photos = state.detailsAsEvent()?.photos ?: listOf(),
-                                    onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) }
+                                    photos = state.detailsAsEvent()?.photos?.map {
+                                        it.toUi()
+                                    } ?: listOf(),
+                                    onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
+                                    imageLoading = state.imageLoading
                                 )
                             }
 

@@ -144,6 +144,18 @@ class AgendaDetailViewModel(
                 _state.update { it.copy(imageLoading = false) }
                 }
             }
+            is AgendaDetailAction.OnPhotoDelete -> {
+                _state.update { it ->
+                    it.detailsAsEvent()?.let { eventDetails ->
+                        val updatedDetails = eventDetails.copy(
+                            photos = eventDetails.photos.filterNot { photo ->
+                                photo.id == action.photoId
+                            }
+                        )
+                        it.copy(details = updatedDetails)
+                    } ?: it
+                }
+            }
         }
     }
 

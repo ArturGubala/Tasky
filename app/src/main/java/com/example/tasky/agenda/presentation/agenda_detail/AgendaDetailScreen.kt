@@ -54,6 +54,8 @@ import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
 import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
+import com.example.tasky.agenda.presentation.util.PhotoDetail
+import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.agenda.presentation.util.rememberAgendaPhotoPickerLauncher
 import com.example.tasky.core.data.util.AndroidImageCompressor.Companion.MAX_SIZE_BYTES
@@ -77,6 +79,7 @@ import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -85,11 +88,13 @@ fun AgendaDetailScreenRoot(
     agendaId: String = "",
     returnedText: String? = null,
     editedFieldType: AgendaEditTextFieldType? = null,
+    photoDetail: PhotoDetail,
     onNavigateBack: () -> Unit,
     onSwitchToReadOnly: () -> Unit,
     onNavigateToEdit: () -> Unit,
     onNavigateToEditText: (fieldType: AgendaEditTextFieldType,
                            text: String) -> Unit,
+    onNavigateToPhotoDetail: (photoId: String, photoUri: String) -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaItemType) }
     )
@@ -120,6 +125,12 @@ fun AgendaDetailScreenRoot(
                     returnedText?.let { viewModel.onAction(OnDescriptionChange(description = it)) }
                 }
             }
+        }
+    }
+
+    LaunchedEffect(photoDetail.photoDetailAction) {
+        if (photoDetail.photoDetailAction == PhotoDetailAction.DELETE && photoDetail.photoId.isNotEmpty()) {
+            viewModel.onAction(AgendaDetailAction.OnPhotoDelete(photoId = photoDetail.photoId))
         }
     }
 
@@ -177,6 +188,9 @@ fun AgendaDetailScreenRoot(
                     } else {
                         launchPhotoPicker()
                     }
+                }
+                is AgendaDetailAction.OnPhotoClick -> {
+                    onNavigateToPhotoDetail(action.photoId, action.uriString)
                 }
                 else -> viewModel.onAction(action)
             }
@@ -422,6 +436,13 @@ fun AgendaDetailScreen(
                                     photos = state.detailsAsEvent()?.photos?.map {
                                         it.toUi()
                                     } ?: listOf(),
+                                    onPhotoClick = { photoId, uriString ->
+                                        onAction(
+                                            AgendaDetailAction.OnPhotoClick(
+                                                photoId = photoId, uriString = uriString
+                                            )
+                                        )
+                                    },
                                     onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
                                     imageLoading = state.imageLoading
                                 )

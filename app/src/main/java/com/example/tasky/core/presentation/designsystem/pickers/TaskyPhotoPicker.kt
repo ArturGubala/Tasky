@@ -43,7 +43,7 @@ fun TaskyPhotoPicker(
     photos: List<PhotoUi>,
     imageLoading: Boolean,
     modifier: Modifier = Modifier,
-    onPhotoClick: (PhotoUi) -> Unit = {},
+    onPhotoClick: (String, String) -> Unit,
     onAddClick: () -> Unit = {},
     isReadOnly: Boolean = false,
 ) {
@@ -68,7 +68,7 @@ fun TaskyPhotoPicker(
                 photos.forEach { photo ->
                     PhotoItem(
                         photo = photo,
-                        onPhotoClick = { onPhotoClick(photo) },
+                        onPhotoClick = { onPhotoClick(photo.id, photo.uri.toString()) },
                         modifier = Modifier.size(thumbnailSize)
                     )
                 }
@@ -230,7 +230,8 @@ fun TaskyPhotoPickerPreview() {
     TaskyTheme {
         TaskyPhotoPicker(
             photos = emptyList(),
-            imageLoading = false
+            imageLoading = false,
+            onPhotoClick = {str1, str2 -> {}}
         )
     }
 }

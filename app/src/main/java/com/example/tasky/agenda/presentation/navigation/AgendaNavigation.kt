@@ -7,11 +7,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailScreenRoot
+import com.example.tasky.agenda.presentation.agenda_detail.photo_detail.PhotoDetailScreenRoot
 import com.example.tasky.agenda.presentation.agenda_edit.AgendaEditTextScreenRoot
 import com.example.tasky.agenda.presentation.agenda_list.AgendaScreenRoot
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemType
+import com.example.tasky.agenda.presentation.util.PhotoDetail
+import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen
 import kotlinx.serialization.Serializable
 
@@ -24,6 +27,7 @@ fun NavGraphBuilder.agendaNavGraph(
         agendaListScreen(navController = navController)
         agendaDetailScreen(navController = navController)
         agendaEditTextScreen(navController = navController)
+        agendaPhotoDetailScreen(navController = navController)
     }
 }
 
@@ -58,12 +62,18 @@ fun NavGraphBuilder.agendaDetailScreen(
         val args = entry.toRoute<AgendaDetailScreen>()
         val text = entry.savedStateHandle.get<String>("text")
         val savedFieldType = entry.savedStateHandle.get<AgendaEditTextFieldType>("fieldType")
+        val photoId = entry.savedStateHandle.get<String>("photoId")
+        val photoDetailAction = entry.savedStateHandle.get<PhotoDetailAction>("photoDetailAction")
+        val photoDetail = PhotoDetail(
+            photoId = photoId ?: "", photoDetailAction = photoDetailAction ?: PhotoDetailAction.NONE
+        )
         AgendaDetailScreenRoot(
             agendaItemType = args.agendaItemType,
             agendaDetailView = args.agendaDetailView,
             agendaId = args.agendaId,
             returnedText = text,
             editedFieldType = savedFieldType,
+            photoDetail = photoDetail,
             onNavigateBack = {
                 navController.popBackStack()
             },
@@ -95,10 +105,15 @@ fun NavGraphBuilder.agendaDetailScreen(
                     )
                 )
             },
-            onNavigateToEditText =  { fieldType, text ->
+            onNavigateToEditText = { fieldType, text ->
                 navController.navigateToAgendaEditTextScreen(
                     editTextFieldType = fieldType,
                     text = text
+                )
+            },
+            onNavigateToPhotoDetail = { photoId, photoUri ->
+                navController.navigateToAgendaPhotoDetailScreen(
+                    photoId = photoId, photoUri = photoUri
                 )
             }
         )
@@ -135,6 +150,31 @@ fun NavGraphBuilder.agendaEditTextScreen(
     }
 }
 
+fun NavController.navigateToAgendaPhotoDetailScreen(photoId: String, photoUri: String)
+        = navigate(AgendaPhotoDetailScreen(photoId = photoId, photoUri = photoUri))
+
+fun NavGraphBuilder.agendaPhotoDetailScreen(
+    navController: NavController
+) {
+    composable<AgendaPhotoDetailScreen> {
+        val args = it.toRoute<AgendaPhotoDetailScreen>()
+        PhotoDetailScreenRoot(
+            imageUri = args.photoUri,
+            onCloseClick = {
+                navController.navigateUp()
+            },
+            onDeleteClick = {
+                navController.previousBackStackEntry
+                    ?.savedStateHandle?.apply {
+                        set("photoId", args.photoId)
+                        set("photoDetailAction", PhotoDetailAction.DELETE)
+                    }
+                navController.navigateUp()
+            }
+        )
+    }
+}
+
 @Serializable
 object AgendaGraph
 
@@ -152,4 +192,10 @@ data class AgendaDetailScreen(
 data class AgendaEditTextScreen(
     val editTextFieldType: AgendaEditTextFieldType,
     val text: String
+)
+
+@Serializable
+data class AgendaPhotoDetailScreen(
+    val photoId: String,
+    val photoUri: String
 )

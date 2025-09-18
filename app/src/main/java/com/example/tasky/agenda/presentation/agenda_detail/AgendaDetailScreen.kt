@@ -450,7 +450,7 @@ fun AgendaDetailScreen(
                                         )
                                     },
                                     onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
-                                    imageLoading = state.imageLoading
+                                    imageLoading = state.detailsAsEvent()?.isImageLoading ?: false
                                 )
                             }
 
@@ -651,15 +651,15 @@ fun AgendaDetailScreen(
                     AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM -> {
                         DeleteBottomSheetContent(
                             onDelete = {},
-                            onCancel = {},
+                            onCancel = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
                             title = deleteButtonText
                         )
                     }
                     AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
                         AddAttendeeBottomSheetContent(
-                            onCLoseClick = {},
+                            onCLoseClick = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
                             onAddClick = {},
-                            attendeeEmail = "artur@test.pl",
+                            attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
                             onAttendeeEmailChange = {}
                         )
                     }

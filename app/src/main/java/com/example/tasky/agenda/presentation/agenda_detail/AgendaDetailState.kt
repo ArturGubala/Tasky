@@ -21,7 +21,6 @@ data class AgendaDetailState(
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
     val details: AgendaItemDetails? = AgendaItemDetails.Event(),
-    val imageLoading: Boolean = false,
     val agendaDetailBottomSheetType: AgendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE
 ) {
     val localFromTime: ZonedDateTime
@@ -38,7 +37,9 @@ sealed interface AgendaItemDetails {
             Attendee("wade4@example.com", "Wade Warren", "4", "event1", false, "2024-01-15T09:30:00Z", false),
             Attendee("wade5@example.com", "Wade Warren", "5", "event1", false, "2024-01-15T09:30:00Z", false)
         ),
-        val photos: List<Photo> = emptyList()
+        val photos: List<Photo> = emptyList(),
+        val isImageLoading: Boolean = false,
+        val attendeeEmail: String = ""
     ): AgendaItemDetails
 
     data class Task(

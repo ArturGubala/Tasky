@@ -19,11 +19,11 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 
 @Composable
 fun TaskyPrimaryButton(
-    content: @Composable (() -> Unit),
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.primary,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    content: @Composable (() -> Unit),
 ) {
     Button(
         onClick = onClick,

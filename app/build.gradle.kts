@@ -115,4 +115,7 @@ dependencies {
 
     // Coil
     implementation(libs.coil.compose)
+
+    // Coroutines
+    implementation(libs.bundles.coroutines)
 }

@@ -25,5 +25,5 @@ val coreDataModule = module {
     }
     singleOf(::AndroidConnectivityObserver).bind<ConnectivityObserver>()
     single<ImageCompressor> { AndroidImageCompressor(get()) }
-    single<CoroutineDispatcher> { Dispatchers.IO }
+    single<CoroutineDispatcher> { Dispatchers.Default }
 }

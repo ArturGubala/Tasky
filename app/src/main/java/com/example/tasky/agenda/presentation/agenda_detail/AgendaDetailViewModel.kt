@@ -36,7 +36,7 @@ class AgendaDetailViewModel(
     private val agendaItemType: AgendaItemType,
     private val connectivityObserver: ConnectivityObserver,
     private val compressor: ImageCompressor,
-    private val io: CoroutineDispatcher = Dispatchers.IO
+    private val default: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState())
@@ -104,7 +104,7 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnPhotoSelected -> {
-                viewModelScope.launch(io) {
+                viewModelScope.launch(default) {
                 _state.update { it.copy(imageLoading = true) }
                     when (val result = compressor.compressFromUriString(
                        uriString = action.uriString, maxBytes = action.maxBytes)) {

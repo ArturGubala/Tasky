@@ -9,20 +9,24 @@ import com.example.tasky.core.domain.util.Result
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.isActive
 import androidx.core.net.toUri
 import java.io.ByteArrayOutputStream
 import androidx.core.graphics.scale
 import com.example.tasky.core.domain.util.DataError
 
+
 class AndroidImageCompressor(
     private val context: Context,
-    private val io: CoroutineDispatcher = Dispatchers.IO
+    private val default: CoroutineDispatcher = Dispatchers.Default
 ) : ImageCompressor {
 
     override suspend fun compressFromUriString(
         uriString: String,
         maxBytes: Int,
-    ): Result<ByteArray, DataError> = withContext(io) {
+    ): Result<ByteArray, DataError> = withContext(default) {
         try {
             val uri = uriString.toUri()
             val compressedBytes = compressImageToFitSize(uri, maxBytes)
@@ -34,16 +38,15 @@ class AndroidImageCompressor(
         }
     }
 
-    private fun compressImageToFitSize(uri: Uri, maxBytes: Int): ByteArray {
-        val originalBytes = getBytes(uri)
-            ?: throw IllegalStateException("Cannot read image from URI")
+    private suspend fun compressImageToFitSize(uri: Uri, maxBytes: Int): ByteArray {
+        coroutineContext.ensureActive()
 
-        if (originalBytes.size <= maxBytes) {
-            return originalBytes
-        }
+        val originalBytes = getBytes(uri)?: error("Cannot read image")
+
+        if (originalBytes.size <= maxBytes) return originalBytes
 
         val bitmap = BitmapFactory.decodeByteArray(originalBytes, 0, originalBytes.size)
-            ?: throw IllegalStateException("Cannot decode image to bitmap")
+            ?: error("Cannot decode bitmap")
 
         var quality = INITIAL_COMPRESS_QUALITY
         var compressedBytes: ByteArray
@@ -53,9 +56,10 @@ class AndroidImageCompressor(
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
             compressedBytes = stream.toByteArray()
             quality -= QUALITY_DECREMENT
-        } while (compressedBytes.size > maxBytes && quality > MIN_COMPRESS_QUALITY)
+        } while (coroutineContext.isActive && compressedBytes.size > maxBytes && quality > MIN_COMPRESS_QUALITY)
 
         if (compressedBytes.size > maxBytes) {
+            coroutineContext.ensureActive()
             val resizedBitmap = resizeBitmapToFitSize(bitmap, maxBytes)
             val stream = ByteArrayOutputStream()
             resizedBitmap.compress(Bitmap.CompressFormat.JPEG, MIN_COMPRESS_QUALITY, stream)
@@ -66,6 +70,7 @@ class AndroidImageCompressor(
             }
         }
 
+        coroutineContext.ensureActive()
         return compressedBytes
     }
 

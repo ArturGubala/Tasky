@@ -39,6 +39,7 @@
     <string name="no_date">No date provided</string>
     <string name="edit_title">EDIT %1$s</string>
     <string name="delete_context">DELETE %1$s</string>
+    <string name="delete_confirmation_context">Delete %1$s?</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="nothing_selected">Nothing selected</string>

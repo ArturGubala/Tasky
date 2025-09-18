@@ -204,6 +204,7 @@ fun AgendaDetailScreenRoot(
             context = context,
             itemDate = null
         ),
+        deleteButtonText = agendaItemTypeConfiguration.getDeleteButtonText(context = context),
         agendaDetailView = agendaDetailView,
         agendaItemTypeConfiguration = agendaItemTypeConfiguration,
         isReadOnly = isReadOnly
@@ -215,6 +216,7 @@ fun AgendaDetailScreen(
     state: AgendaDetailState,
     onAction: (AgendaDetailAction) -> Unit,
     appBarTitle: String,
+    deleteButtonText: String,
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig,
     isReadOnly: Boolean
@@ -315,7 +317,7 @@ fun AgendaDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = screenHeight)
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 48.dp)
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -650,7 +652,7 @@ fun AgendaDetailScreen(
                         DeleteBottomSheetContent(
                             onDelete = {},
                             onCancel = {},
-                            title = "Delete task?"
+                            title = deleteButtonText
                         )
                     }
                     AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
@@ -676,6 +678,7 @@ private fun AgendaDetailScreenPreview() {
             state = AgendaDetailState(),
             onAction = {},
             appBarTitle = "Title",
+            deleteButtonText = "Delete",
             agendaDetailView = AgendaDetailView.EDIT,
             agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK),
             isReadOnly = true

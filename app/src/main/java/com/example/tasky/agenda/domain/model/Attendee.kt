@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.domain
+package com.example.tasky.agenda.domain.model
 
 data class Attendee(
     val email: String,

@@ -9,6 +9,12 @@ fun DataError.asUiText(): UiText {
         DataError.Local.DISK_FULL -> StringResource(
             R.string.error_disk_full
         )
+        DataError.Local.COMPRESSION_FAILURE -> StringResource(
+            R.string.error_compress_image
+        )
+        DataError.Local.IMAGE_TOO_LARGE -> StringResource(
+            R.string.too_large_photo_error
+        )
         DataError.Network.TOO_MANY_REQUESTS -> StringResource(
             R.string.error_too_many_requests
         )

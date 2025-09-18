@@ -2,6 +2,7 @@
 
 package com.example.tasky.agenda.presentation.agenda_detail
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,6 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -49,7 +53,12 @@ import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
+import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
+import com.example.tasky.agenda.presentation.util.PhotoDetail
+import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
+import com.example.tasky.agenda.presentation.util.rememberAgendaPhotoPickerLauncher
+import com.example.tasky.core.data.util.AndroidImageCompressor.Companion.MAX_SIZE_BYTES
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
@@ -61,13 +70,16 @@ import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
 import com.example.tasky.core.presentation.designsystem.labels.TaskyLabel
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyDatePicker
+import com.example.tasky.core.presentation.designsystem.pickers.TaskyPhotoPicker
 import com.example.tasky.core.presentation.designsystem.pickers.TaskyTimePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
+import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -76,11 +88,13 @@ fun AgendaDetailScreenRoot(
     agendaId: String = "",
     returnedText: String? = null,
     editedFieldType: AgendaEditTextFieldType? = null,
+    photoDetail: PhotoDetail,
     onNavigateBack: () -> Unit,
     onSwitchToReadOnly: () -> Unit,
     onNavigateToEdit: () -> Unit,
     onNavigateToEditText: (fieldType: AgendaEditTextFieldType,
                            text: String) -> Unit,
+    onNavigateToPhotoDetail: (photoId: String, photoUri: String) -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaItemType) }
     )
@@ -91,6 +105,15 @@ fun AgendaDetailScreenRoot(
         mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
     }
     val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
+
+    val launchPhotoPicker = rememberAgendaPhotoPickerLauncher(
+        onPhotoSelected = { uri ->
+            viewModel.onAction(
+        AgendaDetailAction.OnPhotoSelected(
+                uriString = uri.toString(), maxBytes = MAX_SIZE_BYTES)
+            )
+        }
+    )
 
     LaunchedEffect(returnedText) {
         editedFieldType?.let {
@@ -105,8 +128,29 @@ fun AgendaDetailScreenRoot(
         }
     }
 
+    LaunchedEffect(photoDetail.photoDetailAction) {
+        if (photoDetail.photoDetailAction == PhotoDetailAction.DELETE && photoDetail.photoId.isNotEmpty()) {
+            viewModel.onAction(AgendaDetailAction.OnPhotoDelete(photoId = photoDetail.photoId))
+        }
+    }
+
     ObserveAsEvents(viewModel.events) { event ->
-        when (event) { }
+        when (event) {
+            is AgendaDetailEvent.ImageCompressFailure -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            is AgendaDetailEvent.ImageTooLarge -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     AgendaDetailScreen(
@@ -131,6 +175,22 @@ fun AgendaDetailScreenRoot(
                 }
                 AgendaDetailAction.OnEditClick -> {
                     onNavigateToEdit()
+                }
+                AgendaDetailAction.OnAddPhotoClick -> {
+                    if ((state.detailsAsEvent()?.photos?.size ?: 0) == MAX_NUMBER_OF_PHOTOS) {
+                        Toast.makeText(
+                            context,
+                            UiText.StringResource(
+                                id = R.string.max_number_of_photo_reach
+                            ).asString(context),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        launchPhotoPicker()
+                    }
+                }
+                is AgendaDetailAction.OnPhotoClick -> {
+                    onNavigateToPhotoDetail(action.photoId, action.uriString)
                 }
                 else -> viewModel.onAction(action)
             }
@@ -245,6 +305,7 @@ fun AgendaDetailScreen(
         ) {
             BoxWithConstraints {
                 val screenHeight = maxHeight
+                val photoSectionBackgroundColor = MaterialTheme.colorScheme.extended.surfaceHigher
 
                 Column(
                     modifier = Modifier
@@ -351,6 +412,42 @@ fun AgendaDetailScreen(
                                     )
                                 }
                             }
+
+                            // Photo picker
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .drawBehind {
+                                        drawRect(
+                                            color = photoSectionBackgroundColor,
+                                            topLeft =
+                                                Offset(-16.dp.toPx(), 0f),
+                                            size = Size(
+                                                width = size.width + 32.dp.toPx(), // Add back the horizontal padding
+                                                height = size.height
+                                            )
+                                        )
+                                    }
+                                    .padding(vertical = 20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TaskyPhotoPicker(
+                                    photos = state.detailsAsEvent()?.photos?.map {
+                                        it.toUi()
+                                    } ?: listOf(),
+                                    onPhotoClick = { photoId, uriString ->
+                                        onAction(
+                                            AgendaDetailAction.OnPhotoClick(
+                                                photoId = photoId, uriString = uriString
+                                            )
+                                        )
+                                    },
+                                    onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
+                                    imageLoading = state.imageLoading
+                                )
+                            }
+
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher

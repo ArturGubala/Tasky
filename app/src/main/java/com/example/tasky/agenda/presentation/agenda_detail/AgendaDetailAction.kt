@@ -15,4 +15,8 @@ interface AgendaDetailAction {
     data object OnCancelClick: AgendaDetailAction
     data object OnCloseClick: AgendaDetailAction
     data object OnEditClick: AgendaDetailAction
+    data object OnAddPhotoClick: AgendaDetailAction
+    data class OnPhotoSelected(val uriString: String, val maxBytes: Int): AgendaDetailAction
+    data class OnPhotoClick(val photoId: String, val uriString: String): AgendaDetailAction
+    data class OnPhotoDelete(val photoId: String): AgendaDetailAction
 }

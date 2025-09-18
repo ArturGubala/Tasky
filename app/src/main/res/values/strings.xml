@@ -58,4 +58,11 @@
     <string name="not_going">Not going</string>
     <string name="title">title</string>
     <string name="description">description</string>
+    <string name="too_large_photo_error">Photo was skipped because it\'s too large</string>
+    <string name="max_number_of_photo_reach">You\'ve reached the maximum number of photos</string>
+    <string name="add_photos">ADD PHOTOS</string>
+    <string name="error_loading_image">Error loading image</string>
+    <string name="error_compress_image">Error while compressing image</string>
+    <string name="add_photo">Add photo</string>
+    <string name="add_icon">Add icon</string>
 </resources>

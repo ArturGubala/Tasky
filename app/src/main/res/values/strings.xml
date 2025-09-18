@@ -65,4 +65,8 @@
     <string name="error_compress_image">Error while compressing image</string>
     <string name="add_photo">Add photo</string>
     <string name="add_icon">Add icon</string>
+    <string name="not_reversed_operation_warning">This action cannot be reversed</string>
+    <string name="delete">Delete</string>
+    <string name="add_visitor">ADD VISITOR</string>
+    <string name="add">ADD</string>
 </resources>

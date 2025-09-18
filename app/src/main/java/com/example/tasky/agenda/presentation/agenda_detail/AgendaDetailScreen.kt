@@ -47,6 +47,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
+import com.example.tasky.agenda.presentation.agenda_detail.components.AddAttendeeBottomSheetContent
+import com.example.tasky.agenda.presentation.agenda_detail.components.DeleteBottomSheetContent
+import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
@@ -60,6 +63,7 @@ import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.agenda.presentation.util.rememberAgendaPhotoPickerLauncher
 import com.example.tasky.core.data.util.AndroidImageCompressor.Companion.MAX_SIZE_BYTES
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
+import com.example.tasky.core.presentation.designsystem.bottom_sheets.TaskyBottomSheet
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.cards.TaskyAttendeeCard
@@ -539,7 +543,7 @@ fun AgendaDetailScreen(
                                             style = MaterialTheme.typography.headlineMedium
                                         )
                                         TaskyTextButton(
-                                            onClick = {}
+                                            onClick = { onAction(AgendaDetailAction.OnAddAttendeeClick) }
                                         ) {
                                             TaskySquare(
                                                 size = 32.dp,
@@ -620,7 +624,7 @@ fun AgendaDetailScreen(
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick = { onAction(AgendaDetailAction.OnDeleteAgendaItemClick) }
                             ) {
                                 Text(
                                     text = stringResource(
@@ -633,6 +637,31 @@ fun AgendaDetailScreen(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        if (state.agendaDetailBottomSheetType != AgendaDetailBottomSheetType.NONE) {
+            TaskyBottomSheet(
+                onDismiss = { onAction(AgendaDetailAction.OnDismissBottomSheet) }
+            ) {
+                when(state.agendaDetailBottomSheetType) {
+                    AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM -> {
+                        DeleteBottomSheetContent(
+                            onDelete = {},
+                            onCancel = {},
+                            title = "Delete task?"
+                        )
+                    }
+                    AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
+                        AddAttendeeBottomSheetContent(
+                            onCLoseClick = {},
+                            onAddClick = {},
+                            attendeeEmail = "artur@test.pl",
+                            onAttendeeEmailChange = {}
+                        )
+                    }
+                    else -> Unit
                 }
             }
         }

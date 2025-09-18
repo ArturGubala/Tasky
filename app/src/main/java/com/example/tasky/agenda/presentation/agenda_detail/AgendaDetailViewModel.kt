@@ -6,6 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.AgendaItemType
@@ -155,6 +156,15 @@ class AgendaDetailViewModel(
                         it.copy(details = updatedDetails)
                     } ?: it
                 }
+            }
+            AgendaDetailAction.OnAddAttendeeClick -> {
+                _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.ADD_ATTENDEE) }
+            }
+            AgendaDetailAction.OnDeleteAgendaItemClick -> {
+                _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM) }
+            }
+            AgendaDetailAction.OnDismissBottomSheet -> {
+                _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE) }
             }
         }
     }

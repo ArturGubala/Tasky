@@ -6,7 +6,7 @@ import com.example.tasky.R
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.UserDataValidator
-import com.example.tasky.auth.domain.ValidationItem
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.core.domain.util.Result
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText

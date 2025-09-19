@@ -1,7 +1,7 @@
 package com.example.tasky.auth.presentation.register
 
 import com.example.tasky.auth.domain.PasswordValidationState
-import com.example.tasky.auth.domain.ValidationItem
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.auth.domain.FocusedField
 
 data class RegisterState (

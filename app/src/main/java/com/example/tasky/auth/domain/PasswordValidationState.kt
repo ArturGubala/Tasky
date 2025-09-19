@@ -2,6 +2,7 @@ package com.example.tasky.auth.domain
 
 import com.example.tasky.R
 import com.example.tasky.auth.presentation.register.RegisterFocusedField
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.core.presentation.ui.UiText
 
 data class PasswordValidationState(
@@ -27,15 +28,18 @@ data class PasswordValidationState(
                 ValidationItem(
                     message = UiText.StringResource(R.string.at_least_one_number),
                     isValid = hasNumber,
-                    focusedField = RegisterFocusedField.PASSWORD),
+                    focusedField = RegisterFocusedField.PASSWORD
+                ),
                 ValidationItem(
                     message = UiText.StringResource(R.string.contains_lowercase_char),
                     isValid = hasLowerCaseCharacter,
-                    focusedField = RegisterFocusedField.PASSWORD),
+                    focusedField = RegisterFocusedField.PASSWORD
+                ),
                 ValidationItem(
                     message = UiText.StringResource(R.string.contains_uppercase_char),
                     isValid = hasUpperCaseCharacter,
-                    focusedField = RegisterFocusedField.PASSWORD)
+                    focusedField = RegisterFocusedField.PASSWORD
+                )
             )
         } else emptyList()
     }

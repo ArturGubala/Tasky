@@ -28,13 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
 import com.example.tasky.auth.presentation.register.RegisterFocusedField
-import com.example.tasky.auth.domain.ValidationItem
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.core.presentation.designsystem.TaskyErrorText
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
@@ -53,9 +55,11 @@ fun TaskyTextFieldPrimary(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    singleLine: Boolean = false,
     isValid: Boolean = false,
     isFocused: Boolean = false,
-    errors: List<ValidationItem> = emptyList()
+    errors: List<ValidationItem> = emptyList(),
+    cursorBrush: Brush = SolidColor(Color.Black)
 ) {
     Column(
         modifier = modifier.animateContentSize(animationSpec = tween(durationMillis = 150)),
@@ -83,6 +87,8 @@ fun TaskyTextFieldPrimary(
             textStyle = textStyle,
             keyboardActions = keyboardActions,
             keyboardOptions = keyboardOptions,
+            singleLine = singleLine,
+            cursorBrush = cursorBrush,
             decorationBox = { innerTextField ->
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween

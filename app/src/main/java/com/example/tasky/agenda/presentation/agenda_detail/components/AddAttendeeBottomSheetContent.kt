@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.tasky.agenda.presentation.agenda_detail.components
 
 import androidx.compose.foundation.clickable
@@ -8,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,15 +95,18 @@ fun AddAttendeeBottomSheetContent(
 @Composable
 fun AddAttendeeBottomSheetContentPreview() {
     TaskyTheme {
+        val sheetState = rememberModalBottomSheetState()
         TaskyBottomSheet(
             onDismiss = {},
-        ) {
-            AddAttendeeBottomSheetContent(
-                onCLoseClick = {},
-                onAddClick = {},
-                attendeeEmail = "",
-                onAttendeeEmailChange = {}
-            )
-        }
+            sheetState = sheetState,
+            content = {
+                AddAttendeeBottomSheetContent(
+                    onCLoseClick = {},
+                    onAddClick = {},
+                    attendeeEmail = "",
+                    onAttendeeEmailChange = {}
+                )
+            },
+        )
     }
 }

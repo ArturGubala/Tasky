@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.tasky.agenda.presentation.agenda_detail.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -6,8 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,14 +87,17 @@ fun DeleteBottomSheetContent(
 @Composable
 private fun DeleteBottomSheetContentPreview() {
     TaskyTheme {
+        val sheetState = rememberModalBottomSheetState()
         TaskyBottomSheet(
             onDismiss = {},
-        ) {
-            DeleteBottomSheetContent(
-                onDelete = {},
-                onCancel = {},
-                title = "Delete task?"
-            )
-        }
+            sheetState = sheetState,
+            content = {
+                DeleteBottomSheetContent(
+                    onDelete = {},
+                    onCancel = {},
+                    title = "Delete task?"
+                )
+            },
+        )
     }
 }

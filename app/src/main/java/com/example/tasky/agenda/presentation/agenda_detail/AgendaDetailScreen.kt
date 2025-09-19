@@ -27,11 +27,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,9 +83,9 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import timber.log.Timber
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -644,28 +646,44 @@ fun AgendaDetailScreen(
         }
 
         if (state.agendaDetailBottomSheetType != AgendaDetailBottomSheetType.NONE) {
+            val sheetState = rememberModalBottomSheetState()
+            val scope = rememberCoroutineScope()
             TaskyBottomSheet(
-                onDismiss = { onAction(AgendaDetailAction.OnDismissBottomSheet) }
-            ) {
-                when(state.agendaDetailBottomSheetType) {
-                    AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM -> {
-                        DeleteBottomSheetContent(
-                            onDelete = {},
-                            onCancel = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
-                            title = deleteButtonText
-                        )
+                onDismiss = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
+                sheetState = sheetState,
+                content = {
+                    when(state.agendaDetailBottomSheetType) {
+                        AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM -> {
+                            DeleteBottomSheetContent(
+                                onDelete = {},
+                                onCancel = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                        onAction(AgendaDetailAction.OnDismissBottomSheet)
+                                    }
+                                },
+                                title = deleteButtonText
+                            )
+                        }
+
+                        AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
+                            AddAttendeeBottomSheetContent(
+                                onCLoseClick = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                        onAction(AgendaDetailAction.OnDismissBottomSheet)
+                                    }
+                                },
+                                onAddClick = {},
+                                attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
+                                onAttendeeEmailChange = {}
+                            )
+                        }
+
+                        else -> Unit
                     }
-                    AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
-                        AddAttendeeBottomSheetContent(
-                            onCLoseClick = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
-                            onAddClick = {},
-                            attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
-                            onAttendeeEmailChange = {}
-                        )
-                    }
-                    else -> Unit
                 }
-            }
+            )
         }
     }
 }

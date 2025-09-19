@@ -5,15 +5,20 @@ package com.example.tasky.agenda.presentation.agenda_detail
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tasky.R
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.AgendaItemType
+import com.example.tasky.auth.presentation.register.RegisterFocusedField
+import com.example.tasky.core.domain.PatternValidator
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.ImageCompressor
 import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +42,8 @@ class AgendaDetailViewModel(
     private val agendaItemType: AgendaItemType,
     private val connectivityObserver: ConnectivityObserver,
     private val compressor: ImageCompressor,
-    private val default: CoroutineDispatcher = Dispatchers.Default
+    private val default: CoroutineDispatcher = Dispatchers.Default,
+    private val patternValidator: PatternValidator
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState())
@@ -165,6 +171,36 @@ class AgendaDetailViewModel(
             AgendaDetailAction.OnDismissBottomSheet -> {
                 _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE) }
             }
+            is AgendaDetailAction.OnAttendeeEmailValueChanged -> {
+                updateDetails<AgendaItemDetails.Event> { event ->
+                    event.copy(
+                        attendeeEmail = action.email
+                    )
+                }
+            }
+            is AgendaDetailAction.OnAttendeeEmailFieldFocusChanged -> {
+                val email = _state.value.detailsAsEvent()?.attendeeEmail ?: ""
+                val isEmailValid = if (!action.hasFocus) {
+                    validateEmail(email)
+                } else false
+                val errors = if (email.isNotEmpty() && !isEmailValid) {
+                    listOf(
+                        ValidationItem(
+                            message = UiText.StringResource(R.string.must_be_a_valid_email),
+                            isValid = isEmailValid,
+                            focusedField = RegisterFocusedField.EMAIL
+                        )
+                    )
+                } else emptyList()
+
+                updateDetails<AgendaItemDetails.Event> { event ->
+                    event.copy(
+                        isAttendeeEmailFocused = action.hasFocus,
+                        isAttendeeEmailValid = isEmailValid,
+                        errors = errors
+                    )
+                }
+            }
         }
     }
 
@@ -205,5 +241,9 @@ class AgendaDetailViewModel(
                 state.copy(details = transform(details))
             } ?: state
         }
+    }
+
+    fun validateEmail(email: String): Boolean {
+        return patternValidator.matches(email.trim())
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,26 +19,37 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.core.presentation.designsystem.bottom_sheets.TaskyBottomSheet
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyPrimaryButton
 import com.example.tasky.core.presentation.designsystem.text_fields.TaskyTextFieldPrimary
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
+import com.example.tasky.core.presentation.util.clearFocusOnTapOutside
 
 @Composable
 fun AddAttendeeBottomSheetContent(
-    onCLoseClick: () -> Unit,
+    onCloseClick: () -> Unit,
     onAddClick: () -> Unit,
-    modifier: Modifier = Modifier,
     attendeeEmail: String,
-    onAttendeeEmailChange: () -> Unit
+    isAttendeeEmailValid: Boolean,
+    isAttendeeEmailFieldFocused: Boolean,
+    onAttendeeEmailChange: (String) -> Unit,
+    onAttendeeEmailFieldFocusChange:((Boolean) -> Unit)?,
+    modifier: Modifier = Modifier,
+    errors: List<ValidationItem> = emptyList()
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = modifier
-            .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 24.dp),
+            .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 24.dp)
+            .clearFocusOnTapOutside(onClear = { focusManager.clearFocus() }),
         verticalArrangement = Arrangement.spacedBy(28.dp)
     ) {
         Box(
@@ -57,8 +69,8 @@ fun AddAttendeeBottomSheetContent(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .clickable {
-                    onCLoseClick()
-                },
+                        onCloseClick()
+                    },
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -68,13 +80,24 @@ fun AddAttendeeBottomSheetContent(
         ) {
             TaskyTextFieldPrimary(
                 text = attendeeEmail,
-                onValueChange = { onAttendeeEmailChange() }
+                onValueChange = { onAttendeeEmailChange(it) },
+                onFocusChanged = { hasFocus -> onAttendeeEmailFieldFocusChange?.invoke(hasFocus) },
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    }
+                ),
+                isValid = isAttendeeEmailValid,
+                isFocused = isAttendeeEmailFieldFocused,
+                singleLine = true,
+                errors = errors,
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
             )
             TaskyPrimaryButton(
                 onClick = { onAddClick() },
                 modifier = Modifier.fillMaxWidth(),
-                backgroundColor = MaterialTheme.colorScheme.error,
-                enabled = false
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                enabled = isAttendeeEmailValid
             ) {
                 Box(
                     modifier = modifier,
@@ -101,10 +124,13 @@ fun AddAttendeeBottomSheetContentPreview() {
             sheetState = sheetState,
             content = {
                 AddAttendeeBottomSheetContent(
-                    onCLoseClick = {},
+                    onCloseClick = {},
                     onAddClick = {},
                     attendeeEmail = "",
-                    onAttendeeEmailChange = {}
+                    onAttendeeEmailChange = {},
+                    isAttendeeEmailValid = false,
+                    isAttendeeEmailFieldFocused = false,
+                    onAttendeeEmailFieldFocusChange = {}
                 )
             },
         )

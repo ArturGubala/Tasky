@@ -668,7 +668,7 @@ fun AgendaDetailScreen(
 
                         AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
                             AddAttendeeBottomSheetContent(
-                                onCLoseClick = {
+                                onCloseClick = {
                                     scope.launch {
                                         sheetState.hide()
                                         onAction(AgendaDetailAction.OnDismissBottomSheet)
@@ -676,7 +676,17 @@ fun AgendaDetailScreen(
                                 },
                                 onAddClick = {},
                                 attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
-                                onAttendeeEmailChange = {}
+                                isAttendeeEmailValid = state.detailsAsEvent()?.isAttendeeEmailValid ?: false,
+                                isAttendeeEmailFieldFocused = state.detailsAsEvent()?.isAttendeeEmailFocused ?: false,
+                                onAttendeeEmailChange = { email ->
+                                    onAction(AgendaDetailAction.OnAttendeeEmailValueChanged(email = email))
+                                },
+                                onAttendeeEmailFieldFocusChange = { hasFocus ->
+                                    onAction(AgendaDetailAction.OnAttendeeEmailFieldFocusChanged(
+                                        hasFocus = hasFocus
+                                    ))
+                                },
+                                errors = state.detailsAsEvent()?.errors ?: emptyList()
                             )
                         }
 

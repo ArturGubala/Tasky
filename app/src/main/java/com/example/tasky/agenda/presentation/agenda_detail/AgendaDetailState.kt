@@ -9,6 +9,7 @@ import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
+import com.example.tasky.core.domain.ValidationItem
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -39,7 +40,11 @@ sealed interface AgendaItemDetails {
         ),
         val photos: List<Photo> = emptyList(),
         val isImageLoading: Boolean = false,
-        val attendeeEmail: String = ""
+        val attendeeEmail: String = "",
+        val isAttendeeEmailValid: Boolean = false,
+        val isAttendeeEmailFocused: Boolean = false,
+        val errors: List<ValidationItem> = emptyList()
+
     ): AgendaItemDetails
 
     data class Task(

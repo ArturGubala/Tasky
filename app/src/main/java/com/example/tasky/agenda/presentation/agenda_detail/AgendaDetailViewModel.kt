@@ -106,13 +106,8 @@ class AgendaDetailViewModel(
             }
             is AgendaDetailAction.OnPhotoSelected -> {
                 viewModelScope.launch(default) {
-                    _state.update { it ->
-                        it.detailsAsEvent()?.let { eventDetails ->
-                            val updatedDetails = eventDetails.copy(
-                                isImageLoading = true
-                            )
-                            it.copy(details = updatedDetails)
-                        } ?: it
+                    updateDetails<AgendaItemDetails.Event> { event ->
+                        event.copy(isImageLoading = true)
                     }
 
                     when (val result = compressor.compressFromUriString(
@@ -124,14 +119,10 @@ class AgendaDetailViewModel(
                                 uri = action.uriString,
                                 compressedBytes = bytes
                             )
-
-                            _state.update { it ->
-                                it.detailsAsEvent()?.let { eventDetails ->
-                                    val updatedDetails = eventDetails.copy(
-                                        photos = eventDetails.photos + photo
-                                    )
-                                    it.copy(details = updatedDetails)
-                                } ?: it
+                            updateDetails<AgendaItemDetails.Event> { event ->
+                                event.copy(
+                                    photos = event.photos + photo
+                                )
                             }
                         }
                         is Result.Error -> {
@@ -151,26 +142,18 @@ class AgendaDetailViewModel(
                         }
                     }
 
-                    _state.update { it ->
-                        it.detailsAsEvent()?.let { eventDetails ->
-                            val updatedDetails = eventDetails.copy(
-                                isImageLoading = false
-                            )
-                            it.copy(details = updatedDetails)
-                        } ?: it
+                    updateDetails<AgendaItemDetails.Event> { event ->
+                        event.copy(isImageLoading = false)
                     }
                 }
             }
             is AgendaDetailAction.OnPhotoDelete -> {
-                _state.update { it ->
-                    it.detailsAsEvent()?.let { eventDetails ->
-                        val updatedDetails = eventDetails.copy(
-                            photos = eventDetails.photos.filterNot { photo ->
-                                photo.id == action.photoId
-                            }
-                        )
-                        it.copy(details = updatedDetails)
-                    } ?: it
+                updateDetails<AgendaItemDetails.Event> { event ->
+                    event.copy(
+                        photos = event.photos.filterNot { photo ->
+                            photo.id == action.photoId
+                        }
+                    )
                 }
             }
             AgendaDetailAction.OnAddAttendeeClick -> {
@@ -213,6 +196,14 @@ class AgendaDetailViewModel(
     private fun changeAttendeeStatus(status: AgendaItemAttendeesStatus) {
         _state.update {
             it.copy(selectedAttendeeStatus = status)
+        }
+    }
+
+    private inline fun <reified T : AgendaItemDetails> updateDetails(transform: (T) -> T) {
+        _state.update { state ->
+            (state.details as? T)?.let { details ->
+                state.copy(details = transform(details))
+            } ?: state
         }
     }
 }

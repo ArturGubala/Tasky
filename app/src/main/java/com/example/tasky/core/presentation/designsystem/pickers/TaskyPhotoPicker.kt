@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,9 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
@@ -46,6 +50,7 @@ fun TaskyPhotoPicker(
     onPhotoClick: (String, String) -> Unit,
     onAddClick: () -> Unit = {},
     isReadOnly: Boolean = false,
+    isOnline: Boolean = false
 ) {
     val thumbnailSize = 64.dp
 
@@ -54,11 +59,24 @@ fun TaskyPhotoPicker(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Photos",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "Photos",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                if (!isOnline) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_offline),
+                        contentDescription = stringResource(R.string.offline_icon),
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                    )
+                }
+            }
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -73,7 +91,7 @@ fun TaskyPhotoPicker(
                     )
                 }
 
-                if (!isReadOnly && photos.size < MAX_NUMBER_OF_PHOTOS) {
+                if (!isReadOnly && photos.size < MAX_NUMBER_OF_PHOTOS && isOnline) {
                     AddPhotoThumbnail(
                         onClick = onAddClick,
                         modifier = Modifier.size(thumbnailSize),
@@ -85,8 +103,7 @@ fun TaskyPhotoPicker(
     } else {
         Box(
             modifier = modifier
-                .fillMaxSize()
-                .padding(vertical = 48.dp),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             if (imageLoading) {
@@ -94,9 +111,25 @@ fun TaskyPhotoPicker(
                     modifier = Modifier.size(24.dp),
                     color = MaterialTheme.colorScheme.outline
                 )
+            } else if (!isOnline) {
+                Box(
+                    modifier = Modifier.height(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_offline),
+                        contentDescription = stringResource(R.string.offline_icon),
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                    )
+                }
             } else {
                 TaskyTextButton(
-                    onClick = onAddClick
+                    onClick = onAddClick,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .heightIn(min = 120.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -74,7 +74,7 @@ fun DeleteBottomSheetContent(
                 ) {
                     Text(
                         text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.labelMedium
                     )
                 }

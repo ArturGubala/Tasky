@@ -25,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -63,6 +65,7 @@ class AgendaDetailViewModel(
                 AgendaItemType.REMINDER -> _state.update { it.copy(details = AgendaItemDetails.Reminder) }
             }
             _state.update { it.copy(loadingInitialData = false) }
+            observeConnectivity()
         }
         .stateIn(
             viewModelScope,
@@ -71,6 +74,18 @@ class AgendaDetailViewModel(
         )
     private val eventChannel = Channel<AgendaDetailEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    private fun observeConnectivity() {
+        connectivityObserver.isConnected
+            .onEach { isConnected ->
+                _state.update {
+                    it.copy(
+                        isOnline = isConnected
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun onAction(action: AgendaDetailAction) {
         when(action) {

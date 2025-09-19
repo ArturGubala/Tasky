@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -452,7 +454,8 @@ fun AgendaDetailScreen(
                                         )
                                     },
                                     onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
-                                    imageLoading = state.detailsAsEvent()?.isImageLoading ?: false
+                                    imageLoading = state.detailsAsEvent()?.isImageLoading ?: false,
+                                    isOnline = state.isOnline
                                 )
                             }
 
@@ -538,7 +541,8 @@ fun AgendaDetailScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        horizontalArrangement = if (state.isOnline)
+                                            Arrangement.SpaceBetween else Arrangement.spacedBy(6.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
@@ -546,19 +550,28 @@ fun AgendaDetailScreen(
                                             color = MaterialTheme.colorScheme.primary,
                                             style = MaterialTheme.typography.headlineMedium
                                         )
-                                        TaskyTextButton(
-                                            onClick = { onAction(AgendaDetailAction.OnAddAttendeeClick) }
-                                        ) {
-                                            TaskySquare(
-                                                size = 32.dp,
-                                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                        if (state.isOnline) {
+                                            TaskyTextButton(
+                                                onClick = { onAction(AgendaDetailAction.OnAddAttendeeClick) }
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Add,
-                                                    contentDescription = "Close icon",
-                                                    tint = MaterialTheme.colorScheme.onSurface
-                                                )
+                                                TaskySquare(
+                                                    size = 32.dp,
+                                                    color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Add,
+                                                        contentDescription = "Close icon",
+                                                        tint = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                }
                                             }
+                                        } else {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_offline),
+                                                contentDescription = stringResource(R.string.offline_icon),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                                            )
                                         }
                                     }
                                     Row(
@@ -589,7 +602,8 @@ fun AgendaDetailScreen(
                                             goingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
                                                     attendeeName = attendee.username,
-                                                    isCreator = attendee.isCreator
+                                                    isCreator = attendee.isCreator,
+                                                    canEdit = state.isOnline
                                                 )
                                             }
                                         }
@@ -607,7 +621,8 @@ fun AgendaDetailScreen(
                                             notGoingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
                                                     attendeeName = attendee.username,
-                                                    isCreator = attendee.isCreator
+                                                    isCreator = attendee.isCreator,
+                                                    canEdit = state.isOnline
                                                 )
                                             }
                                         }

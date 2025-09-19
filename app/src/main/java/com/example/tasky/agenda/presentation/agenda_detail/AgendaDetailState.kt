@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
+    val isOnline: Boolean = false,
     val title: String = "Project X",
     val description: String = "Weekly plan\n Role distribution",
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),

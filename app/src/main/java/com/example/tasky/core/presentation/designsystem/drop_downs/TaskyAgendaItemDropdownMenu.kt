@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,25 +85,19 @@ fun TaskyAgendaItemDropdownMenu(
             Text(
                 text = selectedReminder.toUiText().asString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (enabled) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                }
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Dropdown arrow",
-                modifier = Modifier
-                    .size(20.dp)
-                    .rotate(if (expanded) 180f else 0f),
-                tint = if (enabled) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                }
-            )
+            if (enabled) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = "Dropdown arrow",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .rotate(if (expanded) 180f else 0f),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
 

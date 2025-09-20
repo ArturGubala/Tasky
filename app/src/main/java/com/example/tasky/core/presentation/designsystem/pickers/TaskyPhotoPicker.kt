@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,13 +30,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.example.tasky.R
-import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
 import com.example.tasky.agenda.presentation.agenda_detail.PhotoUi
+import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
@@ -111,7 +109,7 @@ fun TaskyPhotoPicker(
                     modifier = Modifier.size(24.dp),
                     color = MaterialTheme.colorScheme.outline
                 )
-            } else if (!isOnline) {
+            } else if (!isOnline && !isReadOnly) {
                 Box(
                     modifier = Modifier.height(120.dp),
                     contentAlignment = Alignment.Center
@@ -123,7 +121,7 @@ fun TaskyPhotoPicker(
                         tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                     )
                 }
-            } else {
+            } else if (isOnline && !isReadOnly) {
                 TaskyTextButton(
                     onClick = onAddClick,
                     modifier = Modifier

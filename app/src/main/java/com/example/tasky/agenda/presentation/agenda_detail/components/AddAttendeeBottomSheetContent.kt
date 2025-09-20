@@ -82,6 +82,7 @@ fun AddAttendeeBottomSheetContent(
                 text = attendeeEmail,
                 onValueChange = { onAttendeeEmailChange(it) },
                 onFocusChanged = { hasFocus -> onAttendeeEmailFieldFocusChange?.invoke(hasFocus) },
+                hintText = stringResource(R.string.email_address),
                 keyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()

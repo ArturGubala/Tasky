@@ -7,6 +7,8 @@ interface AgendaDetailAction {
     data class OnAgendaItemIntervalSelect(val reminder: AgendaItemInterval): AgendaDetailAction
     data class OnTimeFromPick(val hour: Int, val minute: Int): AgendaDetailAction
     data class OnDateFromPick(val dateMillis: Long): AgendaDetailAction
+    data class OnTimeToPick(val hour: Int, val minute: Int): AgendaDetailAction
+    data class OnDateToPick(val dateMillis: Long): AgendaDetailAction
     data class OnAttendeeStatusClick(val status: AgendaItemAttendeesStatus): AgendaDetailAction
     data class OnEditTitleClick(val title: String): AgendaDetailAction
     data class OnEditDescriptionClick(val description: String): AgendaDetailAction

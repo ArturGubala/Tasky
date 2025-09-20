@@ -47,6 +47,10 @@
     <string name="confirm">Confirm</string>
     <string name="choose_date">Choose date</string>
     <string name="at">At</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="date_from_before_date_to">From date must be before to date</string>
+    <string name="date_to_after_date_from">To date must be after from date</string>
     <string name="chose_time">Chose time</string>
     <string name="reminder_10_min">10 minutes before</string>
     <string name="reminder_30_min">30 minutes before</string>

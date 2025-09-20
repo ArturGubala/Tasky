@@ -95,6 +95,18 @@ class AgendaDetailViewModel(
            is AgendaDetailAction.OnTimeFromPick -> {
                val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.fromTime,
                    hour = action.hour, minutes = action.minute)
+
+               _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
+                   if (updatedTimestamp >= currentToTimestamp) {
+                       viewModelScope.launch(default) {
+                           eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
+                               error = UiText.StringResource(R.string.date_from_before_date_to)
+                           ))
+                       }
+                       return
+                   }
+               }
+
                _state.update {
                    it.copy(
                        fromTime = updatedTimestamp
@@ -104,10 +116,64 @@ class AgendaDetailViewModel(
             is AgendaDetailAction.OnDateFromPick -> {
                 val updatedTimestamp = updateUtcDate(currentTimestamp = _state.value.fromTime,
                     dateMillis = action.dateMillis)
+
+                _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
+                    if (updatedTimestamp >= currentToTimestamp) {
+                        viewModelScope.launch(default) {
+                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
+                                error = UiText.StringResource(R.string.date_from_before_date_to)
+                            ))
+                        }
+                        return
+                    }
+                }
+
                 _state.update {
                     it.copy(
                         fromTime = updatedTimestamp
                     )
+                }
+            }
+            is AgendaDetailAction.OnTimeToPick -> {
+                _state.value.detailsAsEvent()?.toTime?.let { currentTimestamp ->
+                    val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.fromTime,
+                        hour = action.hour, minutes = action.minute)
+
+                    if (updatedTimestamp <= _state.value.fromTime) {
+                        viewModelScope.launch(default) {
+                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
+                                error = UiText.StringResource(R.string.date_to_after_date_from)
+                            ))
+                        }
+                        return
+                    }
+
+                    updateDetails<AgendaItemDetails.Event> { event ->
+                        event.copy(
+                            toTime = updatedTimestamp
+                        )
+                    }
+                }
+            }
+            is AgendaDetailAction.OnDateToPick -> {
+                _state.value.detailsAsEvent()?.toTime?.let { currentTimestamp ->
+                    val updatedTimestamp = updateUtcDate(currentTimestamp = currentTimestamp,
+                        dateMillis = action.dateMillis)
+
+                    if (updatedTimestamp <= _state.value.fromTime) {
+                        viewModelScope.launch(default) {
+                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
+                                error = UiText.StringResource(R.string.date_to_after_date_from)
+                            ))
+                        }
+                        return
+                    }
+
+                    updateDetails<AgendaItemDetails.Event> { event ->
+                        event.copy(
+                            toTime = updatedTimestamp
+                        )
+                    }
                 }
             }
             is AgendaDetailAction.OnAttendeeStatusClick -> changeAttendeeStatus(action.status)

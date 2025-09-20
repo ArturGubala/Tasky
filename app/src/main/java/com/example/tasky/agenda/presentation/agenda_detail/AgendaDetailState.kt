@@ -31,7 +31,8 @@ data class AgendaDetailState(
 
 sealed interface AgendaItemDetails {
     data class Event(
-        val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
+        val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"))
+            .truncatedTo(ChronoUnit.HOURS).plusHours(1),
         val attendees: List<Attendee> = listOf(
             Attendee("wade1@example.com", "Wade Warren", "1", "event1", true, "2024-01-15T09:30:00Z", true),
             Attendee("wade2@example.com", "Wade Warren", "2", "event1", true, "2024-01-15T09:30:00Z", false),
@@ -46,7 +47,10 @@ sealed interface AgendaItemDetails {
         val isAttendeeEmailFocused: Boolean = false,
         val errors: List<ValidationItem> = emptyList()
 
-    ): AgendaItemDetails
+    ): AgendaItemDetails {
+        val localToTime: ZonedDateTime
+            get() = toTime.withZoneSameInstant(ZoneId.systemDefault())
+    }
 
     data class Task(
         val isDone: Boolean = false

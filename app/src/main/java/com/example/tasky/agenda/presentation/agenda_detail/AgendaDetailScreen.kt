@@ -88,6 +88,7 @@ import com.example.tasky.core.presentation.util.DateTimeFormatter
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.time.ZonedDateTime
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -152,6 +153,13 @@ fun AgendaDetailScreenRoot(
                 ).show()
             }
             is AgendaDetailEvent.ImageTooLarge -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            is AgendaDetailEvent.InvalidDatePicked -> {
                 Toast.makeText(
                     context,
                     event.error.asString(context),
@@ -328,6 +336,8 @@ fun AgendaDetailScreen(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
+
+                        // HEADER
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -355,6 +365,7 @@ fun AgendaDetailScreen(
                         }
 
                         Column {
+                            // TITLE
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -394,6 +405,7 @@ fun AgendaDetailScreen(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
+                            // DESCRIPTION
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -423,7 +435,7 @@ fun AgendaDetailScreen(
                                 }
                             }
 
-                            // Photo picker
+                            // PHOTO PICKER
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -463,6 +475,7 @@ fun AgendaDetailScreen(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
+                            // DATE FROM
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -509,6 +522,56 @@ fun AgendaDetailScreen(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
+                            // DATE TO
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.to),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    TaskyTimePicker(
+                                        selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                            hour = state.detailsAsEvent()?.localToTime?.hour ?: 0,
+                                            minute = state.detailsAsEvent()?.localToTime?.minute ?: 0,
+                                        ),
+                                        onValueChange = { hour, minute ->
+                                            onAction(
+                                                AgendaDetailAction.OnTimeToPick(hour = hour, minute = minute)
+                                            )
+                                        },
+                                        modifier = Modifier.requiredWidth(120.dp),
+                                        isReadOnly = isReadOnly
+                                    )
+                                    TaskyDatePicker(
+                                        selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                            dateMillis = state.detailsAsEvent()?.localToTime
+                                                ?.toInstant()?.toEpochMilli() ?:
+                                                ZonedDateTime.now().toInstant().toEpochMilli()
+                                        ),
+                                        onValueChange = { dateMillis ->
+                                            onAction(
+                                                AgendaDetailAction.OnDateToPick(dateMillis = dateMillis)
+                                            )
+                                        },
+                                        modifier = Modifier.requiredWidth(156.dp),
+                                        isReadOnly = isReadOnly
+                                    )
+                                }
+                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            // REMAINDER TIME PICKER
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

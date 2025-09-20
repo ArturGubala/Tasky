@@ -5,22 +5,25 @@ package com.example.tasky.agenda.presentation.agenda_detail
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
+import com.example.tasky.core.domain.ValidationItem
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
+    val isOnline: Boolean = false,
     val title: String = "Project X",
     val description: String = "Weekly plan\n Role distribution",
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
     val details: AgendaItemDetails? = AgendaItemDetails.Event(),
-    val imageLoading: Boolean = false
+    val agendaDetailBottomSheetType: AgendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE
 ) {
     val localFromTime: ZonedDateTime
         get() = fromTime.withZoneSameInstant(ZoneId.systemDefault())
@@ -28,7 +31,8 @@ data class AgendaDetailState(
 
 sealed interface AgendaItemDetails {
     data class Event(
-        val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
+        val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"))
+            .truncatedTo(ChronoUnit.HOURS).plusHours(1),
         val attendees: List<Attendee> = listOf(
             Attendee("wade1@example.com", "Wade Warren", "1", "event1", true, "2024-01-15T09:30:00Z", true),
             Attendee("wade2@example.com", "Wade Warren", "2", "event1", true, "2024-01-15T09:30:00Z", false),
@@ -36,8 +40,17 @@ sealed interface AgendaItemDetails {
             Attendee("wade4@example.com", "Wade Warren", "4", "event1", false, "2024-01-15T09:30:00Z", false),
             Attendee("wade5@example.com", "Wade Warren", "5", "event1", false, "2024-01-15T09:30:00Z", false)
         ),
-        val photos: List<Photo> = emptyList()
-    ): AgendaItemDetails
+        val photos: List<Photo> = emptyList(),
+        val isImageLoading: Boolean = false,
+        val attendeeEmail: String = "",
+        val isAttendeeEmailValid: Boolean = false,
+        val isAttendeeEmailFocused: Boolean = false,
+        val errors: List<ValidationItem> = emptyList()
+
+    ): AgendaItemDetails {
+        val localToTime: ZonedDateTime
+            get() = toTime.withZoneSameInstant(ZoneId.systemDefault())
+    }
 
     data class Task(
         val isDone: Boolean = false

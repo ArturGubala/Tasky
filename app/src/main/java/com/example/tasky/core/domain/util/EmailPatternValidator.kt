@@ -1,7 +1,7 @@
-package com.example.tasky.auth.data
+package com.example.tasky.core.domain.util
 
 import android.util.Patterns
-import com.example.tasky.auth.domain.PatternValidator
+import com.example.tasky.core.domain.PatternValidator
 
 object EmailPatternValidator: PatternValidator {
 

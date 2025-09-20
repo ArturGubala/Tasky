@@ -31,7 +31,8 @@ fun TaskyAttendeeCard(
     attendeeName: String,
     isCreator: Boolean,
     modifier: Modifier = Modifier,
-    onDeleteClick: () -> Unit = {}
+    onDeleteClick: () -> Unit = {},
+    canEdit: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -60,7 +61,7 @@ fun TaskyAttendeeCard(
                 color = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
                 style = MaterialTheme.typography.labelXSmall
             )
-        } else {
+        } else if (canEdit) {
             IconButton(
                 onClick = onDeleteClick,
                 modifier = Modifier.size(20.dp)

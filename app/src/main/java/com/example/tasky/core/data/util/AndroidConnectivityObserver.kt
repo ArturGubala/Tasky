@@ -49,8 +49,17 @@ class AndroidConnectivityObserver(
 
             connectivityManager.registerDefaultNetworkCallback(callback)
 
+            val currentState = getCurrentNetworkState()
+            trySend(currentState)
+
             awaitClose {
                 connectivityManager.unregisterNetworkCallback(callback)
             }
         }
+
+    private fun getCurrentNetworkState(): Boolean {
+        val activeNetwork = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
+    }
 }

@@ -1,9 +1,9 @@
 package com.example.tasky.auth.di
 
 import com.example.tasky.auth.data.AuthRepositoryImpl
-import com.example.tasky.auth.data.EmailPatternValidator
+import com.example.tasky.core.domain.util.EmailPatternValidator
 import com.example.tasky.auth.domain.AuthRepository
-import com.example.tasky.auth.domain.PatternValidator
+import com.example.tasky.core.domain.PatternValidator
 import com.example.tasky.auth.domain.UserDataValidator
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind

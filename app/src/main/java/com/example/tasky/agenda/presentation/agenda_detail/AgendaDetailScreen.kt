@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,11 +28,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -47,6 +51,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
+import com.example.tasky.agenda.presentation.agenda_detail.components.AddAttendeeBottomSheetContent
+import com.example.tasky.agenda.presentation.agenda_detail.components.DeleteBottomSheetContent
+import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
@@ -60,6 +67,7 @@ import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.agenda.presentation.util.rememberAgendaPhotoPickerLauncher
 import com.example.tasky.core.data.util.AndroidImageCompressor.Companion.MAX_SIZE_BYTES
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
+import com.example.tasky.core.presentation.designsystem.bottom_sheets.TaskyBottomSheet
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyAttendeeStatusRadioButton
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.cards.TaskyAttendeeCard
@@ -77,9 +85,10 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import timber.log.Timber
+import java.time.ZonedDateTime
 
 @Composable
 fun AgendaDetailScreenRoot(
@@ -150,6 +159,13 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
+            is AgendaDetailEvent.InvalidDatePicked -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -200,6 +216,7 @@ fun AgendaDetailScreenRoot(
             context = context,
             itemDate = null
         ),
+        deleteButtonText = agendaItemTypeConfiguration.getDeleteButtonText(context = context),
         agendaDetailView = agendaDetailView,
         agendaItemTypeConfiguration = agendaItemTypeConfiguration,
         isReadOnly = isReadOnly
@@ -211,6 +228,7 @@ fun AgendaDetailScreen(
     state: AgendaDetailState,
     onAction: (AgendaDetailAction) -> Unit,
     appBarTitle: String,
+    deleteButtonText: String,
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig,
     isReadOnly: Boolean
@@ -311,13 +329,15 @@ fun AgendaDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = screenHeight)
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 48.dp)
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(28.dp)
                     ) {
+
+                        // HEADER
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -345,6 +365,7 @@ fun AgendaDetailScreen(
                         }
 
                         Column {
+                            // TITLE
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -364,26 +385,29 @@ fun AgendaDetailScreen(
                                         )
                                     }
                                 )
-                                TaskyTextButton(
-                                    onClick = {
-                                        onAction(
-                                            AgendaDetailAction.OnEditTitleClick(
-                                                title = state.title
+                                if (!isReadOnly) {
+                                    TaskyTextButton(
+                                        onClick = {
+                                            onAction(
+                                                AgendaDetailAction.OnEditTitleClick(
+                                                    title = state.title
+                                                )
                                             )
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                                            contentDescription = "Arrow right",
+                                            tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                                         )
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                                        contentDescription = "Arrow right",
-                                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
-                                    )
                                 }
                             }
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
+                            // DESCRIPTION
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -396,108 +420,218 @@ fun AgendaDetailScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
-                                TaskyTextButton(
-                                    onClick = {
-                                        onAction(
-                                            AgendaDetailAction.OnEditDescriptionClick(
-                                                description = state.description
+                                if (!isReadOnly) {
+                                    TaskyTextButton(
+                                        onClick = {
+                                            onAction(
+                                                AgendaDetailAction.OnEditDescriptionClick(
+                                                    description = state.description
+                                                )
                                             )
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                                            contentDescription = "Arrow right",
+                                            tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                                         )
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                                        contentDescription = "Arrow right",
-                                        tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
-                                    )
                                 }
                             }
 
-                            // Photo picker
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .drawBehind {
-                                        drawRect(
-                                            color = photoSectionBackgroundColor,
-                                            topLeft =
-                                                Offset(-16.dp.toPx(), 0f),
-                                            size = Size(
-                                                width = size.width + 32.dp.toPx(), // Add back the horizontal padding
-                                                height = size.height
-                                            )
-                                        )
-                                    }
-                                    .padding(vertical = 20.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                TaskyPhotoPicker(
-                                    photos = state.detailsAsEvent()?.photos?.map {
-                                        it.toUi()
-                                    } ?: listOf(),
-                                    onPhotoClick = { photoId, uriString ->
-                                        onAction(
-                                            AgendaDetailAction.OnPhotoClick(
-                                                photoId = photoId, uriString = uriString
-                                            )
-                                        )
-                                    },
-                                    onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
-                                    imageLoading = state.imageLoading
-                                )
-                            }
-
-                            HorizontalDivider(
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.extended.surfaceHigher
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 20.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.at),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                            // PHOTO PICKER
+                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT &&
+                                !isReadOnly) {
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .drawBehind {
+                                            drawRect(
+                                                color = photoSectionBackgroundColor,
+                                                topLeft =
+                                                    Offset(-16.dp.toPx(), 0f),
+                                                size = Size(
+                                                    width = size.width + 32.dp.toPx(), // Add back the horizontal padding
+                                                    height = size.height
+                                                )
+                                            )
+                                        }
+                                        .padding(vertical = 20.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    TaskyTimePicker(
-                                        selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                            hour = state.localFromTime.hour,
-                                            minute = state.localFromTime.minute,
-                                        ),
-                                        onValueChange = { hour, minute ->
+                                    TaskyPhotoPicker(
+                                        photos = state.detailsAsEvent()?.photos?.map {
+                                            it.toUi()
+                                        } ?: listOf(),
+                                        onPhotoClick = { photoId, uriString ->
                                             onAction(
-                                                AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
+                                                AgendaDetailAction.OnPhotoClick(
+                                                    photoId = photoId, uriString = uriString
+                                                )
                                             )
                                         },
-                                        modifier = Modifier.requiredWidth(120.dp),
-                                        isReadOnly = isReadOnly
-                                    )
-                                    TaskyDatePicker(
-                                        selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                            dateMillis = state.fromTime.toInstant().toEpochMilli()
-                                        ),
-                                        onValueChange = { dateMillis ->
-                                            onAction(
-                                                AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
-                                            )
-                                        },
-                                        modifier = Modifier.requiredWidth(156.dp),
-                                        isReadOnly = isReadOnly
+                                        onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
+                                        imageLoading = state.detailsAsEvent()?.isImageLoading ?: false,
+                                        isReadOnly = isReadOnly,
+                                        isOnline = state.isOnline
                                     )
                                 }
+                            } else {
+                                HorizontalDivider(
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                )
                             }
+
+                            // DATES
+                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                                // DATE FROM
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 20.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.from),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        TaskyTimePicker(
+                                            selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                                hour = state.localFromTime.hour,
+                                                minute = state.localFromTime.minute,
+                                            ),
+                                            onValueChange = { hour, minute ->
+                                                onAction(
+                                                    AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
+                                                )
+                                            },
+                                            modifier = Modifier.requiredWidth(120.dp),
+                                            isReadOnly = isReadOnly
+                                        )
+                                        TaskyDatePicker(
+                                            selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                                dateMillis = state.fromTime.toInstant().toEpochMilli()
+                                            ),
+                                            onValueChange = { dateMillis ->
+                                                onAction(
+                                                    AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
+                                                )
+                                            },
+                                            modifier = Modifier.requiredWidth(156.dp),
+                                            isReadOnly = isReadOnly
+                                        )
+                                    }
+                                }
+
+                                HorizontalDivider(
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                )
+
+                                // DATE TO
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 20.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.to),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        TaskyTimePicker(
+                                            selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                                hour = state.detailsAsEvent()?.localToTime?.hour ?: 0,
+                                                minute = state.detailsAsEvent()?.localToTime?.minute ?: 0,
+                                            ),
+                                            onValueChange = { hour, minute ->
+                                                onAction(
+                                                    AgendaDetailAction.OnTimeToPick(hour = hour, minute = minute)
+                                                )
+                                            },
+                                            modifier = Modifier.requiredWidth(120.dp),
+                                            isReadOnly = isReadOnly
+                                        )
+                                        TaskyDatePicker(
+                                            selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                                dateMillis = state.detailsAsEvent()?.localToTime
+                                                    ?.toInstant()?.toEpochMilli() ?:
+                                                ZonedDateTime.now().toInstant().toEpochMilli()
+                                            ),
+                                            onValueChange = { dateMillis ->
+                                                onAction(
+                                                    AgendaDetailAction.OnDateToPick(dateMillis = dateMillis)
+                                                )
+                                            },
+                                            modifier = Modifier.requiredWidth(156.dp),
+                                            isReadOnly = isReadOnly
+                                        )
+                                    }
+                                }
+                            } else {
+                                // DATE AT
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 20.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.at),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        TaskyTimePicker(
+                                            selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
+                                                hour = state.localFromTime.hour,
+                                                minute = state.localFromTime.minute,
+                                            ),
+                                            onValueChange = { hour, minute ->
+                                                onAction(
+                                                    AgendaDetailAction.OnTimeFromPick(hour = hour, minute = minute)
+                                                )
+                                            },
+                                            modifier = Modifier.requiredWidth(120.dp),
+                                            isReadOnly = isReadOnly
+                                        )
+                                        TaskyDatePicker(
+                                            selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
+                                                dateMillis = state.fromTime.toInstant().toEpochMilli()
+                                            ),
+                                            onValueChange = { dateMillis ->
+                                                onAction(
+                                                    AgendaDetailAction.OnDateFromPick(dateMillis = dateMillis)
+                                                )
+                                            },
+                                            modifier = Modifier.requiredWidth(156.dp),
+                                            isReadOnly = isReadOnly
+                                        )
+                                    }
+                                }
+                            }
+
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
+
+                            // REMAINDER TIME PICKER
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -512,7 +646,8 @@ fun AgendaDetailScreen(
                                         onAction(
                                             AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
                                         )
-                                    }
+                                    },
+                                    enabled = !isReadOnly
                                 )
                             }
                             HorizontalDivider(
@@ -530,7 +665,8 @@ fun AgendaDetailScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        horizontalArrangement = if (state.isOnline)
+                                            Arrangement.SpaceBetween else Arrangement.spacedBy(6.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
@@ -538,19 +674,28 @@ fun AgendaDetailScreen(
                                             color = MaterialTheme.colorScheme.primary,
                                             style = MaterialTheme.typography.headlineMedium
                                         )
-                                        TaskyTextButton(
-                                            onClick = {}
-                                        ) {
-                                            TaskySquare(
-                                                size = 32.dp,
-                                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                        if (state.isOnline && !isReadOnly) {
+                                            TaskyTextButton(
+                                                onClick = { onAction(AgendaDetailAction.OnAddAttendeeClick) }
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Add,
-                                                    contentDescription = "Close icon",
-                                                    tint = MaterialTheme.colorScheme.onSurface
-                                                )
+                                                TaskySquare(
+                                                    size = 32.dp,
+                                                    color = MaterialTheme.colorScheme.extended.surfaceHigher
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Add,
+                                                        contentDescription = "Close icon",
+                                                        tint = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                }
                                             }
+                                        } else if (!state.isOnline && !isReadOnly) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_offline),
+                                                contentDescription = stringResource(R.string.offline_icon),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
+                                            )
                                         }
                                     }
                                     Row(
@@ -581,7 +726,8 @@ fun AgendaDetailScreen(
                                             goingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
                                                     attendeeName = attendee.username,
-                                                    isCreator = attendee.isCreator
+                                                    isCreator = attendee.isCreator,
+                                                    canEdit = state.isOnline && !isReadOnly
                                                 )
                                             }
                                         }
@@ -599,7 +745,8 @@ fun AgendaDetailScreen(
                                             notGoingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
                                                     attendeeName = attendee.username,
-                                                    isCreator = attendee.isCreator
+                                                    isCreator = attendee.isCreator,
+                                                    canEdit = state.isOnline && !isReadOnly
                                                 )
                                             }
                                         }
@@ -620,7 +767,7 @@ fun AgendaDetailScreen(
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick = { onAction(AgendaDetailAction.OnDeleteAgendaItemClick) }
                             ) {
                                 Text(
                                     text = stringResource(
@@ -636,6 +783,57 @@ fun AgendaDetailScreen(
                 }
             }
         }
+
+        if (state.agendaDetailBottomSheetType != AgendaDetailBottomSheetType.NONE) {
+            val sheetState = rememberModalBottomSheetState()
+            val scope = rememberCoroutineScope()
+            TaskyBottomSheet(
+                onDismiss = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
+                sheetState = sheetState,
+                content = {
+                    when(state.agendaDetailBottomSheetType) {
+                        AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM -> {
+                            DeleteBottomSheetContent(
+                                onDelete = {},
+                                onCancel = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                        onAction(AgendaDetailAction.OnDismissBottomSheet)
+                                    }
+                                },
+                                title = deleteButtonText
+                            )
+                        }
+
+                        AgendaDetailBottomSheetType.ADD_ATTENDEE -> {
+                            AddAttendeeBottomSheetContent(
+                                onCloseClick = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                        onAction(AgendaDetailAction.OnDismissBottomSheet)
+                                    }
+                                },
+                                onAddClick = {},
+                                attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
+                                isAttendeeEmailValid = state.detailsAsEvent()?.isAttendeeEmailValid ?: false,
+                                isAttendeeEmailFieldFocused = state.detailsAsEvent()?.isAttendeeEmailFocused ?: false,
+                                onAttendeeEmailChange = { email ->
+                                    onAction(AgendaDetailAction.OnAttendeeEmailValueChanged(email = email))
+                                },
+                                onAttendeeEmailFieldFocusChange = { hasFocus ->
+                                    onAction(AgendaDetailAction.OnAttendeeEmailFieldFocusChanged(
+                                        hasFocus = hasFocus
+                                    ))
+                                },
+                                errors = state.detailsAsEvent()?.errors ?: emptyList()
+                            )
+                        }
+
+                        else -> Unit
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -647,6 +845,7 @@ private fun AgendaDetailScreenPreview() {
             state = AgendaDetailState(),
             onAction = {},
             appBarTitle = "Title",
+            deleteButtonText = "Delete",
             agendaDetailView = AgendaDetailView.EDIT,
             agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK),
             isReadOnly = true

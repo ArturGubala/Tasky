@@ -1,5 +1,7 @@
 package com.example.tasky.auth.domain
 
+import com.example.tasky.core.domain.PatternValidator
+
 class UserDataValidator(
     private val patternValidator: PatternValidator
 ) {

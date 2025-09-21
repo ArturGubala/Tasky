@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -28,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
@@ -60,6 +65,7 @@ import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
+import com.example.tasky.agenda.presentation.util.DropdownTextAlignment
 import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
 import com.example.tasky.agenda.presentation.util.PhotoDetail
 import com.example.tasky.agenda.presentation.util.PhotoDetailAction
@@ -85,6 +91,7 @@ import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
+import com.example.tasky.core.presentation.util.DeviceConfiguration
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -233,6 +240,9 @@ fun AgendaDetailScreen(
     agendaItemTypeConfiguration: AgendaTypeConfig,
     isReadOnly: Boolean
 ) {
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
+
     TaskyScaffold(
         topBar = {
             when(agendaDetailView) {
@@ -330,6 +340,7 @@ fun AgendaDetailScreen(
                         .fillMaxWidth()
                         .heightIn(min = screenHeight)
                         .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 48.dp)
+                        .padding(WindowInsets.displayCutout.asPaddingValues())
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -474,7 +485,11 @@ fun AgendaDetailScreen(
                                         onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
                                         imageLoading = state.detailsAsEvent()?.isImageLoading ?: false,
                                         isReadOnly = isReadOnly,
-                                        isOnline = state.isOnline
+                                        isOnline = state.isOnline,
+                                        numberOfPhotoInRow = when (deviceConfiguration) {
+                                            DeviceConfiguration.MOBILE_PORTRAIT -> 5
+                                            else -> 10
+                                        }
                                     )
                                 }
                             } else {
@@ -647,7 +662,11 @@ fun AgendaDetailScreen(
                                             AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
                                         )
                                     },
-                                    enabled = !isReadOnly
+                                    enabled = !isReadOnly,
+                                    textAlignment = when (deviceConfiguration) {
+                                        DeviceConfiguration.MOBILE_PORTRAIT -> DropdownTextAlignment.Start
+                                        else -> DropdownTextAlignment.End
+                                    }
                                 )
                             }
                             HorizontalDivider(
@@ -708,7 +727,11 @@ fun AgendaDetailScreen(
                                                 onAction(AgendaDetailAction.OnAttendeeStatusClick(status = it))
                                             },
                                             selectedOption = state.selectedAttendeeStatus,
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = when (deviceConfiguration) {
+                                                DeviceConfiguration.MOBILE_PORTRAIT -> Arrangement.SpaceBetween
+                                                else -> Arrangement.spacedBy(8.dp)
+                                            }
                                         )
                                     }
 
@@ -838,17 +861,18 @@ fun AgendaDetailScreen(
 }
 
 @PreviewLightDark
+@PreviewScreenSizes
 @Composable
 private fun AgendaDetailScreenPreview() {
     TaskyTheme {
         AgendaDetailScreen(
-            state = AgendaDetailState(),
+            state = AgendaDetailState(isOnline = true),
             onAction = {},
             appBarTitle = "Title",
             deleteButtonText = "Delete",
             agendaDetailView = AgendaDetailView.EDIT,
-            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.TASK),
-            isReadOnly = true
+            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.EVENT),
+            isReadOnly = false
         )
     }
 }

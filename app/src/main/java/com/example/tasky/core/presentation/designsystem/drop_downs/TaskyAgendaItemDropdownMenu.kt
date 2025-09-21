@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
+import com.example.tasky.agenda.presentation.util.DropdownTextAlignment
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.agenda.presentation.util.toUiText
 import com.example.tasky.core.presentation.designsystem.icons.TaskySquare
@@ -50,6 +51,7 @@ fun TaskyAgendaItemDropdownMenu(
     onReminderSelected: (AgendaItemInterval) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    textAlignment: DropdownTextAlignment = DropdownTextAlignment.Start,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var dropdownWidth by remember { mutableStateOf(0.dp) }
@@ -82,12 +84,24 @@ fun TaskyAgendaItemDropdownMenu(
                     tint = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70
                 )
             }
-            Text(
-                text = selectedReminder.toUiText().asString(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.weight(1f))
+            when (textAlignment) {
+                DropdownTextAlignment.Start -> {
+                    Text(
+                        text = selectedReminder.toUiText().asString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+                DropdownTextAlignment.End -> {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = selectedReminder.toUiText().asString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
             if (enabled) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -171,7 +185,8 @@ private fun NotificationReminderDropdownPreview() {
             onReminderSelected = { reminder ->
                 selectedReminder = reminder
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            textAlignment = DropdownTextAlignment.Start
         )
     }
 }

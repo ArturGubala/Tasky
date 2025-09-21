@@ -6,8 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
@@ -48,10 +49,10 @@ fun TaskyPhotoPicker(
     onPhotoClick: (String, String) -> Unit,
     onAddClick: () -> Unit = {},
     isReadOnly: Boolean = false,
-    isOnline: Boolean = false
+    isOnline: Boolean = false,
+    numberOfPhotoInRow: Int = 2,
+    photoHeight: Dp = 60.dp
 ) {
-    val thumbnailSize = 64.dp
-
     if (photos.isNotEmpty()) {
         Column(
             modifier = modifier,
@@ -76,32 +77,48 @@ fun TaskyPhotoPicker(
                 }
             }
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                maxItemsInEachRow = 5
-            ) {
-                photos.forEach { photo ->
+            val allItems = mutableListOf<@Composable () -> Unit>()
+
+            photos.forEach { photo ->
+                allItems.add {
                     PhotoItem(
                         photo = photo,
                         onPhotoClick = { onPhotoClick(photo.id, photo.uri.toString()) },
-                        modifier = Modifier.size(thumbnailSize)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(photoHeight)
                     )
                 }
+            }
 
-                if (!isReadOnly && photos.size < MAX_NUMBER_OF_PHOTOS && isOnline) {
+            if (!isReadOnly && photos.size < MAX_NUMBER_OF_PHOTOS && isOnline) {
+                allItems.add {
                     AddPhotoThumbnail(
                         onClick = onAddClick,
-                        modifier = Modifier.size(thumbnailSize),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(photoHeight),
                         imageLoading = imageLoading
                     )
+                }
+            }
+
+            allItems.chunked(numberOfPhotoInRow).forEach { rowItems ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    rowItems.forEach { item ->
+                        item()
+                    }
+                    repeat(numberOfPhotoInRow - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
     } else {
         Box(
-            modifier = modifier
-                .fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             if (imageLoading) {
@@ -149,7 +166,6 @@ fun TaskyPhotoPicker(
         }
     }
 }
-
 
 @Composable
 fun PhotoItem(

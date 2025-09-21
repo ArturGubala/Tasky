@@ -136,7 +136,7 @@ class AgendaDetailViewModel(
             }
             is AgendaDetailAction.OnTimeToPick -> {
                 _state.value.detailsAsEvent()?.toTime?.let { currentTimestamp ->
-                    val updatedTimestamp = updateUtcTime(currentTimestamp = currentTimestamp,
+                    val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.fromTime,
                         hour = action.hour, minutes = action.minute)
 
                     if (updatedTimestamp <= _state.value.fromTime) {
@@ -292,11 +292,10 @@ class AgendaDetailViewModel(
     }
 
     private fun updateUtcTime(currentTimestamp: ZonedDateTime, hour: Int, minutes: Int): ZonedDateTime {
-        val localDateTime = currentTimestamp.withZoneSameInstant(ZoneId.systemDefault())
-        val localDate = localDateTime.toLocalDate()
-        val newLocalTime = LocalTime.of(hour, minutes)
-        val newLocalDateTime = ZonedDateTime.of(localDate, newLocalTime, ZoneId.systemDefault())
-        return newLocalDateTime.withZoneSameInstant(ZoneId.of("UTC"))
+        val localTime = LocalTime.of(hour, minutes)
+        val localDate = currentTimestamp.toLocalDate()
+        val localDateTime = ZonedDateTime.of(localDate, localTime, ZoneId.systemDefault())
+        return localDateTime.withZoneSameInstant(ZoneId.of("UTC"))
     }
 
     private fun updateUtcDate(currentTimestamp: ZonedDateTime, dateMillis: Long): ZonedDateTime {

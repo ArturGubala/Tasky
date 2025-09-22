@@ -3,6 +3,7 @@ package com.example.tasky.core.presentation.designsystem.buttons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -22,7 +23,7 @@ fun TaskySecondaryButton(
 ) {
     OutlinedButton (
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.requiredHeight(56.dp),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),

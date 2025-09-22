@@ -5,6 +5,8 @@ import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toLowerCase
 import com.example.tasky.R
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.util.DateTimeFormatter
@@ -24,6 +26,7 @@ object AgendaDetailConfigProvider {
         type = AgendaItemType.TASK,
         displayName = "Task",
         editTitleTemplateRes = R.string.edit_title,
+        deleteTemplateRes = R.string.delete_confirmation_context,
         colorProvider = { MaterialTheme.colorScheme.secondary }
     )
 
@@ -31,6 +34,7 @@ object AgendaDetailConfigProvider {
         type = AgendaItemType.EVENT,
         displayName = "Event",
         editTitleTemplateRes = R.string.edit_title,
+        deleteTemplateRes = R.string.delete_confirmation_context,
         colorProvider = { MaterialTheme.colorScheme.tertiary }
     )
 
@@ -38,6 +42,7 @@ object AgendaDetailConfigProvider {
         type = AgendaItemType.REMINDER,
         displayName = "Reminder",
         editTitleTemplateRes = R.string.edit_title,
+        deleteTemplateRes = R.string.delete_confirmation_context,
         colorProvider = { MaterialTheme.colorScheme.extended.surfaceHigher },
         strokeColorProvider = { MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70 }
     )
@@ -47,6 +52,7 @@ data class AgendaTypeConfig(
     val type: AgendaItemType,
     val displayName: String,
     @param:StringRes val editTitleTemplateRes: Int,
+    @param:StringRes val deleteTemplateRes: Int,
     private val colorProvider: @Composable () -> Color,
     private val strokeColorProvider: (@Composable () -> Color)? = null
 ) {
@@ -69,5 +75,11 @@ data class AgendaTypeConfig(
             }
             AgendaDetailView.EDIT -> context.getString(editTitleTemplateRes, displayName)
         }
+    }
+
+    fun getDeleteButtonText(
+        context: Context
+    ): String {
+        return context.getString(deleteTemplateRes, displayName.toLowerCase(locale = Locale.current))
     }
 }

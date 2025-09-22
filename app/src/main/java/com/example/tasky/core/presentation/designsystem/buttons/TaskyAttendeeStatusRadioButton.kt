@@ -30,10 +30,11 @@ fun TaskyAttendeeStatusRadioButton(
     options: List<AgendaItemAttendeesStatus>,
     onOptionSelect: (AgendaItemAttendeesStatus) -> Unit,
     modifier: Modifier = Modifier,
-    selectedOption: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL
+    selectedOption: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceBetween
 ) {
     LazyRow(
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = horizontalArrangement,
         modifier = modifier
     ) {
         items(options) { option ->
@@ -49,7 +50,7 @@ fun TaskyAttendeeStatusRadioButton(
                         },
                         shape = RoundedCornerShape(100.dp)
                     )
-                    .requiredWidth(105.dp)
+                    .requiredWidth(107.dp)
                     .padding(horizontal = 20.dp, vertical = 5.dp),
                 contentAlignment = Alignment.Center
             ) {

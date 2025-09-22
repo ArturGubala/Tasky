@@ -23,34 +23,68 @@ data class AgendaDetailState(
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
     val details: AgendaItemDetails? = AgendaItemDetails.Event(),
-    val agendaDetailBottomSheetType: AgendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE
-) {
-    val localFromTime: ZonedDateTime
-        get() = fromTime.withZoneSameInstant(ZoneId.systemDefault())
-}
+    val agendaDetailBottomSheetType: AgendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE,
+)
 
 sealed interface AgendaItemDetails {
     data class Event(
         val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"))
             .truncatedTo(ChronoUnit.HOURS).plusHours(1),
         val attendees: List<Attendee> = listOf(
-            Attendee("wade1@example.com", "Wade Warren", "1", "event1", true, "2024-01-15T09:30:00Z", true),
-            Attendee("wade2@example.com", "Wade Warren", "2", "event1", true, "2024-01-15T09:30:00Z", false),
-            Attendee("wade3@example.com", "Wade Warren", "3", "event1", true, "2024-01-15T09:30:00Z", false),
-            Attendee("wade4@example.com", "Wade Warren", "4", "event1", false, "2024-01-15T09:30:00Z", false),
-            Attendee("wade5@example.com", "Wade Warren", "5", "event1", false, "2024-01-15T09:30:00Z", false)
+            Attendee(
+                "wade1@example.com",
+                "Wade Warren",
+                "1",
+                "event1",
+                true,
+                "2024-01-15T09:30:00Z",
+                true
+            ),
+            Attendee(
+                "wade2@example.com",
+                "Wade Warren",
+                "2",
+                "event1",
+                true,
+                "2024-01-15T09:30:00Z",
+                false
+            ),
+            Attendee(
+                "wade3@example.com",
+                "Wade Warren",
+                "3",
+                "event1",
+                true,
+                "2024-01-15T09:30:00Z",
+                false
+            ),
+            Attendee(
+                "wade4@example.com",
+                "Wade Warren",
+                "4",
+                "event1",
+                false,
+                "2024-01-15T09:30:00Z",
+                false
+            ),
+            Attendee(
+                "wade5@example.com",
+                "Wade Warren",
+                "5",
+                "event1",
+                false,
+                "2024-01-15T09:30:00Z",
+                false
+            )
         ),
         val photos: List<Photo> = emptyList(),
         val isImageLoading: Boolean = false,
         val attendeeEmail: String = "",
         val isAttendeeEmailValid: Boolean = false,
         val isAttendeeEmailFocused: Boolean = false,
-        val errors: List<ValidationItem> = emptyList()
+        val errors: List<ValidationItem> = emptyList(),
 
-    ): AgendaItemDetails {
-        val localToTime: ZonedDateTime
-            get() = toTime.withZoneSameInstant(ZoneId.systemDefault())
-    }
+        ) : AgendaItemDetails
 
     data class Task(
         val isDone: Boolean = false

@@ -11,6 +11,8 @@ import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.AgendaItemType
+import com.example.tasky.agenda.presentation.util.updateUtcDate
+import com.example.tasky.agenda.presentation.util.updateUtcTime
 import com.example.tasky.auth.presentation.register.RegisterFocusedField
 import com.example.tasky.core.domain.PatternValidator
 import com.example.tasky.core.domain.ValidationItem
@@ -32,10 +34,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -292,24 +290,11 @@ class AgendaDetailViewModel(
     }
 
     private fun updateUtcTime(currentTimestamp: ZonedDateTime, hour: Int, minutes: Int): ZonedDateTime {
-        return currentTimestamp
-            .withZoneSameInstant(ZoneId.systemDefault())
-            .withHour(hour)
-            .withMinute(minutes)
-            .withZoneSameInstant(ZoneId.of("UTC"))
+        return currentTimestamp.updateUtcTime(hour, minutes)
     }
 
     private fun updateUtcDate(currentTimestamp: ZonedDateTime, dateMillis: Long): ZonedDateTime {
-        return currentTimestamp
-            .withZoneSameInstant(ZoneId.systemDefault())
-            .with(epochMillisToLocalDate(dateMillis))
-            .withZoneSameInstant(ZoneId.of("UTC"))
-    }
-
-    private fun epochMillisToLocalDate(epochMillis: Long): LocalDate {
-        return Instant.ofEpochMilli(epochMillis)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
+        return currentTimestamp.updateUtcDate(dateMillis)
     }
 
     private fun changeAttendeeStatus(status: AgendaItemAttendeesStatus) {
@@ -326,7 +311,7 @@ class AgendaDetailViewModel(
         }
     }
 
-    fun validateEmail(email: String): Boolean {
+    private fun validateEmail(email: String): Boolean {
         return patternValidator.matches(email.trim())
     }
 }

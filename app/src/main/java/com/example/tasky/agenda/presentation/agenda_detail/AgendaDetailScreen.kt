@@ -71,6 +71,7 @@ import com.example.tasky.agenda.presentation.util.PhotoDetail
 import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.agenda.presentation.util.rememberAgendaPhotoPickerLauncher
+import com.example.tasky.agenda.presentation.util.toLocal
 import com.example.tasky.core.data.util.AndroidImageCompressor.Companion.MAX_SIZE_BYTES
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.bottom_sheets.TaskyBottomSheet
@@ -517,10 +518,11 @@ fun AgendaDetailScreen(
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
+                                        val localFromTime = state.fromTime.toLocal()
                                         TaskyTimePicker(
                                             selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                                hour = state.localFromTime.hour,
-                                                minute = state.localFromTime.minute,
+                                                hour = localFromTime.hour,
+                                                minute = localFromTime.minute,
                                             ),
                                             onValueChange = { hour, minute ->
                                                 onAction(
@@ -532,7 +534,8 @@ fun AgendaDetailScreen(
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                                dateMillis = state.fromTime.toInstant().toEpochMilli()
+                                                dateMillis = localFromTime.toInstant()
+                                                    .toEpochMilli()
                                             ),
                                             onValueChange = { dateMillis ->
                                                 onAction(
@@ -566,10 +569,11 @@ fun AgendaDetailScreen(
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
+                                        val localToTime = state.detailsAsEvent()?.toTime?.toLocal()
                                         TaskyTimePicker(
                                             selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                                hour = state.detailsAsEvent()?.localToTime?.hour ?: 0,
-                                                minute = state.detailsAsEvent()?.localToTime?.minute ?: 0,
+                                                hour = localToTime?.hour ?: 0,
+                                                minute = localToTime?.minute ?: 0,
                                             ),
                                             onValueChange = { hour, minute ->
                                                 onAction(
@@ -581,8 +585,8 @@ fun AgendaDetailScreen(
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                                dateMillis = state.detailsAsEvent()?.localToTime
-                                                    ?.toInstant()?.toEpochMilli() ?:
+                                                dateMillis = localToTime?.toInstant()
+                                                    ?.toEpochMilli() ?:
                                                 ZonedDateTime.now().toInstant().toEpochMilli()
                                             ),
                                             onValueChange = { dateMillis ->
@@ -612,10 +616,11 @@ fun AgendaDetailScreen(
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
+                                        val localFromTime = state.fromTime.toLocal()
                                         TaskyTimePicker(
                                             selectedTime = DateTimeFormatter.formatTaskyDetailPickerTime(
-                                                hour = state.localFromTime.hour,
-                                                minute = state.localFromTime.minute,
+                                                hour = localFromTime.hour,
+                                                minute = localFromTime.minute,
                                             ),
                                             onValueChange = { hour, minute ->
                                                 onAction(
@@ -627,7 +632,8 @@ fun AgendaDetailScreen(
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
-                                                dateMillis = state.fromTime.toInstant().toEpochMilli()
+                                                dateMillis = localFromTime.toInstant()
+                                                    .toEpochMilli()
                                             ),
                                             onValueChange = { dateMillis ->
                                                 onAction(

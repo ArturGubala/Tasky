@@ -42,6 +42,18 @@ suspend inline fun <reified Request, reified Response: Any> HttpClient.post(
     }
 }
 
+suspend inline fun <reified Request, reified Response : Any> HttpClient.put(
+    route: String,
+    body: Request,
+): Result<Response, DataError.Network> {
+    return safeCall {
+        post {
+            url(constructRoute(route))
+            setBody(body)
+        }
+    }
+}
+
 suspend inline fun <reified Response: Any> HttpClient.delete(
     route: String,
     queryParameters: Map<String, Any?> = mapOf()

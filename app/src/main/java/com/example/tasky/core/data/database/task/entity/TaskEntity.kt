@@ -1,4 +1,4 @@
-package com.example.tasky.core.data.database.entity
+package com.example.tasky.core.data.database.task.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

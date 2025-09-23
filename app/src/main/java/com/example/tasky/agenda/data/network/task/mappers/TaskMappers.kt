@@ -1,10 +1,10 @@
 @file:OptIn(ExperimentalTime::class)
 
-package com.example.tasky.agenda.data.network.mappers
+package com.example.tasky.agenda.data.network.task.mappers
 
-import com.example.tasky.agenda.data.network.dto.task.CreateTaskRequest
-import com.example.tasky.agenda.data.network.dto.task.TaskDto
-import com.example.tasky.agenda.data.network.dto.task.UpdateTaskRequest
+import com.example.tasky.agenda.data.network.task.dto.CreateTaskRequest
+import com.example.tasky.agenda.data.network.task.dto.TaskDto
+import com.example.tasky.agenda.data.network.task.dto.UpdateTaskRequest
 import com.example.tasky.agenda.domain.model.Task
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant

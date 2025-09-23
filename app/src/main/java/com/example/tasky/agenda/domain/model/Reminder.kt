@@ -12,5 +12,4 @@ data class Reminder(
     val time: Instant,
     val remindAt: Instant,
     val updatedAt: Instant,
-    val isDone: Boolean,
 )

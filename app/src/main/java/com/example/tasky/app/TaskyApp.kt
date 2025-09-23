@@ -2,6 +2,7 @@ package com.example.tasky.app
 
 import android.app.Application
 import com.example.tasky.BuildConfig
+import com.example.tasky.agenda.data.di.agendaNetworkModule
 import com.example.tasky.agenda.di.agendaViewModelModule
 import com.example.tasky.app.di.appModule
 import com.example.tasky.auth.di.authDataModule
@@ -28,7 +29,8 @@ class TaskyApp: Application() {
                 authDataModule,
                 authViewModelModule,
                 coreDataModule,
-                agendaViewModelModule
+                agendaViewModelModule,
+                agendaNetworkModule
             )
         }
     }

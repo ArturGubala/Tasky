@@ -8,7 +8,7 @@ data class CreateTaskRequest(
     val title: String,
     val description: String?,
     val time: String,
-    val remindAt: String?,
+    val remindAt: String,
     val updatedAt: String?,
     val isDone: Boolean,
 )

@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UpdateTaskRequest(
     val id: String,
-    val title: String?,
+    val title: String,
     val description: String?,
-    val time: String?,
-    val remindAt: String?,
-    val isDone: Boolean?,
+    val time: String,
+    val remindAt: String,
+    val isDone: Boolean,
 )

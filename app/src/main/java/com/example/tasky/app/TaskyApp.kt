@@ -7,6 +7,7 @@ import com.example.tasky.agenda.di.agendaViewModelModule
 import com.example.tasky.app.di.appModule
 import com.example.tasky.auth.di.authDataModule
 import com.example.tasky.auth.presentation.di.authViewModelModule
+import com.example.tasky.core.data.database.di.databaseModule
 import com.example.tasky.core.data.di.coreDataModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -30,7 +31,8 @@ class TaskyApp: Application() {
                 authViewModelModule,
                 coreDataModule,
                 agendaViewModelModule,
-                agendaNetworkModule
+                agendaNetworkModule,
+                databaseModule
             )
         }
     }

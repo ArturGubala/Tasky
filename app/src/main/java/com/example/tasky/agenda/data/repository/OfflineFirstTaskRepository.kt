@@ -24,10 +24,12 @@ class OfflineFirstTaskRepository(
         return when (remoteResult) {
             is Result.Error -> {
                 when (remoteResult.error) {
-                    DataError.Network.CONFLICT -> {
+                    DataError.Network.CONFLICT,
+                    DataError.Network.BAD_REQUEST,
+                        -> {
+                        taskLocalDataStore.deleteTask(task.id)
                         return remoteResult.asEmptyDataResult()
                     }
-
                     else -> {
                         // TODO write task to sync queue
                     }

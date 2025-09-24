@@ -9,21 +9,26 @@ import com.example.tasky.core.domain.data.TaskLocalDataStore
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class RoomLocalTaskDataSource(
     private val taskDao: TaskDao,
 ) : TaskLocalDataStore {
 
-    override suspend fun getTask(id: String): Task {
-        return taskDao.getTask(id = id).toTask()
+    override fun getTask(id: String): Flow<Task> {
+        return taskDao.getTask(id = id)
+            .map { it.toTask() }
     }
 
-    override suspend fun getTasksForDay(
+    override fun getTasksForDay(
         startOfDay: Long,
         endOfDay: Long,
-    ): List<Task> {
+    ): Flow<List<Task>> {
         return taskDao.getTasksForDay(startOfDay = startOfDay, endOfDay = endOfDay)
-            .map { it.toTask() }
+            .map { taskEntities ->
+                taskEntities.map { it.toTask() }
+            }
     }
 
     override suspend fun upsertTask(task: Task): EmptyResult<DataError.Local> {

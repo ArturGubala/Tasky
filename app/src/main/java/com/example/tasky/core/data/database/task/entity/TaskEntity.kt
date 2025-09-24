@@ -13,5 +13,4 @@ data class TaskEntity(
     val remindAt: Long,
     val updatedAt: Long?,
     val isDone: Boolean,
-    val isSynced: Boolean = false,
 )

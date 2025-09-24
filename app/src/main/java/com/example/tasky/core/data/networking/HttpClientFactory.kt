@@ -31,6 +31,7 @@ class HttpClientFactory(
                 json(
                     json = Json {
                         ignoreUnknownKeys = true
+                        explicitNulls = true
                     }
                 )
             }

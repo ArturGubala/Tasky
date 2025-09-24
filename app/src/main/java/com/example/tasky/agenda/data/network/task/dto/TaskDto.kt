@@ -9,6 +9,6 @@ data class TaskDto(
     val description: String?,
     val time: String,
     val remindAt: String,
-    val updatedAt: String?,
+    val updatedAt: String? = null,
     val isDone: Boolean,
 )

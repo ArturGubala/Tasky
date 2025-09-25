@@ -18,5 +18,7 @@ val databaseModule = module {
         ).build()
     }
     single { get<TaskyDatabase>().taskDao }
+    single { get<TaskyDatabase>().taskPendingSyncDao }
+
     singleOf(::RoomLocalTaskDataSource).bind<TaskLocalDataStore>()
 }

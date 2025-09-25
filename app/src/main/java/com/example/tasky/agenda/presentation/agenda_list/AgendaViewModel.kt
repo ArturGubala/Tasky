@@ -3,6 +3,7 @@ package com.example.tasky.agenda.presentation.agenda_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.auth.domain.AuthRepository
@@ -26,12 +27,14 @@ import kotlinx.coroutines.launch
 class AgendaViewModel(
     private val connectivityObserver: ConnectivityObserver,
     private val authRepository: AuthRepository,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val taskRepository: TaskRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
     val state = _state
         .onStart {
+            taskRepository.syncPendingTask()
             initializeMenuOptions()
             observeConnectivity()
         }

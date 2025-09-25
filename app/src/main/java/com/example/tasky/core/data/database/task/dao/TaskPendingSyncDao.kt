@@ -1,10 +1,12 @@
 package com.example.tasky.core.data.database.task.dao
 
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.tasky.core.data.database.task.entity.TaskDeletedSyncEntity
 import com.example.tasky.core.data.database.task.entity.TaskPendingSyncEntity
 
+@Dao
 interface TaskPendingSyncDao {
 
     // UPSERT TASK

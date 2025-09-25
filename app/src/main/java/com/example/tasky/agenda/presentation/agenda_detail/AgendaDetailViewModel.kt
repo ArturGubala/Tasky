@@ -24,6 +24,8 @@ import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.ImageCompressor
 import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.domain.util.onError
+import com.example.tasky.core.domain.util.onSuccess
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText
 import kotlinx.coroutines.CoroutineDispatcher
@@ -343,24 +345,22 @@ class AgendaDetailViewModel(
                 updatedAt = currentTimestamp.toKotlinInstant(),
                 isDone = _state.value.detailsAsTask()?.isDone ?: false
             )
-            val result = taskRepository.createTask(task)
-            when (result) {
-                is Result.Error -> {
-                    eventChannel.send(
-                        AgendaDetailEvent.SaveError(
-                            error = result.error.asUiText()
-                        )
-                    )
-                }
 
-                is Result.Success -> {
+            taskRepository.createTask(task)
+                .onSuccess { responseData ->
                     eventChannel.send(
                         AgendaDetailEvent.SaveError(
                             error = UiText.StringResource(R.string.save_successful)
                         )
                     )
                 }
-            }
+                .onError { error ->
+                    eventChannel.send(
+                        AgendaDetailEvent.SaveError(
+                            error = error.asUiText()
+                        )
+                    )
+                }
         }
     }
 }

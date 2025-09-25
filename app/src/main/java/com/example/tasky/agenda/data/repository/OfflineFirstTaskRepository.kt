@@ -8,6 +8,8 @@ import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
 import com.example.tasky.core.domain.util.asEmptyDataResult
+import com.example.tasky.core.domain.util.onError
+import com.example.tasky.core.domain.util.onSuccess
 
 class OfflineFirstTaskRepository(
     private val taskRemoteDataSource: TaskRemoteDataSource,
@@ -20,26 +22,10 @@ class OfflineFirstTaskRepository(
             return localResult.asEmptyDataResult()
         }
 
-        val remoteResult = taskRemoteDataSource.createTask(task)
-        return when (remoteResult) {
-            is Result.Error -> {
-                when (remoteResult.error) {
-                    DataError.Network.CONFLICT,
-                    DataError.Network.BAD_REQUEST,
-                        -> {
-                        taskLocalDataStore.deleteTask(task.id)
-                        return remoteResult.asEmptyDataResult()
-                    }
-                    else -> {
-                        // TODO write task to sync queue
-                    }
-                }
-                Result.Success(Unit)
-            }
-
-            is Result.Success -> {
-                remoteResult.asEmptyDataResult()
-            }
-        }
+        return taskRemoteDataSource.createTask(task)
+            .onSuccess {}.asEmptyDataResult()
+            .onError { error ->
+                // TODO write task to sync queue
+            }.asEmptyDataResult()
     }
 }

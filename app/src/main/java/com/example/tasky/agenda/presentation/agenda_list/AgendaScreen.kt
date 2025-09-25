@@ -26,8 +26,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyProfileButtonMenu

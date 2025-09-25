@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.data.TaskRepository
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver

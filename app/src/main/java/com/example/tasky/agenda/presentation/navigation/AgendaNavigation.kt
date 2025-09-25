@@ -6,13 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailScreenRoot
 import com.example.tasky.agenda.presentation.agenda_detail.photo_detail.PhotoDetailScreenRoot
 import com.example.tasky.agenda.presentation.agenda_edit.AgendaEditTextScreenRoot
 import com.example.tasky.agenda.presentation.agenda_list.AgendaScreenRoot
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.PhotoDetail
 import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen

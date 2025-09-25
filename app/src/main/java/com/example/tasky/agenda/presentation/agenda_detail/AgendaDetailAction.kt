@@ -1,8 +1,8 @@
 package com.example.tasky.agenda.presentation.agenda_detail
 
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 
 interface AgendaDetailAction {
     data class OnAgendaItemIntervalSelect(val reminder: AgendaItemInterval): AgendaDetailAction

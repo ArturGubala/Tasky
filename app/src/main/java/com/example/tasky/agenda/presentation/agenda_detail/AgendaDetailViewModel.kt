@@ -9,10 +9,10 @@ import com.example.tasky.R
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.domain.model.Task
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.apply
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.updateUtcDate

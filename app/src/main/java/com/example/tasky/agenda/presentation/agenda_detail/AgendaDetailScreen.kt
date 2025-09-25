@@ -54,6 +54,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
 import com.example.tasky.agenda.presentation.agenda_detail.components.AddAttendeeBottomSheetContent
@@ -63,7 +64,6 @@ import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
 import com.example.tasky.agenda.presentation.util.DropdownTextAlignment
 import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS

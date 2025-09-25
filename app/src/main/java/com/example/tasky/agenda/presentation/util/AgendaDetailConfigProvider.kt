@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import java.time.LocalDateTime

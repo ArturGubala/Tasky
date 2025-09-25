@@ -1,7 +1,7 @@
 package com.example.tasky.agenda.presentation.agenda_list
 
+import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 
 interface AgendaAction {
     data object OnLogoutClick: AgendaAction

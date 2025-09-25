@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
@@ -29,6 +30,7 @@ class TaskyApp: Application() {
         startKoin {
             androidLogger()
             androidContext(this@TaskyApp)
+            workManagerFactory()
             modules(
                 appModule,
                 authDataModule,

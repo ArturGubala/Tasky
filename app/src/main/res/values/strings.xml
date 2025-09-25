@@ -75,4 +75,5 @@
     <string name="add_visitor">ADD VISITOR</string>
     <string name="add">ADD</string>
     <string name="offline_icon">Offline icon</string>
+    <string name="save_successful">Save successful</string>
 </resources>

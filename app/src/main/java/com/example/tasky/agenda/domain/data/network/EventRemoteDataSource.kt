@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.domain
+package com.example.tasky.agenda.domain.data.network
 
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event

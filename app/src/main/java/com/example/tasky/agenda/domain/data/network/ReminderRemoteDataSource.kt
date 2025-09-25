@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.domain
+package com.example.tasky.agenda.domain.data.network
 
 import com.example.tasky.agenda.domain.model.Reminder
 import com.example.tasky.core.domain.util.DataError

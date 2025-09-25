@@ -1,9 +1,13 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.example.tasky.agenda.presentation.util
 
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant as KotlinInstant
 
 fun ZonedDateTime.updateUtcTime(hour: Int, minutes: Int): ZonedDateTime {
     return this
@@ -22,6 +26,10 @@ fun ZonedDateTime.updateUtcDate(dateMillis: Long): ZonedDateTime {
 
 fun ZonedDateTime.toLocal(): ZonedDateTime =
     withZoneSameInstant(ZoneId.systemDefault())
+
+fun ZonedDateTime.toKotlinInstant(): KotlinInstant {
+    return KotlinInstant.fromEpochSeconds(this.toEpochSecond())
+}
 
 private fun epochMillisToLocalDate(epochMillis: Long): LocalDate {
     return Instant.ofEpochMilli(epochMillis)

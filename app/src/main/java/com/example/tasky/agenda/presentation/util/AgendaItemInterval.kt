@@ -21,11 +21,11 @@ fun AgendaItemInterval.toUiText(): UiText = when (this) {
 }
 
 fun ZonedDateTime.apply(interval: AgendaItemInterval): ZonedDateTime = when (interval) {
-    AgendaItemInterval.TenMinutesFromNow    -> plusMinutes(10)
-    AgendaItemInterval.ThirtyMinutesFromNow -> plusMinutes(30)
-    AgendaItemInterval.OneHourFromNow       -> plusHours(1)
-    AgendaItemInterval.SixHoursFromNow      -> plusHours(6)
-    AgendaItemInterval.OneDayFromNow        -> plusDays(1)
+    AgendaItemInterval.TenMinutesFromNow -> minusMinutes(10)
+    AgendaItemInterval.ThirtyMinutesFromNow -> minusMinutes(30)
+    AgendaItemInterval.OneHourFromNow -> minusHours(1)
+    AgendaItemInterval.SixHoursFromNow -> minusHours(6)
+    AgendaItemInterval.OneDayFromNow -> minusDays(1)
 }
 
 fun defaultAgendaItemIntervals(): List<AgendaItemInterval> = listOf(

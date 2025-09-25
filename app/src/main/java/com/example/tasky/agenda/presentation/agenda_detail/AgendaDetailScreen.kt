@@ -174,6 +174,22 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
+            is AgendaDetailEvent.SaveError -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            is AgendaDetailEvent.SaveSuccessful -> {
+                Toast.makeText(
+                    context,
+                    event.message.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+                onNavigateBack()
+            }
         }
     }
 
@@ -302,7 +318,13 @@ fun AgendaDetailScreen(
                         },
                         rightActions = {
                             TaskyTextButton(
-                                onClick = {}
+                                onClick = {
+                                    onAction(
+                                        AgendaDetailAction.OnSaveClick(
+                                            agendaItemType = agendaItemTypeConfiguration.type
+                                        )
+                                    )
+                                }
                             ) {
                                 Text(
                                     text = stringResource(R.string.save),

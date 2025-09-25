@@ -6,4 +6,6 @@ interface AgendaDetailEvent {
     data class ImageCompressFailure(val error: UiText): AgendaDetailEvent
     data class ImageTooLarge(val error: UiText): AgendaDetailEvent
     data class InvalidDatePicked(val error: UiText): AgendaDetailEvent
+    data class SaveError(val error: UiText) : AgendaDetailEvent
+    data class SaveSuccessful(val message: UiText) : AgendaDetailEvent
 }

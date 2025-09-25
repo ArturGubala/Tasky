@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 
 package com.example.tasky.agenda.presentation.agenda_detail
 
@@ -6,11 +6,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.AgendaItemType
+import com.example.tasky.agenda.presentation.util.apply
+import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.updateUtcDate
 import com.example.tasky.agenda.presentation.util.updateUtcTime
 import com.example.tasky.auth.presentation.register.RegisterFocusedField
@@ -20,6 +24,8 @@ import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.ImageCompressor
 import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.domain.util.onError
+import com.example.tasky.core.domain.util.onSuccess
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText
 import kotlinx.coroutines.CoroutineDispatcher
@@ -34,8 +40,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
+import kotlin.time.ExperimentalTime
 
 class AgendaDetailViewModel(
     private val agendaId: String,
@@ -43,7 +51,8 @@ class AgendaDetailViewModel(
     private val connectivityObserver: ConnectivityObserver,
     private val compressor: ImageCompressor,
     private val default: CoroutineDispatcher = Dispatchers.Default,
-    private val patternValidator: PatternValidator
+    private val patternValidator: PatternValidator,
+    private val taskRepository: TaskRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState())
@@ -280,6 +289,13 @@ class AgendaDetailViewModel(
                     )
                 }
             }
+            is AgendaDetailAction.OnSaveClick -> {
+                when (action.agendaItemType) {
+                    AgendaItemType.TASK -> saveTask()
+                    AgendaItemType.EVENT -> TODO()
+                    AgendaItemType.REMINDER -> TODO()
+                }
+            }
         }
     }
 
@@ -313,5 +329,38 @@ class AgendaDetailViewModel(
 
     private fun validateEmail(email: String): Boolean {
         return patternValidator.matches(email.trim())
+    }
+
+    private fun saveTask() {
+        viewModelScope.launch(default) {
+            val currentTimestamp = ZonedDateTime.now(ZoneId.of("UTC"))
+            val task = Task(
+                id = UUID.randomUUID().toString(),
+                title = _state.value.title,
+                description = _state.value.description,
+                time = _state.value.fromTime.toKotlinInstant(),
+                remindAt = _state.value.fromTime
+                    .apply(_state.value.selectedAgendaReminderInterval)
+                    .toKotlinInstant(),
+                updatedAt = currentTimestamp.toKotlinInstant(),
+                isDone = _state.value.detailsAsTask()?.isDone ?: false
+            )
+
+            taskRepository.createTask(task)
+                .onSuccess { responseData ->
+                    eventChannel.send(
+                        AgendaDetailEvent.SaveError(
+                            error = UiText.StringResource(R.string.save_successful)
+                        )
+                    )
+                }
+                .onError { error ->
+                    eventChannel.send(
+                        AgendaDetailEvent.SaveError(
+                            error = error.asUiText()
+                        )
+                    )
+                }
+        }
     }
 }

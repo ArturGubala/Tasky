@@ -6,7 +6,7 @@ import com.example.tasky.agenda.data.network.task.dto.UpdateTaskRequest
 import com.example.tasky.agenda.data.network.task.mappers.toCreateTaskRequest
 import com.example.tasky.agenda.data.network.task.mappers.toTask
 import com.example.tasky.agenda.data.network.task.mappers.toUpdateTaskRequest
-import com.example.tasky.agenda.domain.TaskRemoteDataSource
+import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.core.data.networking.delete
 import com.example.tasky.core.data.networking.get

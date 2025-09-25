@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.domain.data.sync
+package com.example.tasky.agenda.data.sync
 
 import androidx.work.ListenableWorker
 import com.example.tasky.core.domain.util.DataError

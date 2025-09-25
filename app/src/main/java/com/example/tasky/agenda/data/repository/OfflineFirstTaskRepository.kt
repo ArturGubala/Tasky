@@ -2,6 +2,7 @@ package com.example.tasky.agenda.data.repository
 
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
+import com.example.tasky.agenda.domain.data.sync.SyncTaskScheduler
 import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
@@ -26,6 +27,7 @@ class OfflineFirstTaskRepository(
     private val applicationScope: CoroutineScope,
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val sessionStorage: SessionStorage,
+    private val syncTaskScheduler: SyncTaskScheduler,
 ) : TaskRepository {
 
     override suspend fun createTask(task: Task): EmptyResult<DataError> {
@@ -37,7 +39,14 @@ class OfflineFirstTaskRepository(
         return taskRemoteDataSource.createTask(task)
             .onSuccess {}.asEmptyDataResult()
             .onError { error ->
-                // TODO write task to sync queue
+                applicationScope.launch {
+                    syncTaskScheduler.scheduleSync(
+                        type = SyncTaskScheduler.SyncType.UpsertTask(
+                            task = task,
+                            operation = SyncOperation.CREATE
+                        )
+                    )
+                }.join()
             }.asEmptyDataResult()
     }
 

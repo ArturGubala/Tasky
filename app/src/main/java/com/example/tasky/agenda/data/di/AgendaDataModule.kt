@@ -4,10 +4,10 @@ import com.example.tasky.agenda.data.network.task.KtorTaskDataSource
 import com.example.tasky.agenda.data.repository.OfflineFirstTaskRepository
 import com.example.tasky.agenda.data.sync.UpsertAgendaItemWorker
 import com.example.tasky.agenda.data.sync.task.DeleteTaskWorker
-import com.example.tasky.agenda.data.sync.task.SyncTaskWorkerScheduler
+import com.example.tasky.agenda.data.sync.task.SyncAgendaItemWorkerScheduler
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
-import com.example.tasky.agenda.domain.data.sync.SyncTaskScheduler
+import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -20,5 +20,5 @@ val agendaNetworkModule = module {
     workerOf(::UpsertAgendaItemWorker)
     workerOf(::DeleteTaskWorker)
 
-    singleOf(::SyncTaskWorkerScheduler).bind<SyncTaskScheduler>()
+    singleOf(::SyncAgendaItemWorkerScheduler).bind<SyncAgendaItemScheduler>()
 }

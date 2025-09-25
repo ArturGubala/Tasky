@@ -8,8 +8,13 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
-import com.example.tasky.agenda.domain.data.sync.SyncTaskScheduler
+import com.example.tasky.agenda.data.sync.UpsertAgendaItemWorker
+import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
+import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.Reminder
 import com.example.tasky.agenda.domain.model.Task
+import com.example.tasky.agenda.domain.util.AgendaItemType
+import com.example.tasky.agenda.domain.util.toInt
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.entity.TaskDeletedSyncEntity
@@ -21,27 +26,31 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 
-class SyncTaskWorkerScheduler(
+class SyncAgendaItemWorkerScheduler(
     private val context: Context,
     private val pendingSyncDao: TaskPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val applicationScope: CoroutineScope,
-) : SyncTaskScheduler {
+) : SyncAgendaItemScheduler {
 
     private val workManager = WorkManager.getInstance(context)
 
-    override suspend fun scheduleSync(type: SyncTaskScheduler.SyncType) {
+    override suspend fun scheduleSync(type: SyncAgendaItemScheduler.SyncType) {
         when (type) {
-            is SyncTaskScheduler.SyncType.FetchTasks -> {}
-            is SyncTaskScheduler.SyncType.DeleteTask -> scheduleDeleteTaskWorker(type.taskId)
-            is SyncTaskScheduler.SyncType.UpsertTask -> scheduleUpsertTaskWorker(
-                task = type.task,
-                operation = type.operation
+            is SyncAgendaItemScheduler.SyncType.FetchAgendaItem -> {}
+            is SyncAgendaItemScheduler.SyncType.DeleteAgendaItem -> scheduleDeleteAgendaItemWorker(
+                type.taskId
+            )
+
+            is SyncAgendaItemScheduler.SyncType.UpsertAgendaItem -> scheduleUpsertAgendaItemWorker(
+                item = type.task,
+                operation = type.operation,
+                itemType = type.itemType
             )
         }
     }
 
-    private suspend fun scheduleDeleteTaskWorker(taskId: String) {
+    private suspend fun scheduleDeleteAgendaItemWorker(taskId: String) {
         val userId = sessionStorage.get()?.userId ?: return
         val entity = TaskDeletedSyncEntity(
             taskId = taskId,
@@ -73,18 +82,39 @@ class SyncTaskWorkerScheduler(
         }.join()
     }
 
-    private suspend fun scheduleUpsertTaskWorker(task: Task, operation: SyncOperation) {
+    private suspend fun scheduleUpsertAgendaItemWorker(
+        item: Any, operation: SyncOperation,
+        itemType: AgendaItemType,
+    ) {
         val userId = sessionStorage.get()?.userId ?: return
+        var itemId: String
 
-        val pendingTask = TaskPendingSyncEntity(
-            task = task.toTaskEntity(),
-            operation = operation,
-            userId = userId
-        )
-        pendingSyncDao.upsertTaskPendingSyncEntity(pendingTask)
+        when (itemType) {
+            AgendaItemType.TASK -> {
+                val task = item as Task
+                itemId = task.id
+                val pendingTask = TaskPendingSyncEntity(
+                    task = task.toTaskEntity(),
+                    operation = operation,
+                    userId = userId
+                )
+                pendingSyncDao.upsertTaskPendingSyncEntity(pendingTask)
+            }
 
-        val workRequest = OneTimeWorkRequestBuilder<UpsertTaskWorker>()
-            .addTag("create_work")
+            AgendaItemType.EVENT -> {
+                val event = item as Event
+                itemId = event.id
+            }
+
+            AgendaItemType.REMINDER -> {
+                val reminder = item as Reminder
+                itemId = reminder.id
+            }
+        }
+
+
+        val workRequest = OneTimeWorkRequestBuilder<UpsertAgendaItemWorker>()
+            .addTag("upsert_work")
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -97,7 +127,8 @@ class SyncTaskWorkerScheduler(
             )
             .setInputData(
                 Data.Builder()
-                    .putString(UpsertTaskWorker.TASK_ID, pendingTask.taskId)
+                    .putString(UpsertAgendaItemWorker.ITEM_ID, itemId)
+                    .putInt(UpsertAgendaItemWorker.ITEM_TYPE, itemType.toInt())
                     .build()
             )
             .build()

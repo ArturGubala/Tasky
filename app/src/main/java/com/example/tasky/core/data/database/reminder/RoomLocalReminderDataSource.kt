@@ -5,7 +5,7 @@ import com.example.tasky.agenda.domain.model.Reminder
 import com.example.tasky.core.data.database.reminder.dao.ReminderDao
 import com.example.tasky.core.data.database.reminder.mappers.toReminder
 import com.example.tasky.core.data.database.reminder.mappers.toReminderEntity
-import com.example.tasky.core.domain.data.ReminderLocalDataStore
+import com.example.tasky.core.domain.data.ReminderLocalDataSource
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 
 class RoomLocalReminderDataSource(
     private val reminderDao: ReminderDao,
-) : ReminderLocalDataStore {
+) : ReminderLocalDataSource {
 
     override fun getReminder(id: String): Flow<Reminder> {
         return reminderDao.getReminder(id = id)
@@ -38,6 +38,16 @@ class RoomLocalReminderDataSource(
             Result.Success(Unit)
         } catch (_: SQLiteFullException) {
             Result.Error(DataError.Local.DISK_FULL)
+        }
+    }
+
+    override suspend fun insertReminders(reminders: List<Reminder>): EmptyResult<DataError.Local> {
+        return try {
+            val entities = reminders.map { it.toReminderEntity() }
+            reminderDao.insertReminders(entities)
+            Result.Success(Unit)
+        } catch (_: SQLiteFullException) {
+            Result.Success(Unit)
         }
     }
 

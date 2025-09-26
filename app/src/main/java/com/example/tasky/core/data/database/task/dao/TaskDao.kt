@@ -1,6 +1,8 @@
 package com.example.tasky.core.data.database.task.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.tasky.core.data.database.task.entity.TaskEntity
@@ -11,6 +13,9 @@ interface TaskDao {
 
     @Upsert
     suspend fun upsertTask(task: TaskEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTasks(tasks: List<TaskEntity>)
 
     @Query("SELECT * FROM task WHERE id = :id")
     fun getTask(id: String): Flow<TaskEntity>

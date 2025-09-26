@@ -1,4 +1,4 @@
-package com.example.tasky.agenda.data.sync.task
+package com.example.tasky.agenda.data.sync
 
 import android.content.Context
 import androidx.work.BackoffPolicy
@@ -8,45 +8,43 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
-import com.example.tasky.agenda.data.sync.UpsertAgendaItemWorker
+import androidx.work.workDataOf
+import com.example.tasky.agenda.data.sync.task.DeleteTaskWorker
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
-import com.example.tasky.agenda.domain.model.Event
-import com.example.tasky.agenda.domain.model.Reminder
-import com.example.tasky.agenda.domain.model.Task
-import com.example.tasky.agenda.domain.util.AgendaItemType
-import com.example.tasky.agenda.domain.util.toInt
+import com.example.tasky.agenda.domain.model.AgendaItem
+import com.example.tasky.agenda.domain.model.kind
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.entity.TaskDeletedSyncEntity
 import com.example.tasky.core.data.database.task.entity.TaskPendingSyncEntity
 import com.example.tasky.core.data.database.task.mappers.toTaskEntity
+import com.example.tasky.core.domain.data.TaskLocalDataStore
 import com.example.tasky.core.domain.datastore.SessionStorage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 
 class SyncAgendaItemWorkerScheduler(
     private val context: Context,
-    private val pendingSyncDao: TaskPendingSyncDao,
+    private val taskLocalDataStore: TaskLocalDataStore,
+    private val taskPendingSyncDao: TaskPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val applicationScope: CoroutineScope,
 ) : SyncAgendaItemScheduler {
 
-    private val workManager = WorkManager.getInstance(context)
+    private val workManager = WorkManager.Companion.getInstance(context)
 
     override suspend fun scheduleSync(type: SyncAgendaItemScheduler.SyncType) {
         when (type) {
             is SyncAgendaItemScheduler.SyncType.FetchAgendaItem -> {}
-            is SyncAgendaItemScheduler.SyncType.DeleteAgendaItem -> scheduleDeleteAgendaItemWorker(
-                type.taskId
-            )
+            is SyncAgendaItemScheduler.SyncType.DeleteAgendaItem ->
+                scheduleDeleteAgendaItemWorker(type.taskId)
 
-            is SyncAgendaItemScheduler.SyncType.UpsertAgendaItem -> scheduleUpsertAgendaItemWorker(
-                item = type.task,
-                operation = type.operation,
-                itemType = type.itemType
-            )
+            is SyncAgendaItemScheduler.SyncType.UpsertAgendaItem ->
+                scheduleUpsert(item = type.item, operation = type.operation)
         }
     }
 
@@ -56,7 +54,7 @@ class SyncAgendaItemWorkerScheduler(
             taskId = taskId,
             userId = userId
         )
-        pendingSyncDao.upsertDeletedTaskSyncEntity(entity)
+        taskPendingSyncDao.upsertDeletedTaskSyncEntity(entity)
 
         val workRequest = OneTimeWorkRequestBuilder<DeleteTaskWorker>()
             .addTag("delete_work")
@@ -72,7 +70,7 @@ class SyncAgendaItemWorkerScheduler(
             )
             .setInputData(
                 Data.Builder()
-                    .putString(DeleteTaskWorker.TASK_ID, entity.taskId)
+                    .putString(DeleteTaskWorker.Companion.TASK_ID, entity.taskId)
                     .build()
             )
             .build()
@@ -82,33 +80,31 @@ class SyncAgendaItemWorkerScheduler(
         }.join()
     }
 
-    private suspend fun scheduleUpsertAgendaItemWorker(
-        item: Any, operation: SyncOperation,
-        itemType: AgendaItemType,
-    ) {
+    private suspend fun scheduleUpsert(item: AgendaItem, operation: SyncOperation) {
         val userId = sessionStorage.get()?.userId ?: return
-        var itemId: String
+        val kind = item.kind()
+        val data = workDataOf(
+            UpsertAgendaItemWorker.ITEM_ID to item.id,
+            UpsertAgendaItemWorker.ITEM_KIND to kind.name
+        )
 
-        when (itemType) {
-            AgendaItemType.TASK -> {
-                val task = item as Task
-                itemId = task.id
+        when (kind) {
+            AgendaKind.TASK -> {
+                val task = taskLocalDataStore.getTask(id = item.id).firstOrNull() ?: return
                 val pendingTask = TaskPendingSyncEntity(
                     task = task.toTaskEntity(),
                     operation = operation,
                     userId = userId
                 )
-                pendingSyncDao.upsertTaskPendingSyncEntity(pendingTask)
+                taskPendingSyncDao.upsertTaskPendingSyncEntity(pendingTask)
             }
 
-            AgendaItemType.EVENT -> {
-                val event = item as Event
-                itemId = event.id
+            AgendaKind.EVENT -> {
+
             }
 
-            AgendaItemType.REMINDER -> {
-                val reminder = item as Reminder
-                itemId = reminder.id
+            AgendaKind.REMINDER -> {
+
             }
         }
 
@@ -125,12 +121,7 @@ class SyncAgendaItemWorkerScheduler(
                 backoffDelay = 2000L,
                 timeUnit = TimeUnit.MILLISECONDS
             )
-            .setInputData(
-                Data.Builder()
-                    .putString(UpsertAgendaItemWorker.ITEM_ID, itemId)
-                    .putInt(UpsertAgendaItemWorker.ITEM_TYPE, itemType.toInt())
-                    .build()
-            )
+            .setInputData(data)
             .build()
 
         applicationScope.launch {
@@ -175,7 +166,7 @@ class SyncAgendaItemWorkerScheduler(
     }
 
     override suspend fun cancelAllSyncs() {
-        WorkManager.getInstance(context)
+        WorkManager.Companion.getInstance(context)
             .cancelAllWork()
             .await()
     }

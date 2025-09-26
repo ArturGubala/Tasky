@@ -3,8 +3,8 @@ package com.example.tasky.agenda.data.repository
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
+import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.Task
-import com.example.tasky.agenda.domain.util.AgendaItemType
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.mappers.toTask
@@ -43,9 +43,8 @@ class OfflineFirstTaskRepository(
                 applicationScope.launch {
                     syncAgendaItemScheduler.scheduleSync(
                         type = SyncAgendaItemScheduler.SyncType.UpsertAgendaItem(
-                            task = task,
-                            operation = SyncOperation.CREATE,
-                            itemType = AgendaItemType.TASK
+                            item = AgendaItem.Task(id = task.id),
+                            operation = SyncOperation.CREATE
                         )
                     )
                 }.join()

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.data.TaskRepository
-import com.example.tasky.agenda.domain.util.AgendaItemType
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.datastore.SessionStorage
@@ -49,15 +49,15 @@ class AgendaViewModel(
     private fun initializeMenuOptions() {
         val fabMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
             onEventClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaItemType = AgendaItemType.EVENT,
+                agendaKind = AgendaKind.EVENT,
                 agendaDetailView = AgendaDetailView.EDIT)
             )},
             onTaskClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaItemType = AgendaItemType.TASK,
+                agendaKind = AgendaKind.TASK,
                 agendaDetailView = AgendaDetailView.EDIT)
             )},
             onReminderClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaItemType = AgendaItemType.REMINDER,
+                agendaKind = AgendaKind.REMINDER,
                 agendaDetailView = AgendaDetailView.EDIT)
             )}
         )
@@ -105,7 +105,7 @@ class AgendaViewModel(
                     delay(100)
                     eventChannel.send(
                         AgendaEvent.OnFabMenuOptionClick(
-                            agendaItemType = action.agendaItemType,
+                            agendaKind = action.agendaKind,
                             agendaDetailView = action.agendaDetailView,
                             agendaId = action.agendaId
                         )

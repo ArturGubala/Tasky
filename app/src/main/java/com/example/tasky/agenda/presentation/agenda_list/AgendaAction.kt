@@ -1,6 +1,6 @@
 package com.example.tasky.agenda.presentation.agenda_list
 
-import com.example.tasky.agenda.domain.util.AgendaItemType
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 
 interface AgendaAction {
@@ -8,8 +8,8 @@ interface AgendaAction {
     data object OnFabButtonClick: AgendaAction
     data object OnProfileButtonClick: AgendaAction
     data class OnFabMenuOptionClick(
-        val agendaItemType: AgendaItemType,
+        val agendaKind: AgendaKind,
         val agendaDetailView: AgendaDetailView,
-        val agendaId: String = ""
+        val agendaId: String = "",
     ) : AgendaAction
 }

@@ -4,8 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
-import com.example.tasky.agenda.domain.util.AgendaItemType
-import com.example.tasky.agenda.domain.util.toAgendaItemType
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.mappers.toTask
@@ -14,7 +13,7 @@ import com.example.tasky.core.domain.util.Result.Success as ResultSuccess
 
 class UpsertAgendaItemWorker(
     context: Context,
-    private val params: WorkerParameters,
+    params: WorkerParameters,
     private val taskRemoteDataSource: TaskRemoteDataSource,
     private val pendingSyncDao: TaskPendingSyncDao,
 ) : CoroutineWorker(context, params) {
@@ -24,21 +23,22 @@ class UpsertAgendaItemWorker(
             return Result.failure()
         }
 
-        val itemId = inputData.getString("ITEM_ID") ?: return Result.failure()
-        val itemType =
-            inputData.getInt("ITEM_TYPE", -1).toAgendaItemType() ?: return Result.failure()
+        val id = inputData.getString(ITEM_ID) ?: return Result.failure()
+        val kind = inputData.getString(ITEM_KIND)
+            ?.let { runCatching { AgendaKind.valueOf(it) }.getOrNull() }
+            ?: return Result.failure()
 
-        return when (itemType) {
-            AgendaItemType.TASK -> {
-                upsertTask(itemId)
+        return when (kind) {
+            AgendaKind.TASK -> {
+                upsertTask(itemId = id)
             }
 
-            AgendaItemType.EVENT -> {
-                upsertEvent(itemId)
+            AgendaKind.EVENT -> {
+                upsertEvent(itemId = id)
             }
 
-            AgendaItemType.REMINDER -> {
-                upsertReminder(itemId)
+            AgendaKind.REMINDER -> {
+                upsertReminder(itemId = id)
             }
         }
     }
@@ -129,6 +129,6 @@ class UpsertAgendaItemWorker(
 
     companion object Companion {
         const val ITEM_ID = "ITEM_ID"
-        const val ITEM_TYPE = "ITEM_TYPE"
+        const val ITEM_KIND = "ITEM_KIND"
     }
 }

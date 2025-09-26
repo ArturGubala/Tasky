@@ -11,5 +11,5 @@ data class Reminder(
     val description: String?,
     val time: Instant,
     val remindAt: Instant,
-    val updatedAt: Instant,
+    val updatedAt: Instant?,
 )

@@ -3,13 +3,11 @@ package com.example.tasky.agenda.data.sync
 import android.content.Context
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
-import androidx.work.Data
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
-import com.example.tasky.agenda.data.sync.task.DeleteTaskWorker
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.kind
@@ -41,22 +39,39 @@ class SyncAgendaItemWorkerScheduler(
         when (type) {
             is SyncAgendaItemScheduler.SyncType.FetchAgendaItem -> {}
             is SyncAgendaItemScheduler.SyncType.DeleteAgendaItem ->
-                scheduleDeleteAgendaItemWorker(type.taskId)
-
+                scheduleDelete(item = type.item)
             is SyncAgendaItemScheduler.SyncType.UpsertAgendaItem ->
                 scheduleUpsert(item = type.item, operation = type.operation)
         }
     }
 
-    private suspend fun scheduleDeleteAgendaItemWorker(taskId: String) {
+    private suspend fun scheduleDelete(item: AgendaItem) {
         val userId = sessionStorage.get()?.userId ?: return
-        val entity = TaskDeletedSyncEntity(
-            taskId = taskId,
-            userId = userId
+        val kind = item.kind()
+        val data = workDataOf(
+            DeleteAgendaItemWorker.ITEM_ID to item.id,
+            DeleteAgendaItemWorker.ITEM_KIND to kind.name
         )
-        taskPendingSyncDao.upsertDeletedTaskSyncEntity(entity)
 
-        val workRequest = OneTimeWorkRequestBuilder<DeleteTaskWorker>()
+        when (kind) {
+            AgendaKind.TASK -> {
+                val pendingTask = TaskDeletedSyncEntity(
+                    taskId = item.id,
+                    userId = userId
+                )
+                taskPendingSyncDao.upsertDeletedTaskSyncEntity(pendingTask)
+            }
+
+            AgendaKind.EVENT -> {
+
+            }
+
+            AgendaKind.REMINDER -> {
+
+            }
+        }
+
+        val workRequest = OneTimeWorkRequestBuilder<DeleteAgendaItemWorker>()
             .addTag("delete_work")
             .setConstraints(
                 Constraints.Builder()
@@ -68,11 +83,7 @@ class SyncAgendaItemWorkerScheduler(
                 backoffDelay = 2000L,
                 timeUnit = TimeUnit.MILLISECONDS
             )
-            .setInputData(
-                Data.Builder()
-                    .putString(DeleteTaskWorker.Companion.TASK_ID, entity.taskId)
-                    .build()
-            )
+            .setInputData(data)
             .build()
 
         applicationScope.launch {

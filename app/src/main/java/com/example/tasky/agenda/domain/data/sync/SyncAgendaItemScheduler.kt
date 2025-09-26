@@ -11,7 +11,7 @@ interface SyncAgendaItemScheduler {
 
     sealed interface SyncType {
         data class FetchAgendaItem(val interval: Duration) : SyncType
-        data class DeleteAgendaItem(val taskId: String) : SyncType
+        data class DeleteAgendaItem(val item: AgendaItem) : SyncType
         class UpsertAgendaItem(val item: AgendaItem, val operation: SyncOperation) : SyncType
     }
 }

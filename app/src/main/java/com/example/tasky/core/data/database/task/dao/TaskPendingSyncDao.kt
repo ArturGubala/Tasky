@@ -26,9 +26,8 @@ interface TaskPendingSyncDao {
     @Upsert
     suspend fun upsertTaskPendingSyncEntity(entity: TaskPendingSyncEntity)
 
-    @Query("DELETE FROM task_upsert_pending_sync WHERE taskId = :taskId AND operation = :operation")
-    suspend fun deleteTaskPendingSyncEntity(taskId: String, operation: SyncOperation)
-
+    @Query("DELETE FROM task_upsert_pending_sync WHERE taskId = :taskId AND operation IN (:operations)")
+    suspend fun deleteTaskPendingSyncEntity(taskId: String, operations: List<SyncOperation>)
 
     // DELETED TASK
     @Query("SELECT * FROM task_delete_pending_sync WHERE userId = :userId")

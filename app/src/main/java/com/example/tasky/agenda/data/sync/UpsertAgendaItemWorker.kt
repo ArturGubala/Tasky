@@ -57,7 +57,7 @@ class UpsertAgendaItemWorker(
                 val task = if (pendingUpdateEntity != null) {
                     pendingSyncDao.deleteTaskPendingSyncEntity(
                         taskId = pendingUpdateEntity.taskId,
-                        operation = SyncOperation.UPDATE
+                        operations = listOf(SyncOperation.UPDATE)
                     )
                     pendingUpdateEntity.task.toTask()
                 } else {
@@ -72,7 +72,7 @@ class UpsertAgendaItemWorker(
                     is ResultSuccess -> {
                         pendingSyncDao.deleteTaskPendingSyncEntity(
                             taskId = itemId,
-                            operation = SyncOperation.CREATE
+                            operations = listOf(SyncOperation.CREATE)
                         )
                         Result.success()
                     }
@@ -93,7 +93,7 @@ class UpsertAgendaItemWorker(
                     pendingSyncDao.upsertTaskPendingSyncEntity(updatedCreateEntity)
                     pendingSyncDao.deleteTaskPendingSyncEntity(
                         taskId = itemId,
-                        operation = SyncOperation.UPDATE
+                        operations = listOf(SyncOperation.UPDATE)
                     )
 
                     return Result.success()
@@ -108,7 +108,7 @@ class UpsertAgendaItemWorker(
                     is ResultSuccess -> {
                         pendingSyncDao.deleteTaskPendingSyncEntity(
                             taskId = itemId,
-                            operation = SyncOperation.UPDATE
+                            operations = listOf(SyncOperation.UPDATE)
                         )
                         Result.success()
                     }

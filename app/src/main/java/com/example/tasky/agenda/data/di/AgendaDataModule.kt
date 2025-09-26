@@ -2,9 +2,9 @@ package com.example.tasky.agenda.data.di
 
 import com.example.tasky.agenda.data.network.task.KtorTaskDataSource
 import com.example.tasky.agenda.data.repository.OfflineFirstTaskRepository
+import com.example.tasky.agenda.data.sync.DeleteAgendaItemWorker
 import com.example.tasky.agenda.data.sync.SyncAgendaItemWorkerScheduler
 import com.example.tasky.agenda.data.sync.UpsertAgendaItemWorker
-import com.example.tasky.agenda.data.sync.task.DeleteTaskWorker
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
@@ -18,7 +18,7 @@ val agendaNetworkModule = module {
     singleOf(::OfflineFirstTaskRepository).bind<TaskRepository>()
 
     workerOf(::UpsertAgendaItemWorker)
-    workerOf(::DeleteTaskWorker)
+    workerOf(::DeleteAgendaItemWorker)
 
     singleOf(::SyncAgendaItemWorkerScheduler).bind<SyncAgendaItemScheduler>()
 }

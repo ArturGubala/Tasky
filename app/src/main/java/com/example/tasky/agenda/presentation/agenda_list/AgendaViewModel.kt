@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
 import com.example.tasky.agenda.domain.data.TaskRepository
+import com.example.tasky.agenda.domain.data.TaskyRepository
+import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.auth.domain.AuthRepository
@@ -23,18 +25,21 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.minutes
 
 class AgendaViewModel(
     private val connectivityObserver: ConnectivityObserver,
     private val authRepository: AuthRepository,
     private val sessionStorage: SessionStorage,
     private val taskRepository: TaskRepository,
+    private val taskyRepository: TaskyRepository,
+    private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
     val state = _state
         .onStart {
-            taskRepository.syncPendingTask()
+            initializeData()
             initializeMenuOptions()
             observeConnectivity()
         }
@@ -87,6 +92,18 @@ class AgendaViewModel(
             .launchIn(viewModelScope)
     }
 
+    private fun initializeData() {
+        viewModelScope.launch {
+            syncAgendaItemScheduler.scheduleSync(
+                type = SyncAgendaItemScheduler.SyncType.FetchAgendaItems(
+                    interval = 30.minutes
+                )
+            )
+            taskRepository.syncPendingTask()
+            taskyRepository.fetchFullAgenda()
+        }
+    }
+
     fun onAction(action: AgendaAction) {
         when(action) {
             AgendaAction.OnLogoutClick -> logout()
@@ -101,7 +118,8 @@ class AgendaViewModel(
             is AgendaAction.OnFabMenuOptionClick -> {
                 _state.update { it.copy(fabMenuExpanded = false) }
                 viewModelScope.launch {
-                    // TODO: Don't know why, but without that delay menu collapse on next screen, tried few things, nothing works
+                    // Don't know why, but without that delay menu collapse on next screen,
+                    // tried few things, nothing works
                     delay(100)
                     eventChannel.send(
                         AgendaEvent.OnFabMenuOptionClick(

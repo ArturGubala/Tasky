@@ -8,7 +8,7 @@ import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.mappers.toTask
-import com.example.tasky.core.domain.data.TaskLocalDataStore
+import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
 
 class OfflineFirstTaskRepository(
     private val taskRemoteDataSource: TaskRemoteDataSource,
-    private val taskLocalDataStore: TaskLocalDataStore,
+    private val taskLocalDataSource: TaskLocalDataSource,
     private val applicationScope: CoroutineScope,
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val sessionStorage: SessionStorage,
@@ -32,7 +32,7 @@ class OfflineFirstTaskRepository(
 ) : TaskRepository {
 
     override suspend fun createTask(task: Task): EmptyResult<DataError> {
-        val localResult = taskLocalDataStore.upsertTask(task)
+        val localResult = taskLocalDataSource.upsertTask(task)
         if (localResult !is Result.Success) {
             return localResult.asEmptyDataResult()
         }
@@ -75,7 +75,7 @@ class OfflineFirstTaskRepository(
                                         applicationScope.launch {
                                             taskPendingSyncDao.deleteTaskPendingSyncEntity(
                                                 taskId = it.id,
-                                                operation = SyncOperation.CREATE
+                                                operations = listOf(SyncOperation.CREATE)
                                             )
                                         }.join()
                                     }
@@ -88,7 +88,7 @@ class OfflineFirstTaskRepository(
                                         applicationScope.launch {
                                             taskPendingSyncDao.deleteTaskPendingSyncEntity(
                                                 taskId = it.id,
-                                                operation = SyncOperation.UPDATE
+                                                operations = listOf(SyncOperation.UPDATE)
                                             )
                                         }.join()
                                     }

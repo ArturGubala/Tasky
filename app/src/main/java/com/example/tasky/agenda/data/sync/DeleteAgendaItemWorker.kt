@@ -7,6 +7,7 @@ import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
+import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.Result.Error as ResultError
 import com.example.tasky.core.domain.util.Result.Success as ResultSuccess
 
@@ -47,7 +48,7 @@ class DeleteAgendaItemWorker(
             taskId = itemId, operation = SyncOperation.CREATE
         )
         val pendingUpdateTask = taskPendingSyncDao.getTaskPendingSyncEntityByIdAndOperation(
-            taskId = itemId, operation = SyncOperation.CREATE
+            taskId = itemId, operation = SyncOperation.UPDATE
         )
 
         if (pendingCreateTask != null && pendingUpdateTask != null) {
@@ -69,13 +70,22 @@ class DeleteAgendaItemWorker(
         } else if (pendingUpdateTask != null) {
             taskPendingSyncDao.deleteTaskPendingSyncEntity(
                 taskId = itemId,
-                operations = listOf(SyncOperation.CREATE)
+                operations = listOf(SyncOperation.UPDATE)
             )
         }
 
         return when (val result = taskRemoteDataSource.deleteTask(id = itemId)) {
             is ResultError -> {
-                result.error.toWorkerResult()
+                when (result.error) {
+                    DataError.Network.NOT_FOUND -> {
+                        taskPendingSyncDao.deleteDeletedTaskSyncEntity(taskId = itemId)
+                        Result.success()
+                    }
+
+                    else -> {
+                        result.error.toWorkerResult()
+                    }
+                }
             }
 
             is ResultSuccess -> {

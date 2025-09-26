@@ -22,12 +22,12 @@ fun EventDto.toEvent(): Event {
         updatedAt = updatedAt?.let { Instant.parse(it) },
         hostId = hostId,
         isUserEventCreator = isUserEventCreator,
-        attendees = attendees.map { it.toAttendee(isCreator = isUserEventCreator) },
+        attendees = attendees.map { it.toAttendee(hostId = hostId) },
         photos = photoKeys.map { it.toPhoto() }
     )
 }
 
-fun AttendeeDto.toAttendee(isCreator: Boolean): Attendee {
+fun AttendeeDto.toAttendee(hostId: String): Attendee {
     return Attendee(
         email = email,
         username = username,
@@ -35,7 +35,7 @@ fun AttendeeDto.toAttendee(isCreator: Boolean): Attendee {
         eventId = eventId,
         isGoing = isGoing,
         remindAt = Instant.parse(remindAt),
-        isCreator = isCreator
+        isCreator = hostId == userId
     )
 }
 

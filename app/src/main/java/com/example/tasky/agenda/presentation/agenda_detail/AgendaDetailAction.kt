@@ -1,8 +1,8 @@
 package com.example.tasky.agenda.presentation.agenda_detail
 
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 
 interface AgendaDetailAction {
     data class OnAgendaItemIntervalSelect(val reminder: AgendaItemInterval): AgendaDetailAction
@@ -27,5 +27,5 @@ interface AgendaDetailAction {
     data object OnDismissBottomSheet: AgendaDetailAction
     data class OnAttendeeEmailValueChanged(val email: String) : AgendaDetailAction
     data class OnAttendeeEmailFieldFocusChanged(val hasFocus: Boolean) : AgendaDetailAction
-    data class OnSaveClick(val agendaItemType: AgendaItemType) : AgendaDetailAction
+    data class OnSaveClick(val agendaKind: AgendaKind) : AgendaDetailAction
 }

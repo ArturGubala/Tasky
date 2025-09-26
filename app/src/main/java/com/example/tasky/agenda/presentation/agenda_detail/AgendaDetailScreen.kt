@@ -54,6 +54,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
 import com.example.tasky.agenda.presentation.agenda_detail.components.AddAttendeeBottomSheetContent
@@ -63,7 +64,6 @@ import com.example.tasky.agenda.presentation.util.AgendaDetailConfigProvider
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.AgendaTypeConfig
 import com.example.tasky.agenda.presentation.util.DropdownTextAlignment
 import com.example.tasky.agenda.presentation.util.MAX_NUMBER_OF_PHOTOS
@@ -100,7 +100,7 @@ import java.time.ZonedDateTime
 
 @Composable
 fun AgendaDetailScreenRoot(
-    agendaItemType: AgendaItemType,
+    agendaKind: AgendaKind,
     agendaDetailView: AgendaDetailView,
     agendaId: String = "",
     returnedText: String? = null,
@@ -109,17 +109,19 @@ fun AgendaDetailScreenRoot(
     onNavigateBack: () -> Unit,
     onSwitchToReadOnly: () -> Unit,
     onNavigateToEdit: () -> Unit,
-    onNavigateToEditText: (fieldType: AgendaEditTextFieldType,
-                           text: String) -> Unit,
+    onNavigateToEditText: (
+        fieldType: AgendaEditTextFieldType,
+        text: String
+    ) -> Unit,
     onNavigateToPhotoDetail: (photoId: String, photoUri: String) -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
-        parameters = { parametersOf(agendaId, agendaItemType) }
-    )
+        parameters = { parametersOf(agendaId, agendaKind) }
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val agendaItemTypeConfiguration by remember(agendaItemType) {
-        mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaItemType))
+    val agendaItemTypeConfiguration by remember(agendaKind) {
+        mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaKind))
     }
     val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
 
@@ -321,7 +323,7 @@ fun AgendaDetailScreen(
                                 onClick = {
                                     onAction(
                                         AgendaDetailAction.OnSaveClick(
-                                            agendaItemType = agendaItemTypeConfiguration.type
+                                            agendaKind = agendaItemTypeConfiguration.type
                                         )
                                     )
                                 }
@@ -474,7 +476,7 @@ fun AgendaDetailScreen(
                             }
 
                             // PHOTO PICKER
-                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT &&
+                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT &&
                                 !isReadOnly) {
                                 Row(
                                     modifier = Modifier
@@ -523,7 +525,7 @@ fun AgendaDetailScreen(
                             }
 
                             // DATES
-                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT) {
                                 // DATE FROM
                                 Row(
                                     modifier = Modifier
@@ -702,7 +704,7 @@ fun AgendaDetailScreen(
                                 color = MaterialTheme.colorScheme.extended.surfaceHigher
                             )
 
-                            if (agendaItemTypeConfiguration.type == AgendaItemType.EVENT) {
+                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -899,7 +901,7 @@ private fun AgendaDetailScreenPreview() {
             appBarTitle = "Title",
             deleteButtonText = "Delete",
             agendaDetailView = AgendaDetailView.EDIT,
-            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaItemType.EVENT),
+            agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaKind.EVENT),
             isReadOnly = false
         )
     }

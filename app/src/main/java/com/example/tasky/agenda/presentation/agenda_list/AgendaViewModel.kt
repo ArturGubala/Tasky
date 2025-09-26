@@ -3,8 +3,9 @@ package com.example.tasky.agenda.presentation.agenda_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.data.TaskRepository
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
@@ -26,12 +27,14 @@ import kotlinx.coroutines.launch
 class AgendaViewModel(
     private val connectivityObserver: ConnectivityObserver,
     private val authRepository: AuthRepository,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val taskRepository: TaskRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaState())
     val state = _state
         .onStart {
+            taskRepository.syncPendingTask()
             initializeMenuOptions()
             observeConnectivity()
         }
@@ -46,15 +49,15 @@ class AgendaViewModel(
     private fun initializeMenuOptions() {
         val fabMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
             onEventClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaItemType = AgendaItemType.EVENT,
+                agendaKind = AgendaKind.EVENT,
                 agendaDetailView = AgendaDetailView.EDIT)
             )},
             onTaskClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaItemType = AgendaItemType.TASK,
+                agendaKind = AgendaKind.TASK,
                 agendaDetailView = AgendaDetailView.EDIT)
             )},
             onReminderClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaItemType = AgendaItemType.REMINDER,
+                agendaKind = AgendaKind.REMINDER,
                 agendaDetailView = AgendaDetailView.EDIT)
             )}
         )
@@ -102,7 +105,7 @@ class AgendaViewModel(
                     delay(100)
                     eventChannel.send(
                         AgendaEvent.OnFabMenuOptionClick(
-                            agendaItemType = action.agendaItemType,
+                            agendaKind = action.agendaKind,
                             agendaDetailView = action.agendaDetailView,
                             agendaId = action.agendaId
                         )

@@ -9,10 +9,10 @@ import com.example.tasky.R
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.domain.model.Task
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.apply
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.updateUtcDate
@@ -47,7 +47,7 @@ import kotlin.time.ExperimentalTime
 
 class AgendaDetailViewModel(
     private val agendaId: String,
-    private val agendaItemType: AgendaItemType,
+    private val agendaKind: AgendaKind,
     private val connectivityObserver: ConnectivityObserver,
     private val compressor: ImageCompressor,
     private val default: CoroutineDispatcher = Dispatchers.Default,
@@ -66,10 +66,10 @@ class AgendaDetailViewModel(
             if (agendaId.isNotEmpty()) {
                 // TODO: Get agenda details from db by provided id
             }
-            when(agendaItemType) {
-                AgendaItemType.TASK -> _state.update { it.copy(details = AgendaItemDetails.Task()) }
-                AgendaItemType.EVENT -> _state.update { it.copy(details = AgendaItemDetails.Event()) }
-                AgendaItemType.REMINDER -> _state.update { it.copy(details = AgendaItemDetails.Reminder) }
+            when (agendaKind) {
+                AgendaKind.TASK -> _state.update { it.copy(details = AgendaItemDetails.Task()) }
+                AgendaKind.EVENT -> _state.update { it.copy(details = AgendaItemDetails.Event()) }
+                AgendaKind.REMINDER -> _state.update { it.copy(details = AgendaItemDetails.Reminder) }
             }
             _state.update { it.copy(loadingInitialData = false) }
             observeConnectivity()
@@ -290,10 +290,10 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnSaveClick -> {
-                when (action.agendaItemType) {
-                    AgendaItemType.TASK -> saveTask()
-                    AgendaItemType.EVENT -> TODO()
-                    AgendaItemType.REMINDER -> TODO()
+                when (action.agendaKind) {
+                    AgendaKind.TASK -> saveTask()
+                    AgendaKind.EVENT -> TODO()
+                    AgendaKind.REMINDER -> TODO()
                 }
             }
         }

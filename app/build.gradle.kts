@@ -118,4 +118,8 @@ dependencies {
 
     // Coroutines
     implementation(libs.bundles.coroutines)
+
+    // Work
+    implementation(libs.androidx.work)
+    implementation(libs.koin.android.workmanager)
 }

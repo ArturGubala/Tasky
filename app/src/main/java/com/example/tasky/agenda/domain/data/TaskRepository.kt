@@ -6,4 +6,5 @@ import com.example.tasky.core.domain.util.EmptyResult
 
 interface TaskRepository {
     suspend fun createTask(task: Task): EmptyResult<DataError>
+    suspend fun syncPendingTask()
 }

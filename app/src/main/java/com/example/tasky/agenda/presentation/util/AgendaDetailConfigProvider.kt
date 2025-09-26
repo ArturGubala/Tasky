@@ -8,22 +8,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 object AgendaDetailConfigProvider {
-    fun getConfig(type: AgendaItemType): AgendaTypeConfig {
+    fun getConfig(type: AgendaKind): AgendaTypeConfig {
         return when (type) {
-            AgendaItemType.TASK -> createTaskConfig()
-            AgendaItemType.EVENT -> createEventConfig()
-            AgendaItemType.REMINDER -> createReminderConfig()
+            AgendaKind.TASK -> createTaskConfig()
+            AgendaKind.EVENT -> createEventConfig()
+            AgendaKind.REMINDER -> createReminderConfig()
         }
     }
 
     private fun createTaskConfig() = AgendaTypeConfig(
-        type = AgendaItemType.TASK,
+        type = AgendaKind.TASK,
         displayName = "Task",
         editTitleTemplateRes = R.string.edit_title,
         deleteTemplateRes = R.string.delete_confirmation_context,
@@ -31,7 +32,7 @@ object AgendaDetailConfigProvider {
     )
 
     private fun createEventConfig() = AgendaTypeConfig(
-        type = AgendaItemType.EVENT,
+        type = AgendaKind.EVENT,
         displayName = "Event",
         editTitleTemplateRes = R.string.edit_title,
         deleteTemplateRes = R.string.delete_confirmation_context,
@@ -39,7 +40,7 @@ object AgendaDetailConfigProvider {
     )
 
     private fun createReminderConfig() = AgendaTypeConfig(
-        type = AgendaItemType.REMINDER,
+        type = AgendaKind.REMINDER,
         displayName = "Reminder",
         editTitleTemplateRes = R.string.edit_title,
         deleteTemplateRes = R.string.delete_confirmation_context,
@@ -49,12 +50,12 @@ object AgendaDetailConfigProvider {
 }
 
 data class AgendaTypeConfig(
-    val type: AgendaItemType,
+    val type: AgendaKind,
     val displayName: String,
     @param:StringRes val editTitleTemplateRes: Int,
     @param:StringRes val deleteTemplateRes: Int,
     private val colorProvider: @Composable () -> Color,
-    private val strokeColorProvider: (@Composable () -> Color)? = null
+    private val strokeColorProvider: (@Composable () -> Color)? = null,
 ) {
     @Composable
     fun getColor(): Color = colorProvider()

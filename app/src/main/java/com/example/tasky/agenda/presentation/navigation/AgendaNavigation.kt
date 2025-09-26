@@ -6,13 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
+import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailScreenRoot
 import com.example.tasky.agenda.presentation.agenda_detail.photo_detail.PhotoDetailScreenRoot
 import com.example.tasky.agenda.presentation.agenda_edit.AgendaEditTextScreenRoot
 import com.example.tasky.agenda.presentation.agenda_list.AgendaScreenRoot
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
-import com.example.tasky.agenda.presentation.util.AgendaItemType
 import com.example.tasky.agenda.presentation.util.PhotoDetail
 import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen
@@ -46,11 +46,13 @@ fun NavGraphBuilder.agendaListScreen(
     }
 }
 
-fun NavController.navigateToAgendaDetailScreen(agendaItemType: AgendaItemType,
-                                               agendaDetailView: AgendaDetailView,
-                                               agendaId: String)
+fun NavController.navigateToAgendaDetailScreen(
+    agendaKind: AgendaKind,
+    agendaDetailView: AgendaDetailView,
+    agendaId: String,
+)
 = navigate(AgendaDetailScreen(
-    agendaItemType = agendaItemType,
+    agendaKind = agendaKind,
     agendaDetailView = agendaDetailView,
     agendaId = agendaId
 ))
@@ -68,7 +70,7 @@ fun NavGraphBuilder.agendaDetailScreen(
             photoId = photoId ?: "", photoDetailAction = photoDetailAction ?: PhotoDetailAction.NONE
         )
         AgendaDetailScreenRoot(
-            agendaItemType = args.agendaItemType,
+            agendaKind = args.agendaKind,
             agendaDetailView = args.agendaDetailView,
             agendaId = args.agendaId,
             returnedText = text,
@@ -80,14 +82,14 @@ fun NavGraphBuilder.agendaDetailScreen(
             onSwitchToReadOnly = {
                 navController.navigate(
                     AgendaDetailScreen(
-                        agendaItemType = args.agendaItemType,
+                        agendaKind = args.agendaKind,
                         agendaDetailView = AgendaDetailView.READ_ONLY,
                         agendaId = args.agendaId
                     )
                 ) {
                     popUpTo(
                         AgendaDetailScreen(
-                            agendaItemType = args.agendaItemType,
+                            agendaKind = args.agendaKind,
                             agendaDetailView = args.agendaDetailView,
                             agendaId = args.agendaId
                         )
@@ -99,7 +101,7 @@ fun NavGraphBuilder.agendaDetailScreen(
             onNavigateToEdit = {
                 navController.navigate(
                     AgendaDetailScreen(
-                        agendaItemType = args.agendaItemType,
+                        agendaKind = args.agendaKind,
                         agendaDetailView = AgendaDetailView.EDIT,
                         agendaId = args.agendaId
                     )
@@ -183,9 +185,9 @@ object AgendaListScreen
 
 @Serializable
 data class AgendaDetailScreen(
-    val agendaItemType: AgendaItemType,
+    val agendaKind: AgendaKind,
     val agendaDetailView: AgendaDetailView,
-    val agendaId: String = ""
+    val agendaId: String = "",
 )
 
 @Serializable

@@ -1,4 +1,9 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.example.tasky.agenda.domain.model
+
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 data class Attendee(
     val email: String,
@@ -6,6 +11,6 @@ data class Attendee(
     val userId: String,
     val eventId: String,
     val isGoing: Boolean,
-    val remindAt: String,
-    val isCreator: Boolean
+    val remindAt: Instant,
+    val isCreator: Boolean,
 )

@@ -2,7 +2,9 @@ package com.example.tasky.core.data.database.di
 
 import androidx.room.Room
 import com.example.tasky.core.data.database.TaskyDatabase
+import com.example.tasky.core.data.database.reminder.RoomLocalReminderDataSource
 import com.example.tasky.core.data.database.task.RoomLocalTaskDataSource
+import com.example.tasky.core.domain.data.ReminderLocalDataStore
 import com.example.tasky.core.domain.data.TaskLocalDataStore
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.singleOf
@@ -19,6 +21,9 @@ val databaseModule = module {
     }
     single { get<TaskyDatabase>().taskDao }
     single { get<TaskyDatabase>().taskPendingSyncDao }
+    single { get<TaskyDatabase>().reminderDao }
+    single { get<TaskyDatabase>().reminderPendingSyncDao }
 
     singleOf(::RoomLocalTaskDataSource).bind<TaskLocalDataStore>()
+    singleOf(::RoomLocalReminderDataSource).bind<ReminderLocalDataStore>()
 }

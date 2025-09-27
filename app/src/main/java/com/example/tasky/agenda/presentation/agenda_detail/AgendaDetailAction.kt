@@ -28,5 +28,6 @@ interface AgendaDetailAction {
     data class OnAttendeeEmailValueChanged(val email: String) : AgendaDetailAction
     data class OnAttendeeEmailFieldFocusChanged(val hasFocus: Boolean) : AgendaDetailAction
     data class OnSaveClick(val agendaKind: AgendaKind) : AgendaDetailAction
-    data class OnDeleteOnBottomSheetClick(val id: String) : AgendaDetailAction
+    data class OnDeleteOnBottomSheetClick(val id: String, val agendaKind: AgendaKind) :
+        AgendaDetailAction
 }

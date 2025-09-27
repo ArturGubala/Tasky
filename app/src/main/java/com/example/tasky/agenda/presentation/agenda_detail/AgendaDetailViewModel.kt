@@ -360,7 +360,7 @@ class AgendaDetailViewModel(
     }
 
     private fun saveTask() {
-        viewModelScope.launch(default) {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentTimestamp = ZonedDateTime.now(ZoneId.of("UTC"))
             val task = Task(
                 id = agendaId.ifEmpty { UUID.randomUUID().toString() },
@@ -395,7 +395,7 @@ class AgendaDetailViewModel(
     }
 
     private fun deleteAgendaItem(id: String) {
-        viewModelScope.launch(default) {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.update { it.copy(isDeleting = true) }
             taskRepository.deleteTask(id = id)
                 .onSuccess {

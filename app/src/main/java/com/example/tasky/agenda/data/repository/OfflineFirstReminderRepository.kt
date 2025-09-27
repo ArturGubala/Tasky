@@ -43,7 +43,6 @@ class OfflineFirstReminderRepository(
         when (syncOperation) {
             SyncOperation.CREATE -> {
                 return reminderRemoteDataSource.createReminder(reminder)
-                    .onSuccess {}.asEmptyDataResult()
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -58,7 +57,6 @@ class OfflineFirstReminderRepository(
 
             SyncOperation.UPDATE -> {
                 return reminderRemoteDataSource.updateReminder(reminder)
-                    .onSuccess {}.asEmptyDataResult()
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -77,7 +75,6 @@ class OfflineFirstReminderRepository(
         reminderLocalDataSource.deleteReminder(id = id)
 
         return reminderRemoteDataSource.deleteReminder(id = id)
-            .onSuccess {}.asEmptyDataResult()
             .onError { error ->
                 applicationScope.launch {
                     syncAgendaItemScheduler.scheduleSync(
@@ -108,7 +105,6 @@ class OfflineFirstReminderRepository(
                         when (it.operation) {
                             SyncOperation.CREATE -> {
                                 reminderRemoteDataSource.createReminder(reminder)
-                                    .onError { }
                                     .onSuccess {
                                         applicationScope.launch {
                                             reminderPendingSyncDao.deleteReminderPendingSyncEntity(
@@ -121,7 +117,6 @@ class OfflineFirstReminderRepository(
 
                             SyncOperation.UPDATE -> {
                                 reminderRemoteDataSource.updateReminder(reminder)
-                                    .onError { }
                                     .onSuccess {
                                         applicationScope.launch {
                                             reminderPendingSyncDao.deleteReminderPendingSyncEntity(
@@ -139,7 +134,6 @@ class OfflineFirstReminderRepository(
                 .map {
                     launch {
                         reminderRemoteDataSource.deleteReminder(it.reminderId)
-                            .onError { }
                             .onSuccess { result ->
                                 applicationScope.launch {
                                     reminderPendingSyncDao.deleteDeletedReminderSyncEntity(it.reminderId)

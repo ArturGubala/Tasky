@@ -43,7 +43,6 @@ class OfflineFirstTaskRepository(
         when (syncOperation) {
             SyncOperation.CREATE -> {
                 return taskRemoteDataSource.createTask(task)
-                    .onSuccess {}.asEmptyDataResult()
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -58,7 +57,6 @@ class OfflineFirstTaskRepository(
 
             SyncOperation.UPDATE -> {
                 return taskRemoteDataSource.updateTask(task)
-                    .onSuccess {}.asEmptyDataResult()
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -77,7 +75,6 @@ class OfflineFirstTaskRepository(
         taskLocalDataSource.deleteTask(id = id)
 
         return taskRemoteDataSource.deleteTask(id = id)
-            .onSuccess {}.asEmptyDataResult()
             .onError { error ->
                 applicationScope.launch {
                     syncAgendaItemScheduler.scheduleSync(
@@ -108,7 +105,6 @@ class OfflineFirstTaskRepository(
                         when (it.operation) {
                             SyncOperation.CREATE -> {
                                 taskRemoteDataSource.createTask(task)
-                                    .onError { }
                                     .onSuccess {
                                         applicationScope.launch {
                                             taskPendingSyncDao.deleteTaskPendingSyncEntity(
@@ -121,7 +117,6 @@ class OfflineFirstTaskRepository(
 
                             SyncOperation.UPDATE -> {
                                 taskRemoteDataSource.updateTask(task)
-                                    .onError { }
                                     .onSuccess {
                                         applicationScope.launch {
                                             taskPendingSyncDao.deleteTaskPendingSyncEntity(
@@ -139,7 +134,6 @@ class OfflineFirstTaskRepository(
                 .map {
                     launch {
                         taskRemoteDataSource.deleteTask(it.taskId)
-                            .onError { }
                             .onSuccess { result ->
                                 applicationScope.launch {
                                     taskPendingSyncDao.deleteDeletedTaskSyncEntity(it.taskId)

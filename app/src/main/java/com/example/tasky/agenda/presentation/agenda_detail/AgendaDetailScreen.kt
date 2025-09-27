@@ -869,7 +869,10 @@ fun AgendaDetailScreen(
                                 onDelete = {
                                     scope.launch {
                                         onAction(
-                                            AgendaDetailAction.OnDeleteOnBottomSheetClick(id = agendaId)
+                                            AgendaDetailAction.OnDeleteOnBottomSheetClick(
+                                                id = agendaId,
+                                                agendaKind = agendaItemTypeConfiguration.type
+                                            )
                                         )
                                         sheetState.hide()
                                     }

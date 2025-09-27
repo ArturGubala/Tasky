@@ -40,8 +40,26 @@ fun NavGraphBuilder.agendaListScreen(
         AgendaScreenRoot(
             onSuccessfulLogout = { navController.navigateToLoginScreen() },
             onFabMenuOptionClick = { agendaItemType, agendaDetailView, agendaId ->
-                navController.navigateToAgendaDetailScreen(agendaItemType, agendaDetailView, agendaId)
-            }
+                navController.navigateToAgendaDetailScreen(
+                    agendaItemType,
+                    agendaDetailView,
+                    agendaId
+                )
+            },
+            onOpenClick = { agendaItemType, agendaDetailView, agendaId ->
+                navController.navigateToAgendaDetailScreen(
+                    agendaItemType,
+                    agendaDetailView,
+                    agendaId
+                )
+            },
+            onEditClick = { agendaItemType, agendaDetailView, agendaId ->
+                navController.navigateToAgendaDetailScreen(
+                    agendaItemType,
+                    agendaDetailView,
+                    agendaId
+                )
+            },
         )
     }
 }
@@ -77,7 +95,7 @@ fun NavGraphBuilder.agendaDetailScreen(
             editedFieldType = savedFieldType,
             photoDetail = photoDetail,
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             },
             onSwitchToReadOnly = {
                 navController.navigate(
@@ -117,6 +135,9 @@ fun NavGraphBuilder.agendaDetailScreen(
                 navController.navigateToAgendaPhotoDetailScreen(
                     photoId = photoId, photoUri = photoUri
                 )
+            },
+            onNavigateToAgendaList = {
+                navController.navigateToAgendaListScreen()
             }
         )
     }

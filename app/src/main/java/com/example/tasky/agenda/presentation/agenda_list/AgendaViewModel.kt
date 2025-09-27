@@ -45,10 +45,15 @@ class AgendaViewModel(
     private val localReminderDataSource: RoomLocalReminderDataSource,
 ) : ViewModel() {
 
+    // Moved initializeData from _state.onStart to init because I want to call that function only one
+    // not every time I navigate back to AgendaListScreen
+    init {
+        initializeData()
+    }
+
     private val _state = MutableStateFlow(AgendaState())
     val state = _state
         .onStart {
-            initializeData()
             initializeMenuOptions()
             observeConnectivity()
             observeAgendaItems()

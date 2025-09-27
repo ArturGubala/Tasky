@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 
 package com.example.tasky.agenda.presentation.agenda_list
 
@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRight
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,13 +39,17 @@ import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
+import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import org.koin.androidx.compose.koinViewModel
 
+// TODO test implementation for testing navigation and context menu
 @Composable
 fun AgendaScreenRoot(
     onSuccessfulLogout: () -> Unit,
     onFabMenuOptionClick: (AgendaKind, AgendaDetailView, String) -> Unit,
+    onOpenClick: (AgendaKind, AgendaDetailView, String) -> Unit,
+    onEditClick: (AgendaKind, AgendaDetailView, String) -> Unit,
     viewModel: AgendaViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -76,7 +84,9 @@ fun AgendaScreenRoot(
 
     AgendaScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        onOpenClick = onOpenClick,
+        onEditClick = onEditClick
     )
 }
 
@@ -84,6 +94,8 @@ fun AgendaScreenRoot(
 private fun AgendaScreen(
     state: AgendaState,
     onAction: (AgendaAction) -> Unit,
+    onOpenClick: (AgendaKind, AgendaDetailView, String) -> Unit,
+    onEditClick: (AgendaKind, AgendaDetailView, String) -> Unit,
 ) {
     TaskyScaffold(
         topBar = {
@@ -147,7 +159,76 @@ private fun AgendaScreen(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentAlignment = Alignment.TopCenter
-            ) {}
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LazyColumn {
+                        items(state.agendaItems) { item ->
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = item.agendaKind.name,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                        Text(
+                                            text = item.id,
+                                            color = MaterialTheme.colorScheme.extended.success
+                                        )
+                                        Text(
+                                            text = item.title,
+                                            color = MaterialTheme.colorScheme.extended.success
+                                        )
+                                    }
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            onOpenClick(
+                                                item.agendaKind,
+                                                AgendaDetailView.READ_ONLY,
+                                                item.id
+                                            )
+                                        }
+                                    ) {
+                                        Text(
+                                            text = "Open",
+                                            color = MaterialTheme.colorScheme.extended.success
+                                        )
+                                    }
+                                    Button(
+                                        onClick = {
+                                            onEditClick(
+                                                item.agendaKind,
+                                                AgendaDetailView.EDIT,
+                                                item.id
+                                            )
+                                        }
+                                    ) {
+                                        Text(
+                                            text = "Edit",
+                                            color = MaterialTheme.colorScheme.extended.success
+                                        )
+                                    }
+                                    Button(
+                                        onClick = {}
+                                    ) {
+                                        Text(
+                                            text = "Delete",
+                                            color = MaterialTheme.colorScheme.extended.success
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -158,7 +239,9 @@ private fun AgendaScreenPreview() {
     TaskyTheme {
         AgendaScreen(
             state = AgendaState(),
-            onAction = {}
+            onAction = {},
+            onOpenClick = {} as (AgendaKind, AgendaDetailView, String) -> Unit,
+            onEditClick = {} as (AgendaKind, AgendaDetailView, String) -> Unit
         )
     }
 }

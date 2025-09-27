@@ -3,9 +3,12 @@ package com.example.tasky.agenda.data.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
+import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
+import com.example.tasky.core.data.database.reminder.mappers.toReminder
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.mappers.toTask
 import com.example.tasky.core.domain.util.Result.Error as ResultError
@@ -15,7 +18,9 @@ class UpsertAgendaItemWorker(
     context: Context,
     params: WorkerParameters,
     private val taskRemoteDataSource: TaskRemoteDataSource,
-    private val pendingSyncDao: TaskPendingSyncDao,
+    private val taskPendingSyncDao: TaskPendingSyncDao,
+    private val reminderRemoteDataSource: ReminderRemoteDataSource,
+    private val reminderPendingSyncDao: ReminderPendingSyncDao,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -44,18 +49,19 @@ class UpsertAgendaItemWorker(
     }
 
     private suspend fun upsertTask(itemId: String): Result {
-        val pendingTaskEntity = pendingSyncDao.getTaskPendingSyncEntity(itemId)
+        val pendingTaskEntity = taskPendingSyncDao.getTaskPendingSyncEntity(itemId)
             ?: return Result.failure()
 
         when (pendingTaskEntity.operation) {
             SyncOperation.CREATE -> {
-                val pendingUpdateEntity = pendingSyncDao.getTaskPendingSyncEntityByIdAndOperation(
+                val pendingUpdateEntity =
+                    taskPendingSyncDao.getTaskPendingSyncEntityByIdAndOperation(
                     taskId = itemId,
                     operation = SyncOperation.UPDATE
                 )
 
                 val task = if (pendingUpdateEntity != null) {
-                    pendingSyncDao.deleteTaskPendingSyncEntity(
+                    taskPendingSyncDao.deleteTaskPendingSyncEntity(
                         taskId = pendingUpdateEntity.taskId,
                         operations = listOf(SyncOperation.UPDATE)
                     )
@@ -70,7 +76,7 @@ class UpsertAgendaItemWorker(
                     }
 
                     is ResultSuccess -> {
-                        pendingSyncDao.deleteTaskPendingSyncEntity(
+                        taskPendingSyncDao.deleteTaskPendingSyncEntity(
                             taskId = itemId,
                             operations = listOf(SyncOperation.CREATE)
                         )
@@ -80,7 +86,7 @@ class UpsertAgendaItemWorker(
             }
 
             SyncOperation.UPDATE -> {
-                val pendingCreate = pendingSyncDao.getTaskPendingSyncEntityByIdAndOperation(
+                val pendingCreate = taskPendingSyncDao.getTaskPendingSyncEntityByIdAndOperation(
                     taskId = itemId,
                     operation = SyncOperation.CREATE
                 )
@@ -90,8 +96,8 @@ class UpsertAgendaItemWorker(
                         task = pendingTaskEntity.task,
                         operation = SyncOperation.CREATE
                     )
-                    pendingSyncDao.upsertTaskPendingSyncEntity(updatedCreateEntity)
-                    pendingSyncDao.deleteTaskPendingSyncEntity(
+                    taskPendingSyncDao.upsertTaskPendingSyncEntity(updatedCreateEntity)
+                    taskPendingSyncDao.deleteTaskPendingSyncEntity(
                         taskId = itemId,
                         operations = listOf(SyncOperation.UPDATE)
                     )
@@ -106,7 +112,7 @@ class UpsertAgendaItemWorker(
                     }
 
                     is ResultSuccess -> {
-                        pendingSyncDao.deleteTaskPendingSyncEntity(
+                        taskPendingSyncDao.deleteTaskPendingSyncEntity(
                             taskId = itemId,
                             operations = listOf(SyncOperation.UPDATE)
                         )
@@ -123,8 +129,79 @@ class UpsertAgendaItemWorker(
     }
 
     private suspend fun upsertReminder(itemId: String): Result {
+        val pendingReminderEntity = reminderPendingSyncDao.getReminderPendingSyncEntity(itemId)
+            ?: return Result.failure()
 
-        return Result.success()
+        when (pendingReminderEntity.operation) {
+            SyncOperation.CREATE -> {
+                val pendingUpdateEntity =
+                    reminderPendingSyncDao.getReminderPendingSyncEntityByIdAndOperation(
+                        reminderId = itemId,
+                        operation = SyncOperation.UPDATE
+                    )
+
+                val reminder = if (pendingUpdateEntity != null) {
+                    reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                        reminderId = pendingUpdateEntity.reminderId,
+                        operations = listOf(SyncOperation.UPDATE)
+                    )
+                    pendingUpdateEntity.reminder.toReminder()
+                } else {
+                    pendingReminderEntity.reminder.toReminder()
+                }
+
+                return when (val result = reminderRemoteDataSource.createReminder(reminder)) {
+                    is ResultError -> {
+                        result.error.toWorkerResult()
+                    }
+
+                    is ResultSuccess -> {
+                        reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                            reminderId = itemId,
+                            operations = listOf(SyncOperation.CREATE)
+                        )
+                        Result.success()
+                    }
+                }
+            }
+
+            SyncOperation.UPDATE -> {
+                val pendingCreateEntity =
+                    reminderPendingSyncDao.getReminderPendingSyncEntityByIdAndOperation(
+                        reminderId = itemId,
+                        operation = SyncOperation.CREATE
+                    )
+
+                if (pendingCreateEntity != null) {
+                    val updatedCreateEntity = pendingCreateEntity.copy(
+                        reminder = pendingReminderEntity.reminder,
+                        operation = SyncOperation.CREATE
+                    )
+                    reminderPendingSyncDao.upsertReminderPendingSyncEntity(updatedCreateEntity)
+                    reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                        reminderId = itemId,
+                        operations = listOf(SyncOperation.UPDATE)
+                    )
+
+                    return Result.success()
+                }
+
+                val reminder = pendingReminderEntity.reminder.toReminder()
+                return when (val result = reminderRemoteDataSource.updateReminder(reminder)) {
+                    is ResultError -> {
+                        result.error.toWorkerResult()
+                    }
+
+                    is ResultSuccess -> {
+                        reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                            reminderId = itemId,
+                            operations = listOf(SyncOperation.UPDATE)
+                        )
+                        Result.success()
+                    }
+                }
+            }
+        }
     }
 
     companion object Companion {

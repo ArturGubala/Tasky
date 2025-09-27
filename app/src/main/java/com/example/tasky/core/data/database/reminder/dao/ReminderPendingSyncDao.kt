@@ -15,7 +15,7 @@ interface ReminderPendingSyncDao {
     suspend fun getAllReminderPendingSyncEntities(userId: String): List<ReminderPendingSyncEntity>
 
     @Query("SELECT * FROM reminder_upsert_pending_sync WHERE reminderId = :reminderId")
-    suspend fun getTaskPendingSyncEntity(reminderId: String): ReminderPendingSyncEntity?
+    suspend fun getReminderPendingSyncEntity(reminderId: String): ReminderPendingSyncEntity?
 
     @Query(
         "SELECT * FROM reminder_upsert_pending_sync " +

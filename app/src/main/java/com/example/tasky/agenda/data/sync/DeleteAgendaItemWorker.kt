@@ -3,9 +3,11 @@ package com.example.tasky.agenda.data.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
+import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.Result.Error as ResultError
@@ -16,6 +18,8 @@ class DeleteAgendaItemWorker(
     params: WorkerParameters,
     private val taskRemoteDataSource: TaskRemoteDataSource,
     private val taskPendingSyncDao: TaskPendingSyncDao,
+    private val reminderRemoteDataSource: ReminderRemoteDataSource,
+    private val reminderPendingSyncDao: ReminderPendingSyncDao,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -100,7 +104,57 @@ class DeleteAgendaItemWorker(
     }
 
     private suspend fun deleteReminder(itemId: String): Result {
-        return Result.success()
+        val pendingCreateReminder =
+            reminderPendingSyncDao.getReminderPendingSyncEntityByIdAndOperation(
+                reminderId = itemId, operation = SyncOperation.CREATE
+            )
+        val pendingUpdateReminder =
+            reminderPendingSyncDao.getReminderPendingSyncEntityByIdAndOperation(
+                reminderId = itemId, operation = SyncOperation.UPDATE
+            )
+
+        if (pendingCreateReminder != null && pendingUpdateReminder != null) {
+            reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                reminderId = itemId,
+                operations = listOf(SyncOperation.CREATE, SyncOperation.UPDATE)
+            )
+            reminderPendingSyncDao.deleteDeletedReminderSyncEntity(reminderId = itemId)
+
+            return Result.success()
+        } else if (pendingCreateReminder != null) {
+            reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                reminderId = itemId,
+                operations = listOf(SyncOperation.CREATE)
+            )
+            taskPendingSyncDao.deleteDeletedTaskSyncEntity(taskId = itemId)
+
+            return Result.success()
+        } else if (pendingUpdateReminder != null) {
+            reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                reminderId = itemId,
+                operations = listOf(SyncOperation.UPDATE)
+            )
+        }
+
+        return when (val result = reminderRemoteDataSource.deleteReminder(id = itemId)) {
+            is ResultError -> {
+                when (result.error) {
+                    DataError.Network.NOT_FOUND -> {
+                        reminderPendingSyncDao.deleteDeletedReminderSyncEntity(reminderId = itemId)
+                        Result.success()
+                    }
+
+                    else -> {
+                        result.error.toWorkerResult()
+                    }
+                }
+            }
+
+            is ResultSuccess -> {
+                reminderPendingSyncDao.deleteDeletedReminderSyncEntity(reminderId = itemId)
+                Result.success()
+            }
+        }
     }
 
     companion object Companion {

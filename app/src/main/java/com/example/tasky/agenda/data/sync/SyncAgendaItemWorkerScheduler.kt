@@ -14,10 +14,15 @@ import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.kind
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
+import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
+import com.example.tasky.core.data.database.reminder.entity.ReminderDeletedSyncEntity
+import com.example.tasky.core.data.database.reminder.entity.ReminderPendingSyncEntity
+import com.example.tasky.core.data.database.reminder.mappers.toReminderEntity
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.entity.TaskDeletedSyncEntity
 import com.example.tasky.core.data.database.task.entity.TaskPendingSyncEntity
 import com.example.tasky.core.data.database.task.mappers.toTaskEntity
+import com.example.tasky.core.domain.data.ReminderLocalDataSource
 import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +38,8 @@ class SyncAgendaItemWorkerScheduler(
     private val context: Context,
     private val taskLocalDataSource: TaskLocalDataSource,
     private val taskPendingSyncDao: TaskPendingSyncDao,
+    private val reminderLocalDataSource: ReminderLocalDataSource,
+    private val reminderPendingSyncDao: ReminderPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val applicationScope: CoroutineScope,
 ) : SyncAgendaItemScheduler {
@@ -72,7 +79,11 @@ class SyncAgendaItemWorkerScheduler(
             }
 
             AgendaKind.REMINDER -> {
-
+                val pendingReminder = ReminderDeletedSyncEntity(
+                    reminderId = item.id,
+                    userId = userId
+                )
+                reminderPendingSyncDao.upsertDeletedReminderSyncEntity(pendingReminder)
             }
         }
 
@@ -120,7 +131,14 @@ class SyncAgendaItemWorkerScheduler(
             }
 
             AgendaKind.REMINDER -> {
-
+                val reminder =
+                    reminderLocalDataSource.getReminder(id = item.id).firstOrNull() ?: return
+                val pendingReminder = ReminderPendingSyncEntity(
+                    reminder = reminder.toReminderEntity(),
+                    operation = operation,
+                    userId = userId
+                )
+                reminderPendingSyncDao.upsertReminderPendingSyncEntity(pendingReminder)
             }
         }
 

@@ -1,14 +1,14 @@
 package com.example.tasky.agenda.data.repository
 
-import com.example.tasky.agenda.domain.data.TaskRepository
-import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
+import com.example.tasky.agenda.domain.data.ReminderRepository
+import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
-import com.example.tasky.agenda.domain.model.Task
+import com.example.tasky.agenda.domain.model.Reminder
 import com.example.tasky.core.data.database.SyncOperation
-import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
-import com.example.tasky.core.data.database.task.mappers.toTask
-import com.example.tasky.core.domain.data.TaskLocalDataSource
+import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
+import com.example.tasky.core.data.database.reminder.mappers.toReminder
+import com.example.tasky.core.domain.data.ReminderLocalDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
@@ -22,33 +22,33 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class OfflineFirstTaskRepository(
-    private val taskRemoteDataSource: TaskRemoteDataSource,
-    private val taskLocalDataSource: TaskLocalDataSource,
+class OfflineFirstReminderRepository(
+    private val reminderRemoteDataSource: ReminderRemoteDataSource,
+    private val reminderLocalDataSource: ReminderLocalDataSource,
     private val applicationScope: CoroutineScope,
-    private val taskPendingSyncDao: TaskPendingSyncDao,
+    private val reminderPendingSyncDao: ReminderPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
-) : TaskRepository {
+) : ReminderRepository {
 
-    override suspend fun upsertTask(
-        task: Task,
+    override suspend fun upsertReminder(
+        reminder: Reminder,
         syncOperation: SyncOperation,
     ): EmptyResult<DataError> {
-        val localResult = taskLocalDataSource.upsertTask(task)
+        val localResult = reminderLocalDataSource.upsertReminder(reminder)
         if (localResult !is Result.Success) {
             return localResult.asEmptyDataResult()
         }
 
         when (syncOperation) {
             SyncOperation.CREATE -> {
-                return taskRemoteDataSource.createTask(task)
+                return reminderRemoteDataSource.createReminder(reminder)
                     .onSuccess {}.asEmptyDataResult()
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
                                 type = SyncAgendaItemScheduler.SyncType.UpsertAgendaItem(
-                                    item = AgendaItem.Task(id = task.id),
+                                    item = AgendaItem.Reminder(id = reminder.id),
                                     operation = syncOperation
                                 )
                             )
@@ -57,13 +57,13 @@ class OfflineFirstTaskRepository(
             }
 
             SyncOperation.UPDATE -> {
-                return taskRemoteDataSource.updateTask(task)
+                return reminderRemoteDataSource.updateReminder(reminder)
                     .onSuccess {}.asEmptyDataResult()
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
                                 type = SyncAgendaItemScheduler.SyncType.UpsertAgendaItem(
-                                    item = AgendaItem.Task(id = task.id),
+                                    item = AgendaItem.Reminder(id = reminder.id),
                                     operation = syncOperation
                                 )
                             )
@@ -73,46 +73,46 @@ class OfflineFirstTaskRepository(
         }
     }
 
-    override suspend fun deleteTask(id: String): EmptyResult<DataError> {
-        taskLocalDataSource.deleteTask(id = id)
+    override suspend fun deleteReminder(id: String): EmptyResult<DataError> {
+        reminderLocalDataSource.deleteReminder(id = id)
 
-        return taskRemoteDataSource.deleteTask(id = id)
+        return reminderRemoteDataSource.deleteReminder(id = id)
             .onSuccess {}.asEmptyDataResult()
             .onError { error ->
                 applicationScope.launch {
                     syncAgendaItemScheduler.scheduleSync(
                         type = SyncAgendaItemScheduler.SyncType.DeleteAgendaItem(
-                            item = AgendaItem.Task(id = id)
+                            item = AgendaItem.Reminder(id = id)
                         )
                     )
                 }.join()
             }.asEmptyDataResult()
     }
 
-    override suspend fun syncPendingTask() {
+    override suspend fun syncPendingReminders() {
         withContext(Dispatchers.IO) {
             val userId = sessionStorage.get()?.userId ?: return@withContext
 
-            val createdTasks = async {
-                taskPendingSyncDao.getAllTaskPendingSyncEntities(userId)
+            val createdReminders = async {
+                reminderPendingSyncDao.getAllReminderPendingSyncEntities(userId)
             }
-            val deletedTasks = async {
-                taskPendingSyncDao.getAllDeletedTaskSyncEntities(userId)
+            val deletedReminders = async {
+                reminderPendingSyncDao.getAllDeletedReminderSyncEntities(userId)
             }
 
-            val createJobs = createdTasks
+            val createJobs = createdReminders
                 .await()
                 .map { it ->
                     launch {
-                        val task = it.task.toTask()
+                        val reminder = it.reminder.toReminder()
                         when (it.operation) {
                             SyncOperation.CREATE -> {
-                                taskRemoteDataSource.createTask(task)
+                                reminderRemoteDataSource.createReminder(reminder)
                                     .onError { }
                                     .onSuccess {
                                         applicationScope.launch {
-                                            taskPendingSyncDao.deleteTaskPendingSyncEntity(
-                                                taskId = it.id,
+                                            reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                                                reminderId = it.id,
                                                 operations = listOf(SyncOperation.CREATE)
                                             )
                                         }.join()
@@ -120,12 +120,12 @@ class OfflineFirstTaskRepository(
                             }
 
                             SyncOperation.UPDATE -> {
-                                taskRemoteDataSource.updateTask(task)
+                                reminderRemoteDataSource.updateReminder(reminder)
                                     .onError { }
                                     .onSuccess {
                                         applicationScope.launch {
-                                            taskPendingSyncDao.deleteTaskPendingSyncEntity(
-                                                taskId = it.id,
+                                            reminderPendingSyncDao.deleteReminderPendingSyncEntity(
+                                                reminderId = it.id,
                                                 operations = listOf(SyncOperation.UPDATE)
                                             )
                                         }.join()
@@ -134,15 +134,15 @@ class OfflineFirstTaskRepository(
                         }
                     }
                 }
-            val deleteJobs = deletedTasks
+            val deleteJobs = deletedReminders
                 .await()
                 .map {
                     launch {
-                        taskRemoteDataSource.deleteTask(it.taskId)
+                        reminderRemoteDataSource.deleteReminder(it.reminderId)
                             .onError { }
                             .onSuccess { result ->
                                 applicationScope.launch {
-                                    taskPendingSyncDao.deleteDeletedTaskSyncEntity(it.taskId)
+                                    reminderPendingSyncDao.deleteDeletedReminderSyncEntity(it.reminderId)
                                 }.join()
                             }
                     }
@@ -152,4 +152,5 @@ class OfflineFirstTaskRepository(
             deleteJobs.forEach { it.join() }
         }
     }
+
 }

@@ -8,5 +8,5 @@ data class AgendaState(
     val profileMenuExpanded: Boolean = false,
     val fabButtonMenuOptions: List<MenuOption> = listOf(),
     val profileButtonMenuOptions: List<MenuOption> = listOf(),
-    val agendaItems: List<AgendaItemUiList> = listOf(),
+    val agendaItems: List<AgendaItemUi> = listOf(),
 )

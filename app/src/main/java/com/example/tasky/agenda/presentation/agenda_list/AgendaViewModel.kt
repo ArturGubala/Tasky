@@ -115,6 +115,7 @@ class AgendaViewModel(
     }
 
     private fun observeAgendaItems() {
+        // TODO just for test before implement date picking
         val startOfDay = 1758326400000L
         val endOfDay = 1759276799000L
 
@@ -123,8 +124,8 @@ class AgendaViewModel(
             localReminderDataSource.getReminderForDay(startOfDay, endOfDay)
         ) { tasks, reminders ->
             val allItems = buildList {
-                addAll(tasks.map { AgendaItemUiList.TaskItem(it) })
-                addAll(reminders.map { AgendaItemUiList.ReminderItem(it) })
+                addAll(tasks.map { AgendaItemUi.TaskItem(it) })
+                addAll(reminders.map { AgendaItemUi.ReminderItem(it) })
             }
             allItems.sortedBy { it.time.toKotlinInstant().toEpochMilliseconds() }
         }.onEach { sortedAgendaItems ->

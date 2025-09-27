@@ -11,7 +11,7 @@ import java.time.ZonedDateTime
 import kotlin.time.ExperimentalTime
 import kotlin.time.toJavaInstant
 
-sealed interface AgendaItemUiList {
+sealed interface AgendaItemUi {
     val id: String
     val time: ZonedDateTime
     val title: String
@@ -21,7 +21,7 @@ sealed interface AgendaItemUiList {
     val isCompleted: Boolean get() = false
     val toTime: ZonedDateTime? get() = null
 
-    data class TaskItem(val task: Task) : AgendaItemUiList {
+    data class TaskItem(val task: Task) : AgendaItemUi {
         override val id: String = task.id
         override val time: ZonedDateTime =
             ZonedDateTime.ofInstant(task.time.toJavaInstant(), ZoneId.systemDefault())
@@ -32,7 +32,7 @@ sealed interface AgendaItemUiList {
         override val isCompleted: Boolean = task.isDone
     }
 
-    data class EventItem(val event: Event) : AgendaItemUiList {
+    data class EventItem(val event: Event) : AgendaItemUi {
         override val id: String = event.id
         override val time: ZonedDateTime =
             ZonedDateTime.ofInstant(event.timeFrom.toJavaInstant(), ZoneId.systemDefault())
@@ -43,7 +43,7 @@ sealed interface AgendaItemUiList {
             ZonedDateTime.ofInstant(event.timeTo.toJavaInstant(), ZoneId.systemDefault())
     }
 
-    data class ReminderItem(val reminder: Reminder) : AgendaItemUiList {
+    data class ReminderItem(val reminder: Reminder) : AgendaItemUi {
         override val id: String = reminder.id
         override val time: ZonedDateTime =
             ZonedDateTime.ofInstant(reminder.time.toJavaInstant(), ZoneId.systemDefault())

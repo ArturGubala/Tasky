@@ -45,10 +45,14 @@ class AgendaViewModel(
     private val localReminderDataSource: RoomLocalReminderDataSource,
 ) : ViewModel() {
 
+    private var initialized = false
     private val _state = MutableStateFlow(AgendaState())
     val state = _state
         .onStart {
-            initializeData()
+            if (!initialized) {
+                initializeData()
+                initialized = true
+            }
             initializeMenuOptions()
             observeConnectivity()
             observeAgendaItems()

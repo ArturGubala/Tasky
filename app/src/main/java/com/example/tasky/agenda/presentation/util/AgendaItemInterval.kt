@@ -3,6 +3,10 @@ package com.example.tasky.agenda.presentation.util
 import com.example.tasky.R
 import com.example.tasky.core.presentation.ui.UiText
 import java.time.ZonedDateTime
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 sealed interface AgendaItemInterval {
     data object TenMinutesFromNow : AgendaItemInterval
@@ -35,3 +39,12 @@ fun defaultAgendaItemIntervals(): List<AgendaItemInterval> = listOf(
     AgendaItemInterval.SixHoursFromNow,
     AgendaItemInterval.OneDayFromNow
 )
+
+fun Duration.toAgendaItemInterval(): AgendaItemInterval = when (this) {
+    10.minutes -> AgendaItemInterval.TenMinutesFromNow
+    30.minutes -> AgendaItemInterval.ThirtyMinutesFromNow
+    1.hours -> AgendaItemInterval.OneHourFromNow
+    6.hours -> AgendaItemInterval.SixHoursFromNow
+    1.days -> AgendaItemInterval.OneDayFromNow
+    else -> AgendaItemInterval.TenMinutesFromNow
+}

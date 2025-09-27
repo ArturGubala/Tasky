@@ -7,7 +7,6 @@ import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.asEmptyDataResult
-import com.example.tasky.core.domain.util.onError
 import com.example.tasky.core.domain.util.onSuccess
 
 class TaskyRepositoryImpl(
@@ -22,6 +21,5 @@ class TaskyRepositoryImpl(
                 taskLocalDataSource.insertTasks(result.tasks)
                 reminderLocalDataSource.insertReminders(result.reminders)
             }.asEmptyDataResult()
-            .onError {}.asEmptyDataResult()
     }
 }

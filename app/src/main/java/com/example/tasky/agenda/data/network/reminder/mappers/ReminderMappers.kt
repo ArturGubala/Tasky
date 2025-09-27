@@ -3,6 +3,7 @@
 package com.example.tasky.agenda.data.network.reminder.mappers
 
 import com.example.tasky.agenda.data.network.reminder.dto.ReminderDto
+import com.example.tasky.agenda.data.network.reminder.dto.UpsertReminderRequest
 import com.example.tasky.agenda.domain.model.Reminder
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -15,5 +16,16 @@ fun ReminderDto.toReminder(): Reminder {
         time = Instant.parse(time),
         remindAt = Instant.parse(remindAt),
         updatedAt = updatedAt?.let { Instant.parse(it) }
+    )
+}
+
+fun Reminder.toUpsertReminderRequest(): UpsertReminderRequest {
+    return UpsertReminderRequest(
+        id = id,
+        title = title,
+        description = description,
+        time = time.toString(),
+        remindAt = remindAt.toString(),
+        updatedAt = updatedAt?.toString()
     )
 }

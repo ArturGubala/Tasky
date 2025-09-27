@@ -114,6 +114,7 @@ fun AgendaDetailScreenRoot(
         text: String
     ) -> Unit,
     onNavigateToPhotoDetail: (photoId: String, photoUri: String) -> Unit,
+    onNavigateToAgendaList: () -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaKind) }
     ),
@@ -192,6 +193,22 @@ fun AgendaDetailScreenRoot(
                 ).show()
                 onNavigateBack()
             }
+            is AgendaDetailEvent.DeleteError -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            is AgendaDetailEvent.DeleteSuccessful -> {
+                Toast.makeText(
+                    context,
+                    event.message.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+                onNavigateToAgendaList()
+            }
         }
     }
 
@@ -245,7 +262,8 @@ fun AgendaDetailScreenRoot(
         deleteButtonText = agendaItemTypeConfiguration.getDeleteButtonText(context = context),
         agendaDetailView = agendaDetailView,
         agendaItemTypeConfiguration = agendaItemTypeConfiguration,
-        isReadOnly = isReadOnly
+        isReadOnly = isReadOnly,
+        agendaId = agendaId
     )
 }
 
@@ -257,7 +275,8 @@ fun AgendaDetailScreen(
     deleteButtonText: String,
     agendaDetailView: AgendaDetailView,
     agendaItemTypeConfiguration: AgendaTypeConfig,
-    isReadOnly: Boolean
+    isReadOnly: Boolean,
+    agendaId: String,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
@@ -452,7 +471,7 @@ fun AgendaDetailScreen(
                                     .padding(vertical = 20.dp)
                             ) {
                                 Text(
-                                    text = state.description,
+                                    text = state.description ?: "",
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -461,7 +480,7 @@ fun AgendaDetailScreen(
                                         onClick = {
                                             onAction(
                                                 AgendaDetailAction.OnEditDescriptionClick(
-                                                    description = state.description
+                                                    description = state.description ?: ""
                                                 )
                                             )
                                         }
@@ -847,14 +866,22 @@ fun AgendaDetailScreen(
                     when(state.agendaDetailBottomSheetType) {
                         AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM -> {
                             DeleteBottomSheetContent(
-                                onDelete = {},
+                                onDelete = {
+                                    scope.launch {
+                                        onAction(
+                                            AgendaDetailAction.OnDeleteOnBottomSheetClick(id = agendaId)
+                                        )
+                                        sheetState.hide()
+                                    }
+                                },
                                 onCancel = {
                                     scope.launch {
                                         sheetState.hide()
                                         onAction(AgendaDetailAction.OnDismissBottomSheet)
                                     }
                                 },
-                                title = deleteButtonText
+                                title = deleteButtonText,
+                                enabled = !state.isDeleting
                             )
                         }
 
@@ -902,7 +929,8 @@ private fun AgendaDetailScreenPreview() {
             deleteButtonText = "Delete",
             agendaDetailView = AgendaDetailView.EDIT,
             agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaKind.EVENT),
-            isReadOnly = false
+            isReadOnly = false,
+            agendaId = ""
         )
     }
 }

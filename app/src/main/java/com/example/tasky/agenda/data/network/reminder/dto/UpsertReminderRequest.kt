@@ -1,14 +1,13 @@
-package com.example.tasky.agenda.data.network.task.dto
+package com.example.tasky.agenda.data.network.reminder.dto
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateTaskRequest(
+data class UpsertReminderRequest(
     val id: String,
     val title: String,
     val description: String?,
     val time: String,
     val remindAt: String,
     val updatedAt: String?,
-    val isDone: Boolean,
 )

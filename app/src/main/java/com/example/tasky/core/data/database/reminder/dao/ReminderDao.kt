@@ -1,6 +1,8 @@
 package com.example.tasky.core.data.database.reminder.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.tasky.core.data.database.reminder.entity.ReminderEntity
@@ -11,6 +13,9 @@ interface ReminderDao {
 
     @Upsert
     suspend fun upsertReminder(reminder: ReminderEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertReminders(reminders: List<ReminderEntity>)
 
     @Query("SELECT * FROM reminder WHERE id = :id")
     fun getReminder(id: String): Flow<ReminderEntity>

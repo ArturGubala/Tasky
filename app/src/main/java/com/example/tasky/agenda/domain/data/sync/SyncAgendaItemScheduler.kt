@@ -10,7 +10,7 @@ interface SyncAgendaItemScheduler {
     suspend fun cancelAllSyncs()
 
     sealed interface SyncType {
-        data class FetchAgendaItem(val interval: Duration) : SyncType
+        data class FetchAgendaItems(val interval: Duration) : SyncType
         data class DeleteAgendaItem(val item: AgendaItem) : SyncType
         class UpsertAgendaItem(val item: AgendaItem, val operation: SyncOperation) : SyncType
     }

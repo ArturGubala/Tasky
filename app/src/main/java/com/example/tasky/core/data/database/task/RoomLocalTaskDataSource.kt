@@ -5,7 +5,7 @@ import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.core.data.database.task.dao.TaskDao
 import com.example.tasky.core.data.database.task.mappers.toTask
 import com.example.tasky.core.data.database.task.mappers.toTaskEntity
-import com.example.tasky.core.domain.data.TaskLocalDataStore
+import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 
 class RoomLocalTaskDataSource(
     private val taskDao: TaskDao,
-) : TaskLocalDataStore {
+) : TaskLocalDataSource {
 
     override fun getTask(id: String): Flow<Task> {
         return taskDao.getTask(id = id)
@@ -38,6 +38,16 @@ class RoomLocalTaskDataSource(
             Result.Success(Unit)
         } catch (_: SQLiteFullException) {
             Result.Error(DataError.Local.DISK_FULL)
+        }
+    }
+
+    override suspend fun insertTasks(tasks: List<Task>): EmptyResult<DataError.Local> {
+        return try {
+            val entities = tasks.map { it.toTaskEntity() }
+            taskDao.insertTasks(entities)
+            Result.Success(Unit)
+        } catch (_: SQLiteFullException) {
+            Result.Success(Unit)
         }
     }
 

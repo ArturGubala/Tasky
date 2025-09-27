@@ -5,6 +5,7 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
@@ -17,17 +18,20 @@ import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.entity.TaskDeletedSyncEntity
 import com.example.tasky.core.data.database.task.entity.TaskPendingSyncEntity
 import com.example.tasky.core.data.database.task.mappers.toTaskEntity
-import com.example.tasky.core.domain.data.TaskLocalDataStore
+import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
+import kotlin.time.toJavaDuration
 
 class SyncAgendaItemWorkerScheduler(
     private val context: Context,
-    private val taskLocalDataStore: TaskLocalDataStore,
+    private val taskLocalDataSource: TaskLocalDataSource,
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val applicationScope: CoroutineScope,
@@ -37,7 +41,8 @@ class SyncAgendaItemWorkerScheduler(
 
     override suspend fun scheduleSync(type: SyncAgendaItemScheduler.SyncType) {
         when (type) {
-            is SyncAgendaItemScheduler.SyncType.FetchAgendaItem -> {}
+            is SyncAgendaItemScheduler.SyncType.FetchAgendaItems ->
+                scheduleFetch(type.interval)
             is SyncAgendaItemScheduler.SyncType.DeleteAgendaItem ->
                 scheduleDelete(item = type.item)
             is SyncAgendaItemScheduler.SyncType.UpsertAgendaItem ->
@@ -101,7 +106,7 @@ class SyncAgendaItemWorkerScheduler(
 
         when (kind) {
             AgendaKind.TASK -> {
-                val task = taskLocalDataStore.getTask(id = item.id).firstOrNull() ?: return
+                val task = taskLocalDataSource.getTask(id = item.id).firstOrNull() ?: return
                 val pendingTask = TaskPendingSyncEntity(
                     task = task.toTaskEntity(),
                     operation = operation,
@@ -140,40 +145,38 @@ class SyncAgendaItemWorkerScheduler(
         }.join()
     }
 
-    private suspend fun scheduleFetchRunsWorker(interval: Duration) {
-        // TODO just for test
-        return
-//        val isSyncScheduled = withContext(Dispatchers.IO) {
-//            workManager
-//                .getWorkInfosByTag("sync_work")
-//                .get()
-//                .isNotEmpty()
-//        }
-//        if(isSyncScheduled) {
-//            return
-//        }
-//
-//        val workRequest = PeriodicWorkRequestBuilder<>(
-//            repeatInterval = interval.toJavaDuration()
-//        )
-//            .setConstraints(
-//                Constraints.Builder()
-//                    .setRequiredNetworkType(NetworkType.CONNECTED)
-//                    .build()
-//            )
-//            .setBackoffCriteria(
-//                backoffPolicy = BackoffPolicy.EXPONENTIAL,
-//                backoffDelay = 2000L,
-//                timeUnit = TimeUnit.MILLISECONDS
-//            )
-//            .setInitialDelay(
-//                duration = 30,
-//                timeUnit = TimeUnit.MINUTES
-//            )
-//            .addTag("sync_work")
-//            .build()
-//
-//        workManager.enqueue(workRequest).await()
+    private suspend fun scheduleFetch(interval: Duration) {
+        val isSyncScheduled = withContext(Dispatchers.IO) {
+            workManager
+                .getWorkInfosByTag("sync_work")
+                .get()
+                .isNotEmpty()
+        }
+        if (isSyncScheduled) {
+            return
+        }
+
+        val workRequest = PeriodicWorkRequestBuilder<FetchAgendaItemsWorker>(
+            repeatInterval = interval.toJavaDuration()
+        )
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setBackoffCriteria(
+                backoffPolicy = BackoffPolicy.EXPONENTIAL,
+                backoffDelay = 2000L,
+                timeUnit = TimeUnit.MILLISECONDS
+            )
+            .setInitialDelay(
+                duration = 30,
+                timeUnit = TimeUnit.MINUTES
+            )
+            .addTag("sync_work")
+            .build()
+
+        workManager.enqueue(workRequest).await()
     }
 
     override suspend fun cancelAllSyncs() {

@@ -1,11 +1,9 @@
 package com.example.tasky.agenda.data.network.task
 
-import com.example.tasky.agenda.data.network.task.dto.CreateTaskRequest
 import com.example.tasky.agenda.data.network.task.dto.TaskDto
-import com.example.tasky.agenda.data.network.task.dto.UpdateTaskRequest
-import com.example.tasky.agenda.data.network.task.mappers.toCreateTaskRequest
+import com.example.tasky.agenda.data.network.task.dto.UpsertTaskRequest
 import com.example.tasky.agenda.data.network.task.mappers.toTask
-import com.example.tasky.agenda.data.network.task.mappers.toUpdateTaskRequest
+import com.example.tasky.agenda.data.network.task.mappers.toUpsertTaskRequest
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.core.data.networking.delete
@@ -29,16 +27,16 @@ class KtorTaskDataSource(
     }
 
     override suspend fun createTask(task: Task): Result<Task, DataError.Network> {
-        return httpClient.post<CreateTaskRequest, TaskDto>(
+        return httpClient.post<UpsertTaskRequest, TaskDto>(
             route = "/task",
-            body = task.toCreateTaskRequest()
+            body = task.toUpsertTaskRequest()
         ).map { it.toTask() }
     }
 
     override suspend fun updateTask(task: Task): Result<Task, DataError.Network> {
-        return httpClient.put<UpdateTaskRequest, TaskDto>(
+        return httpClient.put<UpsertTaskRequest, TaskDto>(
             route = "/task",
-            body = task.toUpdateTaskRequest()
+            body = task.toUpsertTaskRequest()
         ).map { it.toTask() }
     }
 

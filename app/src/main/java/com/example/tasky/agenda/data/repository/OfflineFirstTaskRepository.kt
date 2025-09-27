@@ -31,20 +31,60 @@ class OfflineFirstTaskRepository(
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
 ) : TaskRepository {
 
-    override suspend fun createTask(task: Task): EmptyResult<DataError> {
+    override suspend fun upsertTask(
+        task: Task,
+        syncOperation: SyncOperation,
+    ): EmptyResult<DataError> {
         val localResult = taskLocalDataSource.upsertTask(task)
         if (localResult !is Result.Success) {
             return localResult.asEmptyDataResult()
         }
 
-        return taskRemoteDataSource.createTask(task)
+        when (syncOperation) {
+            SyncOperation.CREATE -> {
+                return taskRemoteDataSource.createTask(task)
+                    .onSuccess {}.asEmptyDataResult()
+                    .onError { error ->
+                        applicationScope.launch {
+                            syncAgendaItemScheduler.scheduleSync(
+                                type = SyncAgendaItemScheduler.SyncType.UpsertAgendaItem(
+                                    item = AgendaItem.Task(id = task.id),
+                                    operation = syncOperation
+                                )
+                            )
+                        }.join()
+                    }.asEmptyDataResult()
+            }
+
+            SyncOperation.UPDATE -> {
+                return taskRemoteDataSource.updateTask(task)
+                    .onSuccess {}.asEmptyDataResult()
+                    .onError { error ->
+                        applicationScope.launch {
+                            syncAgendaItemScheduler.scheduleSync(
+                                type = SyncAgendaItemScheduler.SyncType.UpsertAgendaItem(
+                                    item = AgendaItem.Task(id = task.id),
+                                    operation = syncOperation
+                                )
+                            )
+                        }.join()
+                    }.asEmptyDataResult()
+            }
+        }
+
+
+    }
+
+    override suspend fun deleteTask(id: String): EmptyResult<DataError> {
+        taskLocalDataSource.deleteTask(id = id)
+
+        return taskRemoteDataSource.deleteTask(id = id)
             .onSuccess {}.asEmptyDataResult()
             .onError { error ->
                 applicationScope.launch {
                     syncAgendaItemScheduler.scheduleSync(
-                        type = SyncAgendaItemScheduler.SyncType.UpsertAgendaItem(
-                            item = AgendaItem.Task(id = task.id),
-                            operation = SyncOperation.CREATE
+                        type = SyncAgendaItemScheduler.SyncType.DeleteAgendaItem(
+                            item = AgendaItem.Task(id = id)
                         )
                     )
                 }.join()

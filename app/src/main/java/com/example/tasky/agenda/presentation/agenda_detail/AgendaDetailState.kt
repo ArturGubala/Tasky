@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 
 package com.example.tasky.agenda.presentation.agenda_detail
 
@@ -10,15 +10,19 @@ import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.defaultAgendaItemIntervals
 import com.example.tasky.core.domain.ValidationItem
+import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.toKotlinInstant
 
 data class AgendaDetailState(
     val loadingInitialData: Boolean = false,
     val isOnline: Boolean = false,
+    val isDeleting: Boolean = false,
     val title: String = "Project X",
-    val description: String = "Weekly plan\n Role distribution",
+    val description: String? = "Weekly plan\n Role distribution",
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
@@ -37,7 +41,7 @@ sealed interface AgendaItemDetails {
                 "1",
                 "event1",
                 true,
-                "2024-01-15T09:30:00Z",
+                Instant.now().toKotlinInstant(),
                 true
             ),
             Attendee(
@@ -46,7 +50,7 @@ sealed interface AgendaItemDetails {
                 "2",
                 "event1",
                 true,
-                "2024-01-15T09:30:00Z",
+                Instant.now().toKotlinInstant(),
                 false
             ),
             Attendee(
@@ -55,7 +59,7 @@ sealed interface AgendaItemDetails {
                 "3",
                 "event1",
                 true,
-                "2024-01-15T09:30:00Z",
+                Instant.now().toKotlinInstant(),
                 false
             ),
             Attendee(
@@ -64,7 +68,7 @@ sealed interface AgendaItemDetails {
                 "4",
                 "event1",
                 false,
-                "2024-01-15T09:30:00Z",
+                Instant.now().toKotlinInstant(),
                 false
             ),
             Attendee(
@@ -73,7 +77,7 @@ sealed interface AgendaItemDetails {
                 "5",
                 "event1",
                 false,
-                "2024-01-15T09:30:00Z",
+                Instant.now().toKotlinInstant(),
                 false
             )
         ),

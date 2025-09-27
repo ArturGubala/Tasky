@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,7 +31,8 @@ fun DeleteBottomSheetContent(
     onDelete: () -> Unit,
     onCancel: () -> Unit,
     title: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Column(
         modifier = modifier
@@ -66,17 +69,28 @@ fun DeleteBottomSheetContent(
                 onClick = { onDelete() },
                 modifier = Modifier.weight(.5f),
                 backgroundColor = MaterialTheme.colorScheme.error,
-                enabled = true
+                enabled = enabled
             ) {
                 Box(
                     modifier = modifier,
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    when (enabled) {
+                        true -> {
+                            Text(
+                                text = stringResource(R.string.delete),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+
+                        false -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(size = 24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -95,7 +109,8 @@ private fun DeleteBottomSheetContentPreview() {
                 DeleteBottomSheetContent(
                     onDelete = {},
                     onCancel = {},
-                    title = "Delete task?"
+                    title = "Delete task?",
+                    enabled = false
                 )
             },
         )

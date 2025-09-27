@@ -14,12 +14,15 @@ import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
 import com.example.tasky.agenda.presentation.util.AgendaItemInterval
 import com.example.tasky.agenda.presentation.util.apply
+import com.example.tasky.agenda.presentation.util.toAgendaItemInterval
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.updateUtcDate
 import com.example.tasky.agenda.presentation.util.updateUtcTime
 import com.example.tasky.auth.presentation.register.RegisterFocusedField
+import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.domain.PatternValidator
 import com.example.tasky.core.domain.ValidationItem
+import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.ImageCompressor
@@ -33,6 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -44,6 +48,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 import kotlin.time.ExperimentalTime
+import kotlin.time.toJavaInstant
 
 class AgendaDetailViewModel(
     private val agendaId: String,
@@ -53,6 +58,7 @@ class AgendaDetailViewModel(
     private val default: CoroutineDispatcher = Dispatchers.Default,
     private val patternValidator: PatternValidator,
     private val taskRepository: TaskRepository,
+    private val taskLocalDataSource: TaskLocalDataSource,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState())
@@ -63,11 +69,13 @@ class AgendaDetailViewModel(
             }
 
             _state.update { it.copy(loadingInitialData = true) }
-            if (agendaId.isNotEmpty()) {
-                // TODO: Get agenda details from db by provided id
-            }
             when (agendaKind) {
-                AgendaKind.TASK -> _state.update { it.copy(details = AgendaItemDetails.Task()) }
+                AgendaKind.TASK -> {
+                    _state.update { it.copy(details = AgendaItemDetails.Task()) }
+                    if (agendaId.isNotEmpty()) {
+                        getTask(taskId = agendaId)
+                    }
+                }
                 AgendaKind.EVENT -> _state.update { it.copy(details = AgendaItemDetails.Event()) }
                 AgendaKind.REMINDER -> _state.update { it.copy(details = AgendaItemDetails.Reminder) }
             }
@@ -92,6 +100,25 @@ class AgendaDetailViewModel(
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun getTask(taskId: String) {
+        viewModelScope.launch {
+            taskLocalDataSource.getTask(id = taskId).firstOrNull()?.let { task ->
+                val duration = task.time - task.remindAt
+                _state.update {
+                    it.copy(
+                        title = task.title,
+                        description = task.description,
+                        fromTime = ZonedDateTime.ofInstant(
+                            task.time.toJavaInstant(),
+                            ZoneId.of("UTC")
+                        ),
+                        selectedAgendaReminderInterval = duration.toAgendaItemInterval()
+                    )
+                }
+            }
+        }
     }
 
     fun onAction(action: AgendaDetailAction) {
@@ -296,6 +323,7 @@ class AgendaDetailViewModel(
                     AgendaKind.REMINDER -> TODO()
                 }
             }
+            is AgendaDetailAction.OnDeleteOnBottomSheetClick -> deleteAgendaItem(id = action.id)
         }
     }
 
@@ -335,7 +363,7 @@ class AgendaDetailViewModel(
         viewModelScope.launch(default) {
             val currentTimestamp = ZonedDateTime.now(ZoneId.of("UTC"))
             val task = Task(
-                id = UUID.randomUUID().toString(),
+                id = agendaId.ifEmpty { UUID.randomUUID().toString() },
                 title = _state.value.title,
                 description = _state.value.description,
                 time = _state.value.fromTime.toKotlinInstant(),
@@ -346,11 +374,13 @@ class AgendaDetailViewModel(
                 isDone = _state.value.detailsAsTask()?.isDone ?: false
             )
 
-            taskRepository.createTask(task)
+            val syncOperation =
+                if (agendaId.isNotEmpty()) SyncOperation.UPDATE else SyncOperation.CREATE
+            taskRepository.upsertTask(task, syncOperation)
                 .onSuccess { responseData ->
                     eventChannel.send(
-                        AgendaDetailEvent.SaveError(
-                            error = UiText.StringResource(R.string.save_successful)
+                        AgendaDetailEvent.SaveSuccessful(
+                            message = UiText.StringResource(R.string.save_successful)
                         )
                     )
                 }
@@ -361,6 +391,28 @@ class AgendaDetailViewModel(
                         )
                     )
                 }
+        }
+    }
+
+    private fun deleteAgendaItem(id: String) {
+        viewModelScope.launch(default) {
+            _state.update { it.copy(isDeleting = true) }
+            taskRepository.deleteTask(id = id)
+                .onSuccess {
+                    eventChannel.send(
+                        AgendaDetailEvent.DeleteSuccessful(
+                            message = UiText.StringResource(R.string.delete_successful)
+                        )
+                    )
+                }
+                .onError { error ->
+                    eventChannel.send(
+                        AgendaDetailEvent.DeleteError(
+                            error = error.asUiText()
+                        )
+                    )
+                }
+            _state.update { it.copy(isDeleting = false) }
         }
     }
 }

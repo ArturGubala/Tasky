@@ -8,4 +8,6 @@ interface AgendaDetailEvent {
     data class InvalidDatePicked(val error: UiText): AgendaDetailEvent
     data class SaveError(val error: UiText) : AgendaDetailEvent
     data class SaveSuccessful(val message: UiText) : AgendaDetailEvent
+    data class DeleteError(val error: UiText) : AgendaDetailEvent
+    data class DeleteSuccessful(val message: UiText) : AgendaDetailEvent
 }

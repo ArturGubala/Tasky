@@ -12,6 +12,7 @@ import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.core.data.database.event.RoomLocalEventDataSource
 import com.example.tasky.core.data.database.reminder.RoomLocalReminderDataSource
 import com.example.tasky.core.data.database.task.RoomLocalTaskDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
@@ -43,6 +44,7 @@ class AgendaViewModel(
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
     private val localTaskDataSource: RoomLocalTaskDataSource,
     private val localReminderDataSource: RoomLocalReminderDataSource,
+    private val localEventDataSource: RoomLocalEventDataSource,
 ) : ViewModel() {
 
     private var initialized = false
@@ -125,11 +127,13 @@ class AgendaViewModel(
 
         combine(
             localTaskDataSource.getTasksForDay(startOfDay, endOfDay),
-            localReminderDataSource.getReminderForDay(startOfDay, endOfDay)
-        ) { tasks, reminders ->
+            localReminderDataSource.getReminderForDay(startOfDay, endOfDay),
+            localEventDataSource.getEventForDay(startOfDay, endOfDay)
+        ) { tasks, reminders, events ->
             val allItems = buildList {
                 addAll(tasks.map { AgendaItemUi.TaskItem(it) })
                 addAll(reminders.map { AgendaItemUi.ReminderItem(it) })
+                addAll(events.map { AgendaItemUi.EventItem(it) })
             }
             allItems.sortedBy { it.time.toKotlinInstant().toEpochMilliseconds() }
         }.onEach { sortedAgendaItems ->

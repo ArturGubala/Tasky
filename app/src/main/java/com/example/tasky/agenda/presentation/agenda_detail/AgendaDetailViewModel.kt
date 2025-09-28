@@ -6,8 +6,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.data.EventRepository
 import com.example.tasky.agenda.domain.data.ReminderRepository
 import com.example.tasky.agenda.domain.data.TaskRepository
+import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.domain.model.Reminder
 import com.example.tasky.agenda.domain.model.Task
@@ -24,8 +26,10 @@ import com.example.tasky.auth.presentation.register.RegisterFocusedField
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.domain.PatternValidator
 import com.example.tasky.core.domain.ValidationItem
+import com.example.tasky.core.domain.data.EventLocalDataSource
 import com.example.tasky.core.domain.data.ReminderLocalDataSource
 import com.example.tasky.core.domain.data.TaskLocalDataSource
+import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.ImageCompressor
@@ -64,6 +68,9 @@ class AgendaDetailViewModel(
     private val taskLocalDataSource: TaskLocalDataSource,
     private val reminderRepository: ReminderRepository,
     private val reminderLocalDataSource: ReminderLocalDataSource,
+    private val eventRepository: EventRepository,
+    private val eventLocalDataSource: EventLocalDataSource,
+    private val sessionStorage: SessionStorage,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AgendaDetailState())
@@ -81,7 +88,12 @@ class AgendaDetailViewModel(
                         getTask(taskId = agendaId)
                     }
                 }
-                AgendaKind.EVENT -> _state.update { it.copy(details = AgendaItemDetails.Event()) }
+                AgendaKind.EVENT -> {
+                    _state.update { it.copy(details = AgendaItemDetails.Event()) }
+                    if (agendaId.isNotEmpty()) {
+                        getEvent(eventId = agendaId)
+                    }
+                }
                 AgendaKind.REMINDER -> {
                     _state.update { it.copy(details = AgendaItemDetails.Reminder) }
                     if (agendaId.isNotEmpty()) {
@@ -144,6 +156,33 @@ class AgendaDetailViewModel(
                             ZoneId.of("UTC")
                         ),
                         selectedAgendaReminderInterval = duration.toAgendaItemInterval()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun getEvent(eventId: String) {
+        viewModelScope.launch {
+            eventLocalDataSource.getEvent(id = eventId).firstOrNull()?.let { event ->
+                val duration = event.timeFrom - event.remindAt
+                _state.update {
+                    it.copy(
+                        title = event.title,
+                        description = event.description,
+                        fromTime = ZonedDateTime.ofInstant(
+                            event.timeFrom.toJavaInstant(),
+                            ZoneId.of("UTC")
+                        ),
+                        selectedAgendaReminderInterval = duration.toAgendaItemInterval()
+                    )
+                }
+                updateDetails<AgendaItemDetails.Event> {
+                    it.copy(
+                        toTime = ZonedDateTime.ofInstant(
+                            event.timeTo.toJavaInstant(),
+                            ZoneId.of("UTC")
+                        )
                     )
                 }
             }
@@ -348,7 +387,7 @@ class AgendaDetailViewModel(
             is AgendaDetailAction.OnSaveClick -> {
                 when (action.agendaKind) {
                     AgendaKind.TASK -> saveTask()
-                    AgendaKind.EVENT -> TODO()
+                    AgendaKind.EVENT -> saveEvent()
                     AgendaKind.REMINDER -> saveReminder()
                 }
             }
@@ -356,7 +395,7 @@ class AgendaDetailViewModel(
             is AgendaDetailAction.OnDeleteOnBottomSheetClick -> {
                 when (action.agendaKind) {
                     AgendaKind.TASK -> deleteTask(action.id)
-                    AgendaKind.EVENT -> TODO()
+                    AgendaKind.EVENT -> deleteEvent(action.id)
                     AgendaKind.REMINDER -> deleteReminder(action.id)
                 }
             }
@@ -464,6 +503,45 @@ class AgendaDetailViewModel(
         }
     }
 
+    private fun saveEvent() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val currentTimestamp = ZonedDateTime.now(ZoneId.of("UTC"))
+            val event = Event(
+                id = agendaId.ifEmpty { UUID.randomUUID().toString() },
+                title = _state.value.title,
+                description = _state.value.description,
+                timeFrom = _state.value.fromTime.toKotlinInstant(),
+                timeTo = _state.value.detailsAsEvent()?.toTime!!.toKotlinInstant(),
+                remindAt = _state.value.fromTime
+                    .apply(_state.value.selectedAgendaReminderInterval)
+                    .toKotlinInstant(),
+                updatedAt = currentTimestamp.toKotlinInstant(),
+                hostId = sessionStorage.get()?.userId ?: "",
+                isUserEventCreator = true,
+                attendees = listOf(),
+                photos = listOf()
+            )
+
+            val syncOperation =
+                if (agendaId.isNotEmpty()) SyncOperation.UPDATE else SyncOperation.CREATE
+            eventRepository.upsertEvent(event, syncOperation)
+                .onSuccess { responseData ->
+                    eventChannel.send(
+                        AgendaDetailEvent.SaveSuccessful(
+                            message = UiText.StringResource(R.string.save_successful)
+                        )
+                    )
+                }
+                .onError { error ->
+                    eventChannel.send(
+                        AgendaDetailEvent.SaveError(
+                            error = error.asUiText()
+                        )
+                    )
+                }
+        }
+    }
+
     private fun deleteTask(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _state.update { it.copy(isDeleting = true) }
@@ -490,6 +568,28 @@ class AgendaDetailViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             _state.update { it.copy(isDeleting = true) }
             reminderRepository.deleteReminder(id = id)
+                .onSuccess {
+                    eventChannel.send(
+                        AgendaDetailEvent.DeleteSuccessful(
+                            message = UiText.StringResource(R.string.delete_successful)
+                        )
+                    )
+                }
+                .onError { error ->
+                    eventChannel.send(
+                        AgendaDetailEvent.DeleteError(
+                            error = error.asUiText()
+                        )
+                    )
+                }
+            _state.update { it.copy(isDeleting = false) }
+        }
+    }
+
+    private fun deleteEvent(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.update { it.copy(isDeleting = true) }
+            eventRepository.deleteEvent(id = id)
                 .onSuccess {
                     eventChannel.send(
                         AgendaDetailEvent.DeleteSuccessful(

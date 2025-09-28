@@ -174,7 +174,7 @@ class AgendaDetailViewModel(
                             event.timeFrom.toJavaInstant(),
                             ZoneId.of("UTC")
                         ),
-                        selectedAgendaReminderInterval = duration.toAgendaItemInterval()
+                        selectedAgendaReminderInterval = duration.toAgendaItemInterval(),
                     )
                 }
                 updateDetails<AgendaItemDetails.Event> {
@@ -182,7 +182,8 @@ class AgendaDetailViewModel(
                         toTime = ZonedDateTime.ofInstant(
                             event.timeTo.toJavaInstant(),
                             ZoneId.of("UTC")
-                        )
+                        ),
+                        attendees = event.attendees
                     )
                 }
             }

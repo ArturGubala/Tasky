@@ -813,7 +813,9 @@ fun AgendaDetailScreen(
                                             style = MaterialTheme.typography.headlineSmall
                                         )
 
-                                        Column {
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
                                             notGoingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
                                                     attendeeName = attendee.username,

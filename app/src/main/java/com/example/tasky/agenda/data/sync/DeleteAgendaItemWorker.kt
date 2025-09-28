@@ -3,10 +3,12 @@ package com.example.tasky.agenda.data.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
+import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
 import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.domain.util.DataError
@@ -20,6 +22,8 @@ class DeleteAgendaItemWorker(
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val reminderRemoteDataSource: ReminderRemoteDataSource,
     private val reminderPendingSyncDao: ReminderPendingSyncDao,
+    private val eventRemoteDataSource: EventRemoteDataSource,
+    private val eventPendingSyncDao: EventPendingSyncDao,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -100,7 +104,55 @@ class DeleteAgendaItemWorker(
     }
 
     private suspend fun deleteEvent(itemId: String): Result {
-        return Result.success()
+        val pendingCreateEvent = eventPendingSyncDao.getEventPendingSyncEntityByIdAndOperation(
+            eventId = itemId, operation = SyncOperation.CREATE
+        )
+        val pendingUpdateEvent = eventPendingSyncDao.getEventPendingSyncEntityByIdAndOperation(
+            eventId = itemId, operation = SyncOperation.UPDATE
+        )
+
+        if (pendingCreateEvent != null && pendingUpdateEvent != null) {
+            eventPendingSyncDao.deleteEventPendingSyncEntity(
+                eventId = itemId,
+                operations = listOf(SyncOperation.CREATE, SyncOperation.UPDATE)
+            )
+            eventPendingSyncDao.deleteDeletedEventSyncEntity(eventId = itemId)
+
+            return Result.success()
+        } else if (pendingCreateEvent != null) {
+            eventPendingSyncDao.deleteEventPendingSyncEntity(
+                eventId = itemId,
+                operations = listOf(SyncOperation.CREATE)
+            )
+            eventPendingSyncDao.deleteDeletedEventSyncEntity(eventId = itemId)
+
+            return Result.success()
+        } else if (pendingUpdateEvent != null) {
+            eventPendingSyncDao.deleteEventPendingSyncEntity(
+                eventId = itemId,
+                operations = listOf(SyncOperation.UPDATE)
+            )
+        }
+
+        return when (val result = eventRemoteDataSource.deleteEvent(id = itemId)) {
+            is ResultError -> {
+                when (result.error) {
+                    DataError.Network.NOT_FOUND -> {
+                        eventPendingSyncDao.deleteDeletedEventSyncEntity(eventId = itemId)
+                        Result.success()
+                    }
+
+                    else -> {
+                        result.error.toWorkerResult()
+                    }
+                }
+            }
+
+            is ResultSuccess -> {
+                eventPendingSyncDao.deleteDeletedEventSyncEntity(eventId = itemId)
+                Result.success()
+            }
+        }
     }
 
     private suspend fun deleteReminder(itemId: String): Result {

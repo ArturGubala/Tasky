@@ -3,10 +3,13 @@ package com.example.tasky.agenda.data.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
+import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
+import com.example.tasky.core.data.database.event.mappers.toEvent
 import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
 import com.example.tasky.core.data.database.reminder.mappers.toReminder
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
@@ -21,6 +24,8 @@ class UpsertAgendaItemWorker(
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val reminderRemoteDataSource: ReminderRemoteDataSource,
     private val reminderPendingSyncDao: ReminderPendingSyncDao,
+    private val eventRemoteDataSource: EventRemoteDataSource,
+    private val eventPendingSyncDao: EventPendingSyncDao,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -124,8 +129,78 @@ class UpsertAgendaItemWorker(
     }
 
     private suspend fun upsertEvent(itemId: String): Result {
+        val pendingEventEntity = eventPendingSyncDao.getEventPendingSyncEntity(itemId)
+            ?: return Result.failure()
 
-        return Result.success()
+        when (pendingEventEntity.operation) {
+            SyncOperation.CREATE -> {
+                val pendingUpdateEntity =
+                    eventPendingSyncDao.getEventPendingSyncEntityByIdAndOperation(
+                        eventId = itemId,
+                        operation = SyncOperation.UPDATE
+                    )
+
+                val event = if (pendingUpdateEntity != null) {
+                    eventPendingSyncDao.deleteEventPendingSyncEntity(
+                        eventId = pendingUpdateEntity.eventId,
+                        operations = listOf(SyncOperation.UPDATE)
+                    )
+                    pendingUpdateEntity.event.toEvent()
+                } else {
+                    pendingEventEntity.event.toEvent()
+                }
+
+                return when (val result = eventRemoteDataSource.createEvent(event)) {
+                    is ResultError -> {
+                        result.error.toWorkerResult()
+                    }
+
+                    is ResultSuccess -> {
+                        eventPendingSyncDao.deleteEventPendingSyncEntity(
+                            eventId = itemId,
+                            operations = listOf(SyncOperation.CREATE)
+                        )
+                        Result.success()
+                    }
+                }
+            }
+
+            SyncOperation.UPDATE -> {
+                val pendingCreate = eventPendingSyncDao.getEventPendingSyncEntityByIdAndOperation(
+                    eventId = itemId,
+                    operation = SyncOperation.CREATE
+                )
+
+                if (pendingCreate != null) {
+                    val updatedCreateEntity = pendingCreate.copy(
+                        event = pendingEventEntity.event,
+                        operation = SyncOperation.CREATE
+                    )
+                    eventPendingSyncDao.upsertEventPendingSyncEntity(updatedCreateEntity)
+                    eventPendingSyncDao.deleteEventPendingSyncEntity(
+                        eventId = itemId,
+                        operations = listOf(SyncOperation.UPDATE)
+                    )
+
+                    return Result.success()
+                }
+
+                val event = pendingEventEntity.event.toEvent()
+                return when (val result = eventRemoteDataSource.updateEvent(event)) {
+                    is ResultError -> {
+                        result.error.toWorkerResult()
+                    }
+
+                    is ResultSuccess -> {
+                        eventPendingSyncDao.deleteEventPendingSyncEntity(
+                            eventId = itemId,
+                            operations = listOf(SyncOperation.UPDATE)
+                        )
+                        Result.success()
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun upsertReminder(itemId: String): Result {

@@ -14,6 +14,10 @@ import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.kind
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.core.data.database.SyncOperation
+import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
+import com.example.tasky.core.data.database.event.entity.EventDeletedSyncEntity
+import com.example.tasky.core.data.database.event.entity.EventPendingSyncEntity
+import com.example.tasky.core.data.database.event.mappers.toEventEntity
 import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
 import com.example.tasky.core.data.database.reminder.entity.ReminderDeletedSyncEntity
 import com.example.tasky.core.data.database.reminder.entity.ReminderPendingSyncEntity
@@ -22,6 +26,7 @@ import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.entity.TaskDeletedSyncEntity
 import com.example.tasky.core.data.database.task.entity.TaskPendingSyncEntity
 import com.example.tasky.core.data.database.task.mappers.toTaskEntity
+import com.example.tasky.core.domain.data.EventLocalDataSource
 import com.example.tasky.core.domain.data.ReminderLocalDataSource
 import com.example.tasky.core.domain.data.TaskLocalDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
@@ -40,6 +45,8 @@ class SyncAgendaItemWorkerScheduler(
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val reminderLocalDataSource: ReminderLocalDataSource,
     private val reminderPendingSyncDao: ReminderPendingSyncDao,
+    private val eventLocalDataSource: EventLocalDataSource,
+    private val eventPendingSyncDao: EventPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val applicationScope: CoroutineScope,
 ) : SyncAgendaItemScheduler {
@@ -75,7 +82,11 @@ class SyncAgendaItemWorkerScheduler(
             }
 
             AgendaKind.EVENT -> {
-
+                val pendingEvent = EventDeletedSyncEntity(
+                    eventId = item.id,
+                    userId = userId
+                )
+                eventPendingSyncDao.upsertDeletedEventSyncEntity(pendingEvent)
             }
 
             AgendaKind.REMINDER -> {
@@ -127,7 +138,13 @@ class SyncAgendaItemWorkerScheduler(
             }
 
             AgendaKind.EVENT -> {
-
+                val event = eventLocalDataSource.getEvent(id = item.id).firstOrNull() ?: return
+                val pendingEvent = EventPendingSyncEntity(
+                    event = event.toEventEntity(),
+                    operation = operation,
+                    userId = userId
+                )
+                eventPendingSyncDao.upsertEventPendingSyncEntity(pendingEvent)
             }
 
             AgendaKind.REMINDER -> {

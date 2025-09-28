@@ -1,5 +1,6 @@
 package com.example.Eventy.core.data.database.event.dao
 
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -7,6 +8,7 @@ import androidx.room.Upsert
 import com.example.tasky.core.data.database.event.entity.EventEntity
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface EventDao {
 
     @Upsert

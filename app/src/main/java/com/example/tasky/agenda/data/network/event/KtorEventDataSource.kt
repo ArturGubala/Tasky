@@ -4,6 +4,7 @@ import com.example.tasky.agenda.data.network.event.dto.AttendeeDto
 import com.example.tasky.agenda.data.network.event.dto.CreateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.EventDto
 import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
+import com.example.tasky.agenda.data.network.event.dto.UpsertEventResponseDto
 import com.example.tasky.agenda.data.network.event.mappers.toAttendee
 import com.example.tasky.agenda.data.network.event.mappers.toCreateEventRequest
 import com.example.tasky.agenda.data.network.event.mappers.toEvent
@@ -32,21 +33,24 @@ class KtorEventDataSource(
     }
 
     override suspend fun createEvent(event: Event): Result<Event, DataError.Network> {
-        return httpClient.post<CreateEventRequest, EventDto>(
+        return httpClient.post<CreateEventRequest, UpsertEventResponseDto>(
             route = "/event",
             body = event.toCreateEventRequest()
         ).map { it.toEvent() }
     }
 
     override suspend fun updateEvent(event: Event): Result<Event, DataError.Network> {
-        return httpClient.put<UpdateEventRequest, EventDto>(
-            route = "/event",
+        return httpClient.put<UpdateEventRequest, UpsertEventResponseDto>(
+            route = "/event/${event.id}",
             body = event.toUpdateEventRequest()
         ).map { it.toEvent() }
     }
 
     override suspend fun deleteEvent(id: String): EmptyResult<DataError.Network> {
-        return httpClient.delete(route = "/event/$id")
+        return httpClient.delete(
+            route = "/event",
+            queryParameters = mapOf("eventId" to id)
+        )
     }
 
     override suspend fun confirmUpload(ids: List<String>): Result<Event, DataError.Network> {

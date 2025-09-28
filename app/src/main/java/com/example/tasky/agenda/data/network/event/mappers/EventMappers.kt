@@ -7,6 +7,7 @@ import com.example.tasky.agenda.data.network.event.dto.CreateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.EventDto
 import com.example.tasky.agenda.data.network.event.dto.PhotoDto
 import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
+import com.example.tasky.agenda.data.network.event.dto.UpsertEventResponseDto
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.agenda.domain.model.Photo
@@ -14,12 +15,15 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 fun EventDto.toEvent(): Event {
+    val remindAt = attendees.firstOrNull()?.remindAt
+        ?: from
+
     return Event(
         id = id,
         title = title,
         description = description,
-        timeFrom = Instant.parse(timeFrom),
-        timeTo = Instant.parse(timeTo),
+        timeFrom = Instant.parse(from),
+        timeTo = Instant.parse(to),
         remindAt = Instant.parse(remindAt),
         updatedAt = updatedAt?.let { Instant.parse(it) },
         hostId = hostId,
@@ -29,16 +33,33 @@ fun EventDto.toEvent(): Event {
     )
 }
 
+fun UpsertEventResponseDto.toEvent(): Event {
+    return Event(
+        id = event.id,
+        title = event.title,
+        description = event.description,
+        timeFrom = Instant.parse(event.from),
+        timeTo = Instant.parse(event.to),
+        remindAt = event.remindAt?.let { Instant.parse(it) }
+            ?: Instant.parse(event.from),
+        updatedAt = event.updatedAt?.let { Instant.parse(it) },
+        hostId = event.hostId,
+        isUserEventCreator = event.isUserEventCreator,
+        attendees = emptyList(),
+        photos = emptyList()
+    )
+}
+
 fun Event.toCreateEventRequest(): CreateEventRequest {
     return CreateEventRequest(
         id = id,
         title = title,
         description = description,
-        timeFrom = timeFrom.toString(),
-        timeTo = timeTo.toString(),
+        from = timeFrom.toString(),
+        to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendees = listOf(),
+        attendeeIds = listOf(),
         photoKeys = listOf()
     )
 }
@@ -48,11 +69,11 @@ fun Event.toUpdateEventRequest(): UpdateEventRequest {
         id = id,
         title = title,
         description = description,
-        timeFrom = timeFrom.toString(),
-        timeTo = timeTo.toString(),
+        from = timeFrom.toString(),
+        to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendees = listOf(),
+        attendeeIds = listOf(),
         newPhotoKeys = listOf(),
         deletedPhotoKeys = listOf(),
         isGoing = true,

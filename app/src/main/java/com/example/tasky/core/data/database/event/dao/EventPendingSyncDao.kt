@@ -1,11 +1,13 @@
 package com.example.tasky.core.data.database.event.dao
 
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.entity.EventDeletedSyncEntity
 import com.example.tasky.core.data.database.event.entity.EventPendingSyncEntity
 
+@Dao
 interface EventPendingSyncDao {
 
     // UPSERT EVENT

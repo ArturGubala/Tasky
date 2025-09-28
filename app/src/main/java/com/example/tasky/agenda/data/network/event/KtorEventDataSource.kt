@@ -66,7 +66,7 @@ class KtorEventDataSource(
 
     override suspend fun deleteAttendee(eventId: String): EmptyResult<DataError.Network> {
         return httpClient.delete(
-            route = "/event",
+            route = "/attendee",
             queryParameters = mapOf(
                 "eventId" to eventId
             )

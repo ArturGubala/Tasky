@@ -3,8 +3,10 @@
 package com.example.tasky.agenda.data.network.event.mappers
 
 import com.example.tasky.agenda.data.network.event.dto.AttendeeDto
+import com.example.tasky.agenda.data.network.event.dto.CreateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.EventDto
 import com.example.tasky.agenda.data.network.event.dto.PhotoDto
+import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.agenda.domain.model.Photo
@@ -27,7 +29,37 @@ fun EventDto.toEvent(): Event {
     )
 }
 
-fun AttendeeDto.toAttendee(hostId: String): Attendee {
+fun Event.toCreateEventRequest(): CreateEventRequest {
+    return CreateEventRequest(
+        id = id,
+        title = title,
+        description = description,
+        timeFrom = timeFrom.toString(),
+        timeTo = timeTo.toString(),
+        remindAt = remindAt.toString(),
+        updatedAt = updatedAt?.toString(),
+        attendees = listOf(),
+        photoKeys = listOf()
+    )
+}
+
+fun Event.toUpdateEventRequest(): UpdateEventRequest {
+    return UpdateEventRequest(
+        id = id,
+        title = title,
+        description = description,
+        timeFrom = timeFrom.toString(),
+        timeTo = timeTo.toString(),
+        remindAt = remindAt.toString(),
+        updatedAt = updatedAt?.toString(),
+        attendees = listOf(),
+        newPhotoKeys = listOf(),
+        deletedPhotoKeys = listOf(),
+        isGoing = true,
+    )
+}
+
+fun AttendeeDto.toAttendee(hostId: String = ""): Attendee {
     return Attendee(
         email = email,
         username = username,

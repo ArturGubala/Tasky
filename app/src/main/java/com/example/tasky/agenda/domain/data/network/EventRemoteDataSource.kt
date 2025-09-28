@@ -14,5 +14,5 @@ interface EventRemoteDataSource {
     suspend fun confirmUpload(ids: List<String>): Result<Event, DataError.Network>
 
     suspend fun getAttendee(email: String): Result<Attendee, DataError.Network>
-    suspend fun deleteAttendee(id: String): EmptyResult<DataError.Network>
+    suspend fun deleteAttendee(eventId: String): EmptyResult<DataError.Network>
 }

@@ -5,12 +5,14 @@ package com.example.tasky.agenda.data.network.event.mappers
 import com.example.tasky.agenda.data.network.event.dto.AttendeeDto
 import com.example.tasky.agenda.data.network.event.dto.CreateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.EventDto
+import com.example.tasky.agenda.data.network.event.dto.GetAttendeeResponseDto
 import com.example.tasky.agenda.data.network.event.dto.PhotoDto
 import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.UpsertEventResponseDto
 import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.agenda.domain.model.Photo
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -59,8 +61,8 @@ fun Event.toCreateEventRequest(): CreateEventRequest {
         to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendeeIds = listOf(),
-        photoKeys = listOf()
+        attendeeIds = attendees.map { it.userId },
+        photoKeys = photos.map { it.id }
     )
 }
 
@@ -73,7 +75,7 @@ fun Event.toUpdateEventRequest(): UpdateEventRequest {
         to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendeeIds = listOf(),
+        attendeeIds = attendees.map { it.userId },
         newPhotoKeys = listOf(),
         deletedPhotoKeys = listOf(),
         isGoing = true,
@@ -89,6 +91,18 @@ fun AttendeeDto.toAttendee(hostId: String = ""): Attendee {
         isGoing = isGoing,
         remindAt = Instant.parse(remindAt),
         isCreator = hostId == userId
+    )
+}
+
+fun GetAttendeeResponseDto.toAttendee(): Attendee {
+    return Attendee(
+        email = email,
+        username = fullName,
+        userId = userId,
+        eventId = "",
+        isGoing = false,
+        remindAt = Clock.System.now(),
+        isCreator = false
     )
 }
 

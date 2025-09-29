@@ -77,4 +77,5 @@
     <string name="offline_icon">Offline icon</string>
     <string name="save_successful">Save successful</string>
     <string name="delete_successful">Delete successful</string>
+    <string name="visitor_added_successfully">Visitor added successfully</string>
 </resources>

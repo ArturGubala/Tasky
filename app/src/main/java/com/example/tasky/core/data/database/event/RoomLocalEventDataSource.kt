@@ -34,8 +34,16 @@ class RoomLocalEventDataSource(
 
     override suspend fun upsertEvent(event: Event): EmptyResult<DataError.Local> {
         return try {
-            val entity = event.toEventEntity()
-            eventDao.upsertEvent(entity)
+            val eventEntity = event.toEventEntity()
+            val attendeesEntities = event.toAttendeeEntities()
+            val photosEntities = event.toPhotoEntities()
+
+            eventDao.upsertEventWithRelations(
+                event = eventEntity,
+                attendees = attendeesEntities,
+                photos = photosEntities
+            )
+
             Result.Success(Unit)
         } catch (_: SQLiteFullException) {
             Result.Error(DataError.Local.DISK_FULL)
@@ -48,7 +56,7 @@ class RoomLocalEventDataSource(
             val allAttendeesEntities = events.flatMap { it.toAttendeeEntities() }
             val allPhotosEntities = events.flatMap { it.toPhotoEntities() }
 
-            eventDao.insertEventsWithRelations(
+            eventDao.upsertEventsWithRelations(
                 events = eventEntities,
                 attendees = allAttendeesEntities,
                 photos = allPhotosEntities

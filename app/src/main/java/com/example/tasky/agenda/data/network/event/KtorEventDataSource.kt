@@ -1,8 +1,8 @@
 package com.example.tasky.agenda.data.network.event
 
-import com.example.tasky.agenda.data.network.event.dto.AttendeeDto
 import com.example.tasky.agenda.data.network.event.dto.CreateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.EventDto
+import com.example.tasky.agenda.data.network.event.dto.GetAttendeeResponseDto
 import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.UpsertEventResponseDto
 import com.example.tasky.agenda.data.network.event.mappers.toAttendee
@@ -26,6 +26,7 @@ class KtorEventDataSource(
     private val httpClient: HttpClient,
 ) : EventRemoteDataSource {
 
+    // EVENT
     override suspend fun getEvent(id: String): Result<Event, DataError.Network> {
         return httpClient.get<EventDto>(
             route = "/event/$id",
@@ -53,12 +54,16 @@ class KtorEventDataSource(
         )
     }
 
+
+    // PHOTO
     override suspend fun confirmUpload(ids: List<String>): Result<Event, DataError.Network> {
         TODO("Not yet implemented")
     }
 
+
+    // ATTENDEE
     override suspend fun getAttendee(email: String): Result<Attendee, DataError.Network> {
-        return httpClient.get<AttendeeDto>(
+        return httpClient.get<GetAttendeeResponseDto>(
             route = "/attendee",
             queryParameters = mapOf("email" to email)
         ).map { it.toAttendee() }

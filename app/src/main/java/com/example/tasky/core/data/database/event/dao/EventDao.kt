@@ -1,8 +1,6 @@
 package com.example.Eventy.core.data.database.event.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
@@ -19,18 +17,29 @@ interface EventDao {
     @Upsert
     suspend fun upsertEvent(event: EventEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEvents(events: List<EventEntity>)
+    @Upsert
+    suspend fun upsertEvents(events: List<EventEntity>)
 
     @Transaction
-    suspend fun insertEventsWithRelations(
+    suspend fun upsertEventWithRelations(
+        event: EventEntity,
+        attendees: List<AttendeeEntity>,
+        photos: List<PhotoEntity>,
+    ) {
+        upsertEvent(event)
+        upsertAttendees(attendees)
+        upsertPhotos(photos)
+    }
+
+    @Transaction
+    suspend fun upsertEventsWithRelations(
         events: List<EventEntity>,
         attendees: List<AttendeeEntity>,
         photos: List<PhotoEntity>,
     ) {
-        insertEvents(events)
-        insertAttendees(attendees)
-        insertPhotos(photos)
+        upsertEvents(events)
+        upsertAttendees(attendees)
+        upsertPhotos(photos)
     }
 
     @Query("SELECT * FROM Event WHERE id = :id")
@@ -49,16 +58,16 @@ interface EventDao {
 
 
     // ATTENDEE
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAttendees(attendees: List<AttendeeEntity>)
+    @Upsert
+    suspend fun upsertAttendees(attendees: List<AttendeeEntity>)
 
     @Query("DELETE FROM attendee WHERE userId = :userId and eventId = :eventId")
     suspend fun deleteAttendee(userId: String, eventId: String)
 
 
     // PHOTO
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPhotos(photos: List<PhotoEntity>)
+    @Upsert
+    suspend fun upsertPhotos(photos: List<PhotoEntity>)
 
     @Query("DELETE FROM photo WHERE `key` = :key and eventId = :eventId")
     suspend fun deletePhoto(key: String, eventId: String)

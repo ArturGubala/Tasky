@@ -30,4 +30,6 @@ interface AgendaDetailAction {
     data class OnSaveClick(val agendaKind: AgendaKind) : AgendaDetailAction
     data class OnDeleteOnBottomSheetClick(val id: String, val agendaKind: AgendaKind) :
         AgendaDetailAction
+    data class OnAddOnBottomSheetClick(val email: String) :
+        AgendaDetailAction
 }

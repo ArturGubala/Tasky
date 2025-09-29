@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,9 +42,10 @@ fun AddAttendeeBottomSheetContent(
     isAttendeeEmailValid: Boolean,
     isAttendeeEmailFieldFocused: Boolean,
     onAttendeeEmailChange: (String) -> Unit,
-    onAttendeeEmailFieldFocusChange:((Boolean) -> Unit)?,
+    onAttendeeEmailFieldFocusChange: ((Boolean) -> Unit)?,
     modifier: Modifier = Modifier,
-    errors: List<ValidationItem> = emptyList()
+    errors: List<ValidationItem> = emptyList(),
+    enabled: Boolean = true,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -98,17 +101,28 @@ fun AddAttendeeBottomSheetContent(
                 onClick = { onAddClick() },
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colorScheme.primary,
-                enabled = isAttendeeEmailValid
+                enabled = enabled && isAttendeeEmailValid
             ) {
                 Box(
                     modifier = modifier,
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.add),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    when (enabled) {
+                        true -> {
+                            Text(
+                                text = stringResource(R.string.add),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+
+                        false -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(size = 24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 }
             }
         }

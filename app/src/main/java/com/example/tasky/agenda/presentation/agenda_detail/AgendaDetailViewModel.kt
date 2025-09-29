@@ -22,7 +22,6 @@ import com.example.tasky.agenda.presentation.util.toAgendaItemInterval
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.updateUtcDate
 import com.example.tasky.agenda.presentation.util.updateUtcTime
-import com.example.tasky.auth.presentation.register.RegisterFocusedField
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.domain.PatternValidator
 import com.example.tasky.core.domain.ValidationItem
@@ -354,6 +353,11 @@ class AgendaDetailViewModel(
             }
             AgendaDetailAction.OnDismissBottomSheet -> {
                 _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE) }
+                updateDetails<AgendaItemDetails.Event> { event ->
+                    event.copy(
+                        attendeeEmail = ""
+                    )
+                }
             }
             is AgendaDetailAction.OnAttendeeEmailValueChanged -> {
                 updateDetails<AgendaItemDetails.Event> { event ->
@@ -372,7 +376,7 @@ class AgendaDetailViewModel(
                         ValidationItem(
                             message = UiText.StringResource(R.string.must_be_a_valid_email),
                             isValid = isEmailValid,
-                            focusedField = RegisterFocusedField.EMAIL
+                            focusedField = null
                         )
                     )
                 } else emptyList()
@@ -400,6 +404,7 @@ class AgendaDetailViewModel(
                     AgendaKind.REMINDER -> deleteReminder(action.id)
                 }
             }
+            is AgendaDetailAction.OnAddOnBottomSheetClick -> addAttendee(action.email)
         }
     }
 
@@ -519,8 +524,8 @@ class AgendaDetailViewModel(
                 updatedAt = currentTimestamp.toKotlinInstant(),
                 hostId = sessionStorage.get()?.userId ?: "",
                 isUserEventCreator = true,
-                attendees = listOf(),
-                photos = listOf()
+                attendees = _state.value.detailsAsEvent()?.attendees ?: listOf(),
+                photos = _state.value.detailsAsEvent()?.photos ?: listOf(),
             )
 
             val syncOperation =
@@ -608,4 +613,41 @@ class AgendaDetailViewModel(
             _state.update { it.copy(isDeleting = false) }
         }
     }
+
+    private fun addAttendee(email: String) {
+        viewModelScope.launch {
+            updateDetails<AgendaItemDetails.Event> {
+                it.copy(isAttendeeOperationInProgress = true)
+            }
+            eventRepository.getAttendee(email = email)
+                .onError { error ->
+                    updateDetails<AgendaItemDetails.Event> {
+                        it.copy(
+                            errors = listOf(
+                                ValidationItem(
+                                    message = error.asUiText(),
+                                    isValid = false,
+                                    focusedField = null
+                                )
+                            ),
+                            isAttendeeEmailValid = false
+                        )
+                    }
+                }
+                .onSuccess { attendee ->
+                    updateDetails<AgendaItemDetails.Event> {
+                        it.copy(attendees = it.attendees + attendee)
+                    }
+                    eventChannel.send(
+                        AgendaDetailEvent.AttendeeOperationFinish(
+                            message = UiText.StringResource(R.string.visitor_added_successfully)
+                        )
+                    )
+                }
+            updateDetails<AgendaItemDetails.Event> {
+                it.copy(isAttendeeOperationInProgress = false)
+            }
+        }
+    }
+
 }

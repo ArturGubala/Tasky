@@ -39,6 +39,7 @@ sealed interface AgendaItemDetails {
         val isAttendeeEmailValid: Boolean = false,
         val isAttendeeEmailFocused: Boolean = false,
         val errors: List<ValidationItem> = emptyList(),
+        val isAttendeeOperationInProgress: Boolean = false,
 
         ) : AgendaItemDetails
 

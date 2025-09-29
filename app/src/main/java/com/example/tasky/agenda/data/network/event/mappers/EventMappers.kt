@@ -9,10 +9,10 @@ import com.example.tasky.agenda.data.network.event.dto.GetAttendeeResponseDto
 import com.example.tasky.agenda.data.network.event.dto.PhotoDto
 import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.UpsertEventResponseDto
-import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.EventAttendee
+import com.example.tasky.agenda.domain.model.LookupAttendee
 import com.example.tasky.agenda.domain.model.Photo
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -30,7 +30,8 @@ fun EventDto.toEvent(): Event {
         updatedAt = updatedAt?.let { Instant.parse(it) },
         hostId = hostId,
         isUserEventCreator = isUserEventCreator,
-        attendees = attendees.map { it.toAttendee(hostId = hostId) },
+        lookupAttendees = listOf(),
+        eventAttendees = attendees.map { it.toEventAttendee(hostId = hostId) },
         photos = photoKeys.map { it.toPhoto() }
     )
 }
@@ -47,7 +48,8 @@ fun UpsertEventResponseDto.toEvent(): Event {
         updatedAt = event.updatedAt?.let { Instant.parse(it) },
         hostId = event.hostId,
         isUserEventCreator = event.isUserEventCreator,
-        attendees = emptyList(),
+        lookupAttendees = listOf(),
+        eventAttendees = event.attendees.map { it.toEventAttendee(hostId = event.hostId) },
         photos = emptyList()
     )
 }
@@ -61,7 +63,7 @@ fun Event.toCreateEventRequest(): CreateEventRequest {
         to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendeeIds = attendees.map { it.userId },
+        attendeeIds = lookupAttendees.map { it.userId },
         photoKeys = photos.map { it.id }
     )
 }
@@ -75,17 +77,17 @@ fun Event.toUpdateEventRequest(): UpdateEventRequest {
         to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendeeIds = attendees.map { it.userId },
+        attendeeIds = listOf(lookupAttendees, eventAttendees).flatten().map { it.userId },
         newPhotoKeys = listOf(),
         deletedPhotoKeys = listOf(),
         isGoing = true,
     )
 }
 
-fun AttendeeDto.toAttendee(hostId: String = ""): Attendee {
-    return Attendee(
+fun AttendeeDto.toEventAttendee(hostId: String = ""): EventAttendee {
+    return EventAttendee(
         email = email,
-        username = username,
+        name = username,
         userId = userId,
         eventId = eventId,
         isGoing = isGoing,
@@ -94,15 +96,11 @@ fun AttendeeDto.toAttendee(hostId: String = ""): Attendee {
     )
 }
 
-fun GetAttendeeResponseDto.toAttendee(): Attendee {
-    return Attendee(
+fun GetAttendeeResponseDto.toLookupAttendee(): LookupAttendee {
+    return LookupAttendee(
         email = email,
-        username = fullName,
+        name = fullName,
         userId = userId,
-        eventId = "",
-        isGoing = false,
-        remindAt = Clock.System.now(),
-        isCreator = false
     )
 }
 

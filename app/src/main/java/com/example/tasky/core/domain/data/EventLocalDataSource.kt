@@ -11,4 +11,5 @@ interface EventLocalDataSource {
     suspend fun upsertEvent(event: Event): EmptyResult<DataError.Local>
     suspend fun insertEvents(events: List<Event>): EmptyResult<DataError.Local>
     suspend fun deleteEvent(id: String)
+    suspend fun deleteAttendee(userId: String, eventId: String)
 }

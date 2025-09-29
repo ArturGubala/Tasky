@@ -5,13 +5,13 @@ import com.example.tasky.agenda.data.network.event.dto.EventDto
 import com.example.tasky.agenda.data.network.event.dto.GetAttendeeResponseDto
 import com.example.tasky.agenda.data.network.event.dto.UpdateEventRequest
 import com.example.tasky.agenda.data.network.event.dto.UpsertEventResponseDto
-import com.example.tasky.agenda.data.network.event.mappers.toAttendee
 import com.example.tasky.agenda.data.network.event.mappers.toCreateEventRequest
 import com.example.tasky.agenda.data.network.event.mappers.toEvent
+import com.example.tasky.agenda.data.network.event.mappers.toLookupAttendee
 import com.example.tasky.agenda.data.network.event.mappers.toUpdateEventRequest
 import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
-import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.LookupAttendee
 import com.example.tasky.core.data.networking.delete
 import com.example.tasky.core.data.networking.get
 import com.example.tasky.core.data.networking.post
@@ -62,11 +62,11 @@ class KtorEventDataSource(
 
 
     // ATTENDEE
-    override suspend fun getAttendee(email: String): Result<Attendee, DataError.Network> {
+    override suspend fun getAttendee(email: String): Result<LookupAttendee, DataError.Network> {
         return httpClient.get<GetAttendeeResponseDto>(
             route = "/attendee",
             queryParameters = mapOf("email" to email)
-        ).map { it.toAttendee() }
+        ).map { it.toLookupAttendee() }
     }
 
     override suspend fun deleteAttendee(eventId: String): EmptyResult<DataError.Network> {

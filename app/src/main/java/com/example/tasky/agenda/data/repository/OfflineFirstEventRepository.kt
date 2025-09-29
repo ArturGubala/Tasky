@@ -4,8 +4,8 @@ import com.example.tasky.agenda.domain.data.EventRepository
 import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
-import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.LookupAttendee
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
 import com.example.tasky.core.data.database.event.mappers.toEvent
@@ -98,8 +98,12 @@ class OfflineFirstEventRepository(
             }.asEmptyDataResult()
     }
 
-    override suspend fun getAttendee(email: String): Result<Attendee, DataError.Network> {
+    override suspend fun getAttendee(email: String): Result<LookupAttendee, DataError.Network> {
         return eventRemoteDataSource.getAttendee(email = email)
+    }
+
+    override suspend fun deleteAttendee(userId: String, eventId: String) {
+        eventLocalDataSource.deleteAttendee(userId = userId, eventId = eventId)
     }
 
     override suspend fun syncPendingEvent() {

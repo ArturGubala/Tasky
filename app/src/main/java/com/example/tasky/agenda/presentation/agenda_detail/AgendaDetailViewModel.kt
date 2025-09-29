@@ -182,7 +182,8 @@ class AgendaDetailViewModel(
                             event.timeTo.toJavaInstant(),
                             ZoneId.of("UTC")
                         ),
-                        attendees = event.attendees
+                        lookupAttendees = event.lookupAttendees,
+                        eventAttendees = event.eventAttendees,
                     )
                 }
             }
@@ -349,6 +350,7 @@ class AgendaDetailViewModel(
             AgendaDetailAction.OnAddAttendeeClick -> {
                 _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.ADD_ATTENDEE) }
             }
+            is AgendaDetailAction.OnDeleteAttendeeClick -> deleteAttendee(action.userId)
             AgendaDetailAction.OnDeleteAgendaItemClick -> {
                 _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM) }
             }
@@ -525,7 +527,8 @@ class AgendaDetailViewModel(
                 updatedAt = currentTimestamp.toKotlinInstant(),
                 hostId = sessionStorage.get()?.userId ?: "",
                 isUserEventCreator = true,
-                attendees = _state.value.detailsAsEvent()?.attendees ?: listOf(),
+                lookupAttendees = _state.value.detailsAsEvent()?.lookupAttendees ?: listOf(),
+                eventAttendees = _state.value.detailsAsEvent()?.eventAttendees ?: listOf(),
                 photos = _state.value.detailsAsEvent()?.photos ?: listOf(),
             )
 
@@ -637,7 +640,7 @@ class AgendaDetailViewModel(
                 }
                 .onSuccess { attendee ->
                     updateDetails<AgendaItemDetails.Event> {
-                        it.copy(attendees = it.attendees + attendee)
+                        it.copy(lookupAttendees = it.lookupAttendees + attendee)
                     }
                     eventChannel.send(
                         AgendaDetailEvent.AttendeeOperationFinish(
@@ -651,4 +654,20 @@ class AgendaDetailViewModel(
         }
     }
 
+    private fun deleteAttendee(userId: String) {
+        viewModelScope.launch {
+            if (agendaId.isNotEmpty()) {
+                eventRepository.deleteAttendee(userId = userId, eventId = agendaId)
+            }
+            updateDetails<AgendaItemDetails.Event> { event ->
+                val updatedLookupAttendees = event.lookupAttendees.filterNot { it.userId == userId }
+                val updatedEventAttendees = event.eventAttendees.filterNot { it.userId == userId }
+
+                event.copy(
+                    lookupAttendees = updatedLookupAttendees,
+                    eventAttendees = updatedEventAttendees
+                )
+            }
+        }
+    }
 }

@@ -15,6 +15,7 @@ data class Event(
     val updatedAt: Instant?,
     val hostId: String,
     val isUserEventCreator: Boolean,
-    val attendees: List<Attendee>,
+    val lookupAttendees: List<LookupAttendee>,
+    val eventAttendees: List<EventAttendee>,
     val photos: List<Photo>,
 )

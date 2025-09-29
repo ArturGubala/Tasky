@@ -1,7 +1,7 @@
 package com.example.tasky.agenda.domain.data.network
 
-import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.LookupAttendee
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
@@ -13,6 +13,6 @@ interface EventRemoteDataSource {
     suspend fun deleteEvent(id: String): EmptyResult<DataError.Network>
     suspend fun confirmUpload(ids: List<String>): Result<Event, DataError.Network>
 
-    suspend fun getAttendee(email: String): Result<Attendee, DataError.Network>
+    suspend fun getAttendee(email: String): Result<LookupAttendee, DataError.Network>
     suspend fun deleteAttendee(eventId: String): EmptyResult<DataError.Network>
 }

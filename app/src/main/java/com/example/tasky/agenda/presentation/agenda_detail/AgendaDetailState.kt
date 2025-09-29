@@ -3,7 +3,8 @@
 package com.example.tasky.agenda.presentation.agenda_detail
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.example.tasky.agenda.domain.model.Attendee
+import com.example.tasky.agenda.domain.model.EventAttendee
+import com.example.tasky.agenda.domain.model.LookupAttendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.agenda.presentation.util.AgendaDetailBottomSheetType
 import com.example.tasky.agenda.presentation.util.AgendaItemAttendeesStatus
@@ -32,7 +33,8 @@ sealed interface AgendaItemDetails {
     data class Event(
         val toTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC"))
             .truncatedTo(ChronoUnit.HOURS).plusHours(1),
-        val attendees: List<Attendee> = listOf(),
+        val lookupAttendees: List<LookupAttendee> = listOf(),
+        val eventAttendees: List<EventAttendee> = listOf(),
         val photos: List<Photo> = emptyList(),
         val isImageLoading: Boolean = false,
         val attendeeEmail: String = "",

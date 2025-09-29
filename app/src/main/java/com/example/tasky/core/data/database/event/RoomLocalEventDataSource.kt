@@ -71,4 +71,8 @@ class RoomLocalEventDataSource(
     override suspend fun deleteEvent(id: String) {
         eventDao.deleteEvent(id)
     }
+
+    override suspend fun deleteAttendee(userId: String, eventId: String) {
+        eventDao.deleteAttendee(userId = userId, eventId = eventId)
+    }
 }

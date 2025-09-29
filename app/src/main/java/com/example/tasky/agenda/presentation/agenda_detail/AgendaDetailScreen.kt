@@ -117,7 +117,7 @@ fun AgendaDetailScreenRoot(
         fieldType: AgendaEditTextFieldType,
         text: String
     ) -> Unit,
-    onNavigateToPhotoDetail: (photoId: String, photoUri: String) -> Unit,
+    onNavigateToPhotoDetail: (photoId: String, photoUri: String, agendaDetailView: AgendaDetailView) -> Unit,
     onNavigateToAgendaList: () -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaKind) }
@@ -262,7 +262,7 @@ fun AgendaDetailScreenRoot(
                     }
                 }
                 is AgendaDetailAction.OnPhotoClick -> {
-                    onNavigateToPhotoDetail(action.photoId, action.uriString)
+                    onNavigateToPhotoDetail(action.photoId, action.uriString, agendaDetailView)
                 }
                 else -> viewModel.onAction(action)
             }
@@ -512,8 +512,7 @@ fun AgendaDetailScreen(
                             }
 
                             // PHOTO PICKER
-                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT &&
-                                !isReadOnly) {
+                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()

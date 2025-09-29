@@ -131,9 +131,11 @@ fun NavGraphBuilder.agendaDetailScreen(
                     text = text
                 )
             },
-            onNavigateToPhotoDetail = { photoId, photoUri ->
+            onNavigateToPhotoDetail = { photoId, photoUri, agendaDetailView ->
                 navController.navigateToAgendaPhotoDetailScreen(
-                    photoId = photoId, photoUri = photoUri
+                    photoId = photoId,
+                    photoUri = photoUri,
+                    agendaDetailView = agendaDetailView
                 )
             },
             onNavigateToAgendaList = {
@@ -173,8 +175,15 @@ fun NavGraphBuilder.agendaEditTextScreen(
     }
 }
 
-fun NavController.navigateToAgendaPhotoDetailScreen(photoId: String, photoUri: String)
-        = navigate(AgendaPhotoDetailScreen(photoId = photoId, photoUri = photoUri))
+fun NavController.navigateToAgendaPhotoDetailScreen(
+    photoId: String, photoUri: String, agendaDetailView: AgendaDetailView,
+) = navigate(
+    AgendaPhotoDetailScreen(
+        photoId = photoId,
+        photoUri = photoUri,
+        agendaDetailView = agendaDetailView
+    )
+)
 
 fun NavGraphBuilder.agendaPhotoDetailScreen(
     navController: NavController
@@ -183,6 +192,7 @@ fun NavGraphBuilder.agendaPhotoDetailScreen(
         val args = it.toRoute<AgendaPhotoDetailScreen>()
         PhotoDetailScreenRoot(
             imageUri = args.photoUri,
+            agendaDetailView = args.agendaDetailView,
             onCloseClick = {
                 navController.navigateUp()
             },
@@ -220,5 +230,6 @@ data class AgendaEditTextScreen(
 @Serializable
 data class AgendaPhotoDetailScreen(
     val photoId: String,
-    val photoUri: String
+    val photoUri: String,
+    val agendaDetailView: AgendaDetailView,
 )

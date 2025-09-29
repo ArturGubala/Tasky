@@ -4,18 +4,18 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.graphics.scale
+import androidx.core.net.toUri
+import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.ImageCompressor
 import com.example.tasky.core.domain.util.Result
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.ensureActive
-import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.isActive
-import androidx.core.net.toUri
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import androidx.core.graphics.scale
-import com.example.tasky.core.domain.util.DataError
+import kotlin.coroutines.coroutineContext
 
 
 class AndroidImageCompressor(
@@ -32,9 +32,9 @@ class AndroidImageCompressor(
             val compressedBytes = compressImageToFitSize(uri, maxBytes)
             Result.Success(compressedBytes)
         } catch (_: ImageTooLargeException) {
-            Result.Error(DataError.Local.IMAGE_TOO_LARGE)
+            Result.Error(DataError.Local.ImageTooLarge)
         } catch (_: Exception) {
-            Result.Error(DataError.Local.COMPRESSION_FAILURE)
+            Result.Error(DataError.Local.CompressionFailure)
         }
     }
 

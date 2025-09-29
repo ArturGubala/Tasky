@@ -2,8 +2,13 @@
 
 package com.example.tasky.core.data.database.event.mappers
 
+import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.Photo
+import com.example.tasky.core.data.database.event.entity.AttendeeEntity
 import com.example.tasky.core.data.database.event.entity.EventEntity
+import com.example.tasky.core.data.database.event.entity.PhotoEntity
+import com.example.tasky.core.data.database.event.util.EventWithRelations
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -35,4 +40,64 @@ fun Event.toEventEntity(): EventEntity {
         hostId = hostId,
         isUserEventCreator = isUserEventCreator
     )
+}
+
+fun EventWithRelations.toEvent(): Event {
+    return Event(
+        id = event.id,
+        title = event.title,
+        description = event.description,
+        timeFrom = Instant.fromEpochMilliseconds(event.timeFrom),
+        timeTo = Instant.fromEpochMilliseconds(event.timeTo),
+        remindAt = Instant.fromEpochMilliseconds(event.remindAt),
+        updatedAt = event.updatedAt?.let { Instant.fromEpochMilliseconds(it) },
+        hostId = event.hostId,
+        isUserEventCreator = event.isUserEventCreator,
+        attendees = attendees.map { it.toAttendee() },
+        photos = photos.map { it.toPhoto() }
+    )
+}
+
+fun AttendeeEntity.toAttendee(): Attendee {
+    return Attendee(
+        email = email,
+        username = username,
+        userId = userId,
+        eventId = eventId,
+        isGoing = isGoing,
+        remindAt = Instant.fromEpochMilliseconds(remindAt),
+        isCreator = isCreator
+    )
+}
+
+fun Event.toAttendeeEntities(): List<AttendeeEntity> {
+    return attendees.map { attendee ->
+        AttendeeEntity(
+            userId = attendee.userId,
+            eventId = id,
+            email = attendee.email,
+            username = attendee.username,
+            isGoing = attendee.isGoing,
+            remindAt = attendee.remindAt.toEpochMilliseconds(),
+            isCreator = attendee.isCreator
+        )
+    }
+}
+
+fun PhotoEntity.toPhoto(): Photo {
+    return Photo(
+        id = key,
+        uri = url,
+        compressedBytes = null
+    )
+}
+
+fun Event.toPhotoEntities(): List<PhotoEntity> {
+    return photos.map { photo ->
+        PhotoEntity(
+            key = photo.id,
+            eventId = id,
+            url = photo.uri
+        )
+    }
 }

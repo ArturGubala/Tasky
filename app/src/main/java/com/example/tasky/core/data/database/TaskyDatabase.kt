@@ -4,9 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.Eventy.core.data.database.event.dao.EventDao
 import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
+import com.example.tasky.core.data.database.event.entity.AttendeeEntity
 import com.example.tasky.core.data.database.event.entity.EventDeletedSyncEntity
 import com.example.tasky.core.data.database.event.entity.EventEntity
 import com.example.tasky.core.data.database.event.entity.EventPendingSyncEntity
+import com.example.tasky.core.data.database.event.entity.PhotoEntity
 import com.example.tasky.core.data.database.reminder.dao.ReminderDao
 import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
 import com.example.tasky.core.data.database.reminder.entity.ReminderDeletedSyncEntity
@@ -27,6 +29,8 @@ import com.example.tasky.core.data.database.task.entity.TaskPendingSyncEntity
         ReminderPendingSyncEntity::class,
         ReminderDeletedSyncEntity::class,
         EventEntity::class,
+        AttendeeEntity::class,
+        PhotoEntity::class,
         EventPendingSyncEntity::class,
         EventDeletedSyncEntity::class,
     ],

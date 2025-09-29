@@ -4,6 +4,7 @@ import com.example.tasky.agenda.domain.data.EventRepository
 import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
+import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
@@ -52,6 +53,9 @@ class OfflineFirstEventRepository(
                                 )
                             )
                         }.join()
+                    }
+                    .onSuccess { event ->
+                        eventLocalDataSource.upsertEvent(event)
                     }.asEmptyDataResult()
             }
 
@@ -66,6 +70,9 @@ class OfflineFirstEventRepository(
                                 )
                             )
                         }.join()
+                    }
+                    .onSuccess { event ->
+                        eventLocalDataSource.upsertEvent(event)
                     }.asEmptyDataResult()
             }
         }
@@ -76,14 +83,23 @@ class OfflineFirstEventRepository(
 
         return eventRemoteDataSource.deleteEvent(id = id)
             .onError { error ->
-                applicationScope.launch {
-                    syncAgendaItemScheduler.scheduleSync(
-                        type = SyncAgendaItemScheduler.SyncType.DeleteAgendaItem(
-                            item = AgendaItem.Event(id = id)
-                        )
-                    )
-                }.join()
+                when (error) {
+                    DataError.Network.NotFound() -> {}
+                    else -> {
+                        applicationScope.launch {
+                            syncAgendaItemScheduler.scheduleSync(
+                                type = SyncAgendaItemScheduler.SyncType.DeleteAgendaItem(
+                                    item = AgendaItem.Event(id = id)
+                                )
+                            )
+                        }.join()
+                    }
+                }
             }.asEmptyDataResult()
+    }
+
+    override suspend fun getAttendee(email: String): Result<Attendee, DataError.Network> {
+        return eventRemoteDataSource.getAttendee(email = email)
     }
 
     override suspend fun syncPendingEvent() {
@@ -146,4 +162,6 @@ class OfflineFirstEventRepository(
             deleteJobs.forEach { it.join() }
         }
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.example.tasky.core.data.networking
 
 import com.example.tasky.BuildConfig
 import com.example.tasky.core.domain.util.DataError
+import com.example.tasky.core.domain.util.ErrorResponseDto
 import com.example.tasky.core.domain.util.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -74,14 +75,14 @@ suspend inline fun <reified T> safeCall(execute: () -> HttpResponse): Result<T, 
         execute()
     } catch(e: UnresolvedAddressException) {
         e.printStackTrace()
-        return Result.Error(DataError.Network.NO_INTERNET)
+        return Result.Error(DataError.Network.NoInternet)
     } catch (e: SerializationException) {
         e.printStackTrace()
-        return Result.Error(DataError.Network.SERIALIZATION)
+        return Result.Error(DataError.Network.Serialization)
     } catch(e: Exception) {
         if(e is CancellationException) throw e
         e.printStackTrace()
-        return Result.Error(DataError.Network.UNKNOWN)
+        return Result.Error(DataError.Network.Unknown)
     }
 
     return responseToResult(response)
@@ -90,14 +91,26 @@ suspend inline fun <reified T> safeCall(execute: () -> HttpResponse): Result<T, 
 suspend inline fun <reified T> responseToResult(response: HttpResponse): Result<T, DataError.Network> {
     return when(response.status.value) {
         in 200..299 -> Result.Success(response.body<T>())
-        400 -> Result.Error(DataError.Network.BAD_REQUEST)
-        401 -> Result.Error(DataError.Network.UNAUTHORIZED)
-        403 -> Result.Error(DataError.Network.FORBIDDEN)
-        404 -> Result.Error(DataError.Network.NOT_FOUND)
-        409 -> Result.Error(DataError.Network.CONFLICT)
-        429 -> Result.Error(DataError.Network.TOO_MANY_REQUESTS)
-        in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
-        else -> Result.Error(DataError.Network.UNKNOWN)
+        else -> {
+            val errorMessage = try {
+                response.body<ErrorResponseDto>().reason.firstOrNull()
+            } catch (_: Exception) {
+                null
+            }
+
+            val error = when (response.status.value) {
+                400 -> DataError.Network.BadRequest(errorMessage)
+                401 -> DataError.Network.Unauthorized
+                403 -> DataError.Network.Forbidden
+                404 -> DataError.Network.NotFound(errorMessage)
+                409 -> DataError.Network.Conflict(errorMessage)
+                429 -> DataError.Network.TooManyRequests
+                in 500..599 -> DataError.Network.ServerError
+                else -> DataError.Network.Unknown
+            }
+
+            Result.Error(error)
+        }
     }
 }
 

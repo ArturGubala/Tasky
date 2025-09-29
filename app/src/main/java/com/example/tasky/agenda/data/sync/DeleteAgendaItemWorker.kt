@@ -85,7 +85,7 @@ class DeleteAgendaItemWorker(
         return when (val result = taskRemoteDataSource.deleteTask(id = itemId)) {
             is ResultError -> {
                 when (result.error) {
-                    DataError.Network.NOT_FOUND -> {
+                    DataError.Network.NotFound() -> {
                         taskPendingSyncDao.deleteDeletedTaskSyncEntity(taskId = itemId)
                         Result.success()
                     }
@@ -137,7 +137,7 @@ class DeleteAgendaItemWorker(
         return when (val result = eventRemoteDataSource.deleteEvent(id = itemId)) {
             is ResultError -> {
                 when (result.error) {
-                    DataError.Network.NOT_FOUND -> {
+                    DataError.Network.NotFound() -> {
                         eventPendingSyncDao.deleteDeletedEventSyncEntity(eventId = itemId)
                         Result.success()
                     }
@@ -191,7 +191,7 @@ class DeleteAgendaItemWorker(
         return when (val result = reminderRemoteDataSource.deleteReminder(id = itemId)) {
             is ResultError -> {
                 when (result.error) {
-                    DataError.Network.NOT_FOUND -> {
+                    DataError.Network.NotFound() -> {
                         reminderPendingSyncDao.deleteDeletedReminderSyncEntity(reminderId = itemId)
                         Result.success()
                     }

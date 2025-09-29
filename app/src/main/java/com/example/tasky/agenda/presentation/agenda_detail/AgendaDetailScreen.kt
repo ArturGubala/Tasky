@@ -29,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -93,6 +94,7 @@ import com.example.tasky.core.presentation.ui.ObserveAsEvents
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.DateTimeFormatter
 import com.example.tasky.core.presentation.util.DeviceConfiguration
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -125,6 +127,8 @@ fun AgendaDetailScreenRoot(
         mutableStateOf(AgendaDetailConfigProvider.getConfig(type = agendaKind))
     }
     val isReadOnly = rememberSaveable { agendaDetailView == AgendaDetailView.READ_ONLY }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     val launchPhotoPicker = rememberAgendaPhotoPickerLauncher(
         onPhotoSelected = { uri ->
@@ -200,7 +204,6 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-
             is AgendaDetailEvent.DeleteSuccessful -> {
                 Toast.makeText(
                     context,
@@ -208,6 +211,14 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
                 onNavigateToAgendaList()
+            }
+            is AgendaDetailEvent.AttendeeOperationFinish -> {
+                Toast.makeText(
+                    context,
+                    event.message.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+                scope.launch { sheetState.hide() }
             }
         }
     }
@@ -263,7 +274,9 @@ fun AgendaDetailScreenRoot(
         agendaDetailView = agendaDetailView,
         agendaItemTypeConfiguration = agendaItemTypeConfiguration,
         isReadOnly = isReadOnly,
-        agendaId = agendaId
+        agendaId = agendaId,
+        sheetState = sheetState,
+        scope = scope
     )
 }
 
@@ -277,6 +290,8 @@ fun AgendaDetailScreen(
     agendaItemTypeConfiguration: AgendaTypeConfig,
     isReadOnly: Boolean,
     agendaId: String,
+    sheetState: SheetState,
+    scope: CoroutineScope,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
@@ -813,7 +828,9 @@ fun AgendaDetailScreen(
                                             style = MaterialTheme.typography.headlineSmall
                                         )
 
-                                        Column {
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
                                             notGoingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
                                                     attendeeName = attendee.username,
@@ -857,8 +874,6 @@ fun AgendaDetailScreen(
         }
 
         if (state.agendaDetailBottomSheetType != AgendaDetailBottomSheetType.NONE) {
-            val sheetState = rememberModalBottomSheetState()
-            val scope = rememberCoroutineScope()
             TaskyBottomSheet(
                 onDismiss = { onAction(AgendaDetailAction.OnDismissBottomSheet) },
                 sheetState = sheetState,
@@ -896,7 +911,13 @@ fun AgendaDetailScreen(
                                         onAction(AgendaDetailAction.OnDismissBottomSheet)
                                     }
                                 },
-                                onAddClick = {},
+                                onAddClick = {
+                                    onAction(
+                                        AgendaDetailAction.OnAddOnBottomSheetClick(
+                                            email = state.detailsAsEvent()?.attendeeEmail ?: ""
+                                        )
+                                    )
+                                },
                                 attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
                                 isAttendeeEmailValid = state.detailsAsEvent()?.isAttendeeEmailValid ?: false,
                                 isAttendeeEmailFieldFocused = state.detailsAsEvent()?.isAttendeeEmailFocused ?: false,
@@ -908,7 +929,9 @@ fun AgendaDetailScreen(
                                         hasFocus = hasFocus
                                     ))
                                 },
-                                errors = state.detailsAsEvent()?.errors ?: emptyList()
+                                errors = state.detailsAsEvent()?.errors ?: emptyList(),
+                                enabled = state.detailsAsEvent()?.isAttendeeOperationInProgress?.not()
+                                    ?: false
                             )
                         }
 
@@ -933,7 +956,9 @@ private fun AgendaDetailScreenPreview() {
             agendaDetailView = AgendaDetailView.EDIT,
             agendaItemTypeConfiguration = AgendaDetailConfigProvider.getConfig(type = AgendaKind.EVENT),
             isReadOnly = false,
-            agendaId = ""
+            agendaId = "",
+            sheetState = rememberModalBottomSheetState(),
+            scope = rememberCoroutineScope()
         )
     }
 }

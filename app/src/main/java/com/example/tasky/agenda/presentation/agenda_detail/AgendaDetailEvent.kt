@@ -10,4 +10,5 @@ interface AgendaDetailEvent {
     data class SaveSuccessful(val message: UiText) : AgendaDetailEvent
     data class DeleteError(val error: UiText) : AgendaDetailEvent
     data class DeleteSuccessful(val message: UiText) : AgendaDetailEvent
+    data class AttendeeOperationFinish(val message: UiText) : AgendaDetailEvent
 }

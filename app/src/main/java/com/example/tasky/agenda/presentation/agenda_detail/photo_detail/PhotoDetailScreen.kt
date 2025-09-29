@@ -28,6 +28,7 @@ import androidx.core.net.toUri
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.tasky.R
+import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
@@ -36,11 +37,13 @@ import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 @Composable
 fun PhotoDetailScreenRoot(
     imageUri: String,
+    agendaDetailView: AgendaDetailView,
     onCloseClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     PhotoDetailScreen(
         imageUri = imageUri,
+        agendaDetailView = agendaDetailView,
         onCloseClick = onCloseClick,
         onDeleteClick = onDeleteClick
     )
@@ -49,6 +52,7 @@ fun PhotoDetailScreenRoot(
 @Composable
 fun PhotoDetailScreen(
     imageUri: String,
+    agendaDetailView: AgendaDetailView,
     onCloseClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
@@ -70,16 +74,18 @@ fun PhotoDetailScreen(
                     }
                 },
                 rightActions = {
-                    TaskyTextButton(
-                        onClick = {
-                            onDeleteClick()
+                    if (agendaDetailView == AgendaDetailView.EDIT) {
+                        TaskyTextButton(
+                            onClick = {
+                                onDeleteClick()
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_bin),
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_bin),
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
                     }
                 },
                 modifier = Modifier
@@ -139,6 +145,7 @@ private fun PhotoDetailScreenPreview() {
     TaskyTheme {
         PhotoDetailScreen(
             imageUri = "content://media/picker/0/com.android.providers.media.photopicker/media/1000000380",
+            agendaDetailView = AgendaDetailView.EDIT,
             onCloseClick = {},
             onDeleteClick = {}
         )

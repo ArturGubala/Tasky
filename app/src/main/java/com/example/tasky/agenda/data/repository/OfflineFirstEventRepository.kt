@@ -1,5 +1,7 @@
 package com.example.tasky.agenda.data.repository
 
+import com.example.tasky.agenda.data.network.event.dto.ConfirmUploadRequest
+import com.example.tasky.agenda.data.network.event.mappers.toEvent
 import com.example.tasky.agenda.domain.data.EventRepository
 import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
@@ -54,8 +56,32 @@ class OfflineFirstEventRepository(
                             )
                         }.join()
                     }
-                    .onSuccess { event ->
-                        eventLocalDataSource.upsertEvent(event)
+                    .onSuccess { eventResponse ->
+                        var uploadedKeys: List<String> = listOf()
+
+                        // UPLOAD TO AWS
+                        for (uploadUrl in eventResponse.uploadUrls) {
+                            event.photos.first {
+                                it.id == uploadUrl.photoKey
+                            }.compressedBytes?.let {
+                                eventRemoteDataSource.uploadPhoto(
+                                    url = uploadUrl.url,
+                                    photo = it
+                                ).onSuccess {
+                                    uploadedKeys = uploadedKeys + uploadUrl.uploadKey
+                                }
+                            }
+                        }
+
+                        // CONFIRM
+                        eventRemoteDataSource.confirmUpload(
+                            eventId = event.id,
+                            confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
+                        )
+                            .onSuccess { event ->
+                                eventLocalDataSource.upsertEvent(event)
+                            }
+
                     }.asEmptyDataResult()
             }
 
@@ -72,7 +98,7 @@ class OfflineFirstEventRepository(
                         }.join()
                     }
                     .onSuccess { event ->
-                        eventLocalDataSource.upsertEvent(event)
+                        eventLocalDataSource.upsertEvent(event.toEvent())
                     }.asEmptyDataResult()
             }
         }
@@ -128,7 +154,7 @@ class OfflineFirstEventRepository(
                                     .onSuccess {
                                         applicationScope.launch {
                                             eventPendingSyncDao.deleteEventPendingSyncEntity(
-                                                eventId = it.id,
+                                                eventId = it.event.id,
                                                 operations = listOf(SyncOperation.CREATE)
                                             )
                                         }.join()
@@ -140,7 +166,7 @@ class OfflineFirstEventRepository(
                                     .onSuccess {
                                         applicationScope.launch {
                                             eventPendingSyncDao.deleteEventPendingSyncEntity(
-                                                eventId = it.id,
+                                                eventId = it.event.id,
                                                 operations = listOf(SyncOperation.UPDATE)
                                             )
                                         }.join()

@@ -184,6 +184,7 @@ class AgendaDetailViewModel(
                         ),
                         lookupAttendees = event.lookupAttendees,
                         eventAttendees = event.eventAttendees,
+                        photos = event.photos
                     )
                 }
             }
@@ -399,7 +400,6 @@ class AgendaDetailViewModel(
                     AgendaKind.REMINDER -> saveReminder()
                 }
             }
-
             is AgendaDetailAction.OnDeleteOnBottomSheetClick -> {
                 when (action.agendaKind) {
                     AgendaKind.TASK -> deleteTask(action.id)

@@ -202,12 +202,11 @@ class AgendaDetailViewModel(
 
                _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
                    if (updatedTimestamp >= currentToTimestamp) {
-                       viewModelScope.launch(default) {
-                           eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                               error = UiText.StringResource(R.string.date_from_before_date_to)
-                           ))
+                       updateDetails<AgendaItemDetails.Event> { event ->
+                           event.copy(
+                               toTime = updatedTimestamp.plusHours(1)
+                           )
                        }
-                       return
                    }
                }
 
@@ -223,12 +222,11 @@ class AgendaDetailViewModel(
 
                 _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
                     if (updatedTimestamp >= currentToTimestamp) {
-                        viewModelScope.launch(default) {
-                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                                error = UiText.StringResource(R.string.date_from_before_date_to)
-                            ))
+                        updateDetails<AgendaItemDetails.Event> { event ->
+                            event.copy(
+                                toTime = updatedTimestamp.plusHours(1)
+                            )
                         }
-                        return
                     }
                 }
 
@@ -244,12 +242,7 @@ class AgendaDetailViewModel(
                         hour = action.hour, minutes = action.minute)
 
                     if (updatedTimestamp <= _state.value.fromTime) {
-                        viewModelScope.launch(default) {
-                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                                error = UiText.StringResource(R.string.date_to_after_date_from)
-                            ))
-                        }
-                        return
+                        _state.update { it.copy(fromTime = updatedTimestamp.minusHours(1)) }
                     }
 
                     updateDetails<AgendaItemDetails.Event> { event ->
@@ -265,12 +258,7 @@ class AgendaDetailViewModel(
                         dateMillis = action.dateMillis)
 
                     if (updatedTimestamp <= _state.value.fromTime) {
-                        viewModelScope.launch(default) {
-                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                                error = UiText.StringResource(R.string.date_to_after_date_from)
-                            ))
-                        }
-                        return
+                        _state.update { it.copy(fromTime = updatedTimestamp.minusHours(1)) }
                     }
 
                     updateDetails<AgendaItemDetails.Event> { event ->

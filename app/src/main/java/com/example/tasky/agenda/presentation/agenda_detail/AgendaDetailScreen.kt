@@ -176,13 +176,6 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-            is AgendaDetailEvent.InvalidDatePicked -> {
-                Toast.makeText(
-                    context,
-                    event.error.asString(context),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
             is AgendaDetailEvent.SaveError -> {
                 Toast.makeText(
                     context,
@@ -190,7 +183,6 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-
             is AgendaDetailEvent.SaveSuccessful -> {
                 Toast.makeText(
                     context,

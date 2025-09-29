@@ -316,12 +316,13 @@ class AgendaDetailViewModel(
                         }
                         is Result.Error -> {
                             when (result.error as DataError.Local) {
-                                DataError.Local.COMPRESSION_FAILURE -> {
+                                DataError.Local.CompressionFailure -> {
                                     eventChannel.send(AgendaDetailEvent.ImageCompressFailure(
                                         error = result.error.asUiText()
                                     ))
                                 }
-                                DataError.Local.IMAGE_TOO_LARGE -> {
+
+                                DataError.Local.ImageTooLarge -> {
                                     eventChannel.send(AgendaDetailEvent.ImageTooLarge(
                                             error = result.error.asUiText()
                                     ))

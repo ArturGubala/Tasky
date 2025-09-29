@@ -37,7 +37,7 @@ class RoomLocalReminderDataSource(
             reminderDao.upsertReminder(entity)
             Result.Success(Unit)
         } catch (_: SQLiteFullException) {
-            Result.Error(DataError.Local.DISK_FULL)
+            Result.Error(DataError.Local.DiskFull)
         }
     }
 

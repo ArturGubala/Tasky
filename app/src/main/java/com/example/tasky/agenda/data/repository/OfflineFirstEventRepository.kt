@@ -84,7 +84,7 @@ class OfflineFirstEventRepository(
         return eventRemoteDataSource.deleteEvent(id = id)
             .onError { error ->
                 when (error) {
-                    DataError.Network.NOT_FOUND -> {}
+                    DataError.Network.NotFound() -> {}
                     else -> {
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(

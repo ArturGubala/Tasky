@@ -6,8 +6,8 @@ import com.example.tasky.R
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.auth.domain.FocusedField
 import com.example.tasky.auth.domain.UserDataValidator
-import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.auth.domain.ValidationRules
+import com.example.tasky.core.domain.ValidationItem
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.Result
 import com.example.tasky.core.presentation.ui.UiText
@@ -85,7 +85,7 @@ class RegisterViewModel(
 
             when(result) {
                 is Result.Error -> {
-                    if(result.error == DataError.Network.CONFLICT) {
+                    if (result.error == DataError.Network.Conflict()) {
                         eventChannel.send(RegisterEvent.RegistrationFailure(
                             error = UiText.StringResource(R.string.error_email_exists)
                         ))

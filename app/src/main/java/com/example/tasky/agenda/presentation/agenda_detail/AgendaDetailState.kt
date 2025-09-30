@@ -36,6 +36,8 @@ sealed interface AgendaItemDetails {
         val lookupAttendees: List<LookupAttendee> = listOf(),
         val eventAttendees: List<EventAttendee> = listOf(),
         val photos: List<Photo> = emptyList(),
+        val newPhotosIds: List<String> = emptyList(),
+        val deletedPhotosIds: List<String> = emptyList(),
         val isImageLoading: Boolean = false,
         val attendeeEmail: String = "",
         val isAttendeeEmailValid: Boolean = false,

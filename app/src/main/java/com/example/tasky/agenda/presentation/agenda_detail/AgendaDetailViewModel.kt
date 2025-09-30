@@ -193,10 +193,10 @@ class AgendaDetailViewModel(
 
     fun onAction(action: AgendaDetailAction) {
         when(action) {
-           is AgendaDetailAction.OnAgendaItemIntervalSelect -> onAgendaItemIntervalSelect(
-               reminder = action.reminder
-           )
-           is AgendaDetailAction.OnTimeFromPick -> {
+            is AgendaDetailAction.OnAgendaItemIntervalSelect ->
+                onAgendaItemIntervalSelect(reminder = action.reminder)
+
+            is AgendaDetailAction.OnTimeFromPick -> {
                val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.fromTime,
                    hour = action.hour, minutes = action.minute)
 
@@ -300,7 +300,8 @@ class AgendaDetailViewModel(
                             )
                             updateDetails<AgendaItemDetails.Event> { event ->
                                 event.copy(
-                                    photos = event.photos + photo
+                                    photos = event.photos + photo,
+                                    newPhotosIds = event.newPhotosIds + photo.id
                                 )
                             }
                         }
@@ -332,7 +333,8 @@ class AgendaDetailViewModel(
                     event.copy(
                         photos = event.photos.filterNot { photo ->
                             photo.id == action.photoId
-                        }
+                        },
+                        deletedPhotosIds = event.deletedPhotosIds + action.photoId
                     )
                 }
             }
@@ -518,6 +520,8 @@ class AgendaDetailViewModel(
                 lookupAttendees = _state.value.detailsAsEvent()?.lookupAttendees ?: listOf(),
                 eventAttendees = _state.value.detailsAsEvent()?.eventAttendees ?: listOf(),
                 photos = _state.value.detailsAsEvent()?.photos ?: listOf(),
+                newPhotosIds = _state.value.detailsAsEvent()?.newPhotosIds ?: listOf(),
+                deletedPhotosIds = _state.value.detailsAsEvent()?.deletedPhotosIds ?: listOf(),
             )
 
             val syncOperation =

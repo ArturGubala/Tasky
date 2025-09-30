@@ -18,4 +18,6 @@ data class Event(
     val lookupAttendees: List<LookupAttendee>,
     val eventAttendees: List<EventAttendee>,
     val photos: List<Photo>,
+    val newPhotosIds: List<String>,
+    val deletedPhotosIds: List<String>,
 )

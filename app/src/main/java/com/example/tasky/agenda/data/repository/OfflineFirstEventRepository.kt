@@ -1,7 +1,6 @@
 package com.example.tasky.agenda.data.repository
 
 import com.example.tasky.agenda.data.network.event.dto.ConfirmUploadRequest
-import com.example.tasky.agenda.data.network.event.mappers.toEvent
 import com.example.tasky.agenda.domain.data.EventRepository
 import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
@@ -94,7 +93,6 @@ class OfflineFirstEventRepository(
                                     eventLocalDataSource.upsertEvent(event)
                                 }
                         }.join()
-
                     }.asEmptyDataResult()
             }
 
@@ -110,8 +108,42 @@ class OfflineFirstEventRepository(
                             )
                         }.join()
                     }
-                    .onSuccess { event ->
-                        eventLocalDataSource.upsertEvent(event.toEvent())
+                    .onSuccess { eventResponse ->
+                        var uploadedKeys: List<String> = listOf()
+
+                        // UPLOAD TO AWS
+                        val uploaded = coroutineScope {
+                            eventResponse.uploadUrls.map { uploadUrl ->
+                                async {
+                                    val bytes =
+                                        event.photos.first { it.id == uploadUrl.photoKey }.compressedBytes
+                                    if (bytes != null) {
+                                        when (eventRemoteDataSource.uploadPhoto(
+                                            url = uploadUrl.url,
+                                            photo = bytes
+                                        )) {
+                                            is Result.Success -> uploadUrl.uploadKey
+                                            is Result.Error -> null
+                                        }
+                                    } else {
+                                        null
+                                    }
+                                }
+                            }.awaitAll().filterNotNull()
+                        }
+
+                        uploadedKeys = uploadedKeys + uploaded
+
+                        // CONFIRM
+                        applicationScope.launch {
+                            eventRemoteDataSource.confirmUpload(
+                                eventId = event.id,
+                                confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
+                            )
+                                .onSuccess { event ->
+                                    eventLocalDataSource.upsertEvent(event)
+                                }
+                        }.join()
                     }.asEmptyDataResult()
             }
         }

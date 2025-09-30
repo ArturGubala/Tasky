@@ -25,7 +25,9 @@ fun EventEntity.toEvent(): Event {
         isUserEventCreator = isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = listOf(),
-        photos = listOf()
+        photos = listOf(),
+        newPhotosIds = listOf(),
+        deletedPhotosIds = listOf(),
     )
 }
 
@@ -56,7 +58,9 @@ fun EventWithRelations.toEvent(): Event {
         isUserEventCreator = event.isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = attendees.map { it.toAttendee() },
-        photos = photos.map { it.toPhoto() }
+        photos = photos.map { it.toPhoto() },
+        newPhotosIds = listOf(),
+        deletedPhotosIds = listOf(),
     )
 }
 

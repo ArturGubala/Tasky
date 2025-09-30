@@ -32,7 +32,9 @@ fun EventDto.toEvent(): Event {
         isUserEventCreator = isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = attendees.map { it.toEventAttendee(hostId = hostId) },
-        photos = photoKeys.map { it.toPhoto() }
+        photos = photoKeys.map { it.toPhoto() },
+        newPhotosIds = emptyList(),
+        deletedPhotosIds = emptyList()
     )
 }
 
@@ -50,7 +52,9 @@ fun UpsertEventResponseDto.toEvent(): Event {
         isUserEventCreator = event.isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = event.attendees.map { it.toEventAttendee(hostId = event.hostId) },
-        photos = emptyList()
+        photos = emptyList(),
+        newPhotosIds = emptyList(),
+        deletedPhotosIds = emptyList()
     )
 }
 
@@ -78,8 +82,8 @@ fun Event.toUpdateEventRequest(): UpdateEventRequest {
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
         attendeeIds = listOf(lookupAttendees, eventAttendees).flatten().map { it.userId },
-        newPhotoKeys = listOf(),
-        deletedPhotoKeys = listOf(),
+        newPhotoKeys = newPhotosIds,
+        deletedPhotoKeys = deletedPhotosIds,
         isGoing = true,
     )
 }

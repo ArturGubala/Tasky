@@ -2,8 +2,8 @@
 
 package com.example.tasky.core.data.database.event.mappers
 
-import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.EventAttendee
 import com.example.tasky.agenda.domain.model.Photo
 import com.example.tasky.core.data.database.event.entity.AttendeeEntity
 import com.example.tasky.core.data.database.event.entity.EventEntity
@@ -23,7 +23,8 @@ fun EventEntity.toEvent(): Event {
         updatedAt = updatedAt?.let { Instant.fromEpochMilliseconds(updatedAt) },
         hostId = hostId,
         isUserEventCreator = isUserEventCreator,
-        attendees = listOf(),
+        lookupAttendees = listOf(),
+        eventAttendees = listOf(),
         photos = listOf()
     )
 }
@@ -53,15 +54,16 @@ fun EventWithRelations.toEvent(): Event {
         updatedAt = event.updatedAt?.let { Instant.fromEpochMilliseconds(it) },
         hostId = event.hostId,
         isUserEventCreator = event.isUserEventCreator,
-        attendees = attendees.map { it.toAttendee() },
+        lookupAttendees = listOf(),
+        eventAttendees = attendees.map { it.toAttendee() },
         photos = photos.map { it.toPhoto() }
     )
 }
 
-fun AttendeeEntity.toAttendee(): Attendee {
-    return Attendee(
+fun AttendeeEntity.toAttendee(): EventAttendee {
+    return EventAttendee(
         email = email,
-        username = username,
+        name = username,
         userId = userId,
         eventId = eventId,
         isGoing = isGoing,
@@ -71,12 +73,12 @@ fun AttendeeEntity.toAttendee(): Attendee {
 }
 
 fun Event.toAttendeeEntities(): List<AttendeeEntity> {
-    return attendees.map { attendee ->
+    return eventAttendees.map { attendee ->
         AttendeeEntity(
             userId = attendee.userId,
             eventId = id,
             email = attendee.email,
-            username = attendee.username,
+            username = attendee.name,
             isGoing = attendee.isGoing,
             remindAt = attendee.remindAt.toEpochMilliseconds(),
             isCreator = attendee.isCreator

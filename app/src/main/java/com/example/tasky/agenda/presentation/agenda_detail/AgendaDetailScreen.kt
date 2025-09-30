@@ -55,6 +55,8 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.model.AttendeeMinimal
+import com.example.tasky.agenda.domain.model.EventAttendee
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnTitleChange
@@ -115,7 +117,7 @@ fun AgendaDetailScreenRoot(
         fieldType: AgendaEditTextFieldType,
         text: String
     ) -> Unit,
-    onNavigateToPhotoDetail: (photoId: String, photoUri: String) -> Unit,
+    onNavigateToPhotoDetail: (photoId: String, photoUri: String, agendaDetailView: AgendaDetailView) -> Unit,
     onNavigateToAgendaList: () -> Unit,
     viewModel: AgendaDetailViewModel = koinViewModel(
         parameters = { parametersOf(agendaId, agendaKind) }
@@ -174,13 +176,6 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-            is AgendaDetailEvent.InvalidDatePicked -> {
-                Toast.makeText(
-                    context,
-                    event.error.asString(context),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
             is AgendaDetailEvent.SaveError -> {
                 Toast.makeText(
                     context,
@@ -188,7 +183,6 @@ fun AgendaDetailScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-
             is AgendaDetailEvent.SaveSuccessful -> {
                 Toast.makeText(
                     context,
@@ -260,7 +254,7 @@ fun AgendaDetailScreenRoot(
                     }
                 }
                 is AgendaDetailAction.OnPhotoClick -> {
-                    onNavigateToPhotoDetail(action.photoId, action.uriString)
+                    onNavigateToPhotoDetail(action.photoId, action.uriString, agendaDetailView)
                 }
                 else -> viewModel.onAction(action)
             }
@@ -510,8 +504,7 @@ fun AgendaDetailScreen(
                             }
 
                             // PHOTO PICKER
-                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT &&
-                                !isReadOnly) {
+                            if (agendaItemTypeConfiguration.type == AgendaKind.EVENT) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -799,8 +792,23 @@ fun AgendaDetailScreen(
                                         )
                                     }
 
-                                    val goingAttendees = state.detailsAsEvent()?.attendees?.filter { it.isGoing }
-                                    if (goingAttendees?.isNotEmpty() ?: false && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
+                                    val allAttendees: List<AttendeeMinimal> =
+                                        (state.detailsAsEvent()?.lookupAttendees ?: emptyList()) +
+                                                (state.detailsAsEvent()?.eventAttendees
+                                                    ?: emptyList())
+
+                                    val goingAttendees = allAttendees
+                                        .filter { attendee ->
+                                            if (attendee is EventAttendee) {
+                                                attendee.isGoing
+                                            } else true
+                                        }
+                                        .sortedByDescending { attendee ->
+                                            if (attendee is EventAttendee) {
+                                                attendee.isCreator
+                                            } else false
+                                        }
+                                    if (goingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.NOT_GOING) {
                                         Text(
                                             text = "Going",
                                             color = MaterialTheme.colorScheme.onSurface,
@@ -812,16 +820,30 @@ fun AgendaDetailScreen(
                                         ) {
                                             goingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
-                                                    attendeeName = attendee.username,
-                                                    isCreator = attendee.isCreator,
+                                                    attendeeName = attendee.name,
+                                                    isCreator = if (attendee is EventAttendee) {
+                                                        attendee.isCreator
+                                                    } else false,
+                                                    onDeleteClick = {
+                                                        onAction(
+                                                            AgendaDetailAction.OnDeleteAttendeeClick(
+                                                                userId = attendee.userId
+                                                            )
+                                                        )
+                                                    },
                                                     canEdit = state.isOnline && !isReadOnly
                                                 )
                                             }
                                         }
                                     }
 
-                                    val notGoingAttendees = state.detailsAsEvent()?.attendees?.filter { !it.isGoing }
-                                    if (notGoingAttendees?.isNotEmpty() ?: false && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
+                                    val notGoingAttendees = allAttendees
+                                        .filter { attendee ->
+                                            if (attendee is EventAttendee) {
+                                                !attendee.isGoing
+                                            } else false
+                                        }
+                                    if (notGoingAttendees.isNotEmpty() && state.selectedAttendeeStatus != AgendaItemAttendeesStatus.GOING) {
                                         Text(
                                             text = "Not going",
                                             color = MaterialTheme.colorScheme.onSurface,
@@ -833,8 +855,17 @@ fun AgendaDetailScreen(
                                         ) {
                                             notGoingAttendees.forEach { attendee ->
                                                 TaskyAttendeeCard(
-                                                    attendeeName = attendee.username,
-                                                    isCreator = attendee.isCreator,
+                                                    attendeeName = attendee.name,
+                                                    isCreator = if (attendee is EventAttendee) {
+                                                        attendee.isCreator
+                                                    } else false,
+                                                    onDeleteClick = {
+                                                        onAction(
+                                                            AgendaDetailAction.OnDeleteAttendeeClick(
+                                                                userId = attendee.userId
+                                                            )
+                                                        )
+                                                    },
                                                     canEdit = state.isOnline && !isReadOnly
                                                 )
                                             }

@@ -182,7 +182,9 @@ class AgendaDetailViewModel(
                             event.timeTo.toJavaInstant(),
                             ZoneId.of("UTC")
                         ),
-                        attendees = event.attendees
+                        lookupAttendees = event.lookupAttendees,
+                        eventAttendees = event.eventAttendees,
+                        photos = event.photos
                     )
                 }
             }
@@ -200,12 +202,11 @@ class AgendaDetailViewModel(
 
                _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
                    if (updatedTimestamp >= currentToTimestamp) {
-                       viewModelScope.launch(default) {
-                           eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                               error = UiText.StringResource(R.string.date_from_before_date_to)
-                           ))
+                       updateDetails<AgendaItemDetails.Event> { event ->
+                           event.copy(
+                               toTime = updatedTimestamp.plusHours(1)
+                           )
                        }
-                       return
                    }
                }
 
@@ -221,12 +222,11 @@ class AgendaDetailViewModel(
 
                 _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
                     if (updatedTimestamp >= currentToTimestamp) {
-                        viewModelScope.launch(default) {
-                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                                error = UiText.StringResource(R.string.date_from_before_date_to)
-                            ))
+                        updateDetails<AgendaItemDetails.Event> { event ->
+                            event.copy(
+                                toTime = updatedTimestamp.plusHours(1)
+                            )
                         }
-                        return
                     }
                 }
 
@@ -242,12 +242,7 @@ class AgendaDetailViewModel(
                         hour = action.hour, minutes = action.minute)
 
                     if (updatedTimestamp <= _state.value.fromTime) {
-                        viewModelScope.launch(default) {
-                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                                error = UiText.StringResource(R.string.date_to_after_date_from)
-                            ))
-                        }
-                        return
+                        _state.update { it.copy(fromTime = updatedTimestamp.minusHours(1)) }
                     }
 
                     updateDetails<AgendaItemDetails.Event> { event ->
@@ -263,12 +258,7 @@ class AgendaDetailViewModel(
                         dateMillis = action.dateMillis)
 
                     if (updatedTimestamp <= _state.value.fromTime) {
-                        viewModelScope.launch(default) {
-                            eventChannel.send(AgendaDetailEvent.InvalidDatePicked(
-                                error = UiText.StringResource(R.string.date_to_after_date_from)
-                            ))
-                        }
-                        return
+                        _state.update { it.copy(fromTime = updatedTimestamp.minusHours(1)) }
                     }
 
                     updateDetails<AgendaItemDetails.Event> { event ->
@@ -349,6 +339,7 @@ class AgendaDetailViewModel(
             AgendaDetailAction.OnAddAttendeeClick -> {
                 _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.ADD_ATTENDEE) }
             }
+            is AgendaDetailAction.OnDeleteAttendeeClick -> deleteAttendee(action.userId)
             AgendaDetailAction.OnDeleteAgendaItemClick -> {
                 _state.update { it.copy(agendaDetailBottomSheetType = AgendaDetailBottomSheetType.DELETE_AGENDA_ITEM) }
             }
@@ -397,7 +388,6 @@ class AgendaDetailViewModel(
                     AgendaKind.REMINDER -> saveReminder()
                 }
             }
-
             is AgendaDetailAction.OnDeleteOnBottomSheetClick -> {
                 when (action.agendaKind) {
                     AgendaKind.TASK -> deleteTask(action.id)
@@ -525,7 +515,8 @@ class AgendaDetailViewModel(
                 updatedAt = currentTimestamp.toKotlinInstant(),
                 hostId = sessionStorage.get()?.userId ?: "",
                 isUserEventCreator = true,
-                attendees = _state.value.detailsAsEvent()?.attendees ?: listOf(),
+                lookupAttendees = _state.value.detailsAsEvent()?.lookupAttendees ?: listOf(),
+                eventAttendees = _state.value.detailsAsEvent()?.eventAttendees ?: listOf(),
                 photos = _state.value.detailsAsEvent()?.photos ?: listOf(),
             )
 
@@ -637,7 +628,7 @@ class AgendaDetailViewModel(
                 }
                 .onSuccess { attendee ->
                     updateDetails<AgendaItemDetails.Event> {
-                        it.copy(attendees = it.attendees + attendee)
+                        it.copy(lookupAttendees = it.lookupAttendees + attendee)
                     }
                     eventChannel.send(
                         AgendaDetailEvent.AttendeeOperationFinish(
@@ -651,4 +642,20 @@ class AgendaDetailViewModel(
         }
     }
 
+    private fun deleteAttendee(userId: String) {
+        viewModelScope.launch {
+            if (agendaId.isNotEmpty()) {
+                eventRepository.deleteAttendee(userId = userId, eventId = agendaId)
+            }
+            updateDetails<AgendaItemDetails.Event> { event ->
+                val updatedLookupAttendees = event.lookupAttendees.filterNot { it.userId == userId }
+                val updatedEventAttendees = event.eventAttendees.filterNot { it.userId == userId }
+
+                event.copy(
+                    lookupAttendees = updatedLookupAttendees,
+                    eventAttendees = updatedEventAttendees
+                )
+            }
+        }
+    }
 }

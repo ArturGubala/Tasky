@@ -1,11 +1,13 @@
 package com.example.tasky.agenda.data.repository
 
+import com.example.tasky.agenda.data.network.event.dto.ConfirmUploadRequest
+import com.example.tasky.agenda.data.network.event.mappers.toEvent
 import com.example.tasky.agenda.domain.data.EventRepository
 import com.example.tasky.agenda.domain.data.network.EventRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
-import com.example.tasky.agenda.domain.model.Attendee
 import com.example.tasky.agenda.domain.model.Event
+import com.example.tasky.agenda.domain.model.LookupAttendee
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
 import com.example.tasky.core.data.database.event.mappers.toEvent
@@ -20,6 +22,8 @@ import com.example.tasky.core.domain.util.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -54,8 +58,43 @@ class OfflineFirstEventRepository(
                             )
                         }.join()
                     }
-                    .onSuccess { event ->
-                        eventLocalDataSource.upsertEvent(event)
+                    .onSuccess { eventResponse ->
+                        var uploadedKeys: List<String> = listOf()
+
+                        // UPLOAD TO AWS
+                        val uploaded = coroutineScope {
+                            eventResponse.uploadUrls.map { uploadUrl ->
+                                async {
+                                    val bytes =
+                                        event.photos.first { it.id == uploadUrl.photoKey }.compressedBytes
+                                    if (bytes != null) {
+                                        when (eventRemoteDataSource.uploadPhoto(
+                                            url = uploadUrl.url,
+                                            photo = bytes
+                                        )) {
+                                            is Result.Success -> uploadUrl.uploadKey
+                                            is Result.Error -> null
+                                        }
+                                    } else {
+                                        null
+                                    }
+                                }
+                            }.awaitAll().filterNotNull()
+                        }
+
+                        uploadedKeys = uploadedKeys + uploaded
+
+                        // CONFIRM
+                        applicationScope.launch {
+                            eventRemoteDataSource.confirmUpload(
+                                eventId = event.id,
+                                confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
+                            )
+                                .onSuccess { event ->
+                                    eventLocalDataSource.upsertEvent(event)
+                                }
+                        }.join()
+
                     }.asEmptyDataResult()
             }
 
@@ -72,7 +111,7 @@ class OfflineFirstEventRepository(
                         }.join()
                     }
                     .onSuccess { event ->
-                        eventLocalDataSource.upsertEvent(event)
+                        eventLocalDataSource.upsertEvent(event.toEvent())
                     }.asEmptyDataResult()
             }
         }
@@ -98,8 +137,12 @@ class OfflineFirstEventRepository(
             }.asEmptyDataResult()
     }
 
-    override suspend fun getAttendee(email: String): Result<Attendee, DataError.Network> {
+    override suspend fun getAttendee(email: String): Result<LookupAttendee, DataError.Network> {
         return eventRemoteDataSource.getAttendee(email = email)
+    }
+
+    override suspend fun deleteAttendee(userId: String, eventId: String) {
+        eventLocalDataSource.deleteAttendee(userId = userId, eventId = eventId)
     }
 
     override suspend fun syncPendingEvent() {
@@ -124,7 +167,7 @@ class OfflineFirstEventRepository(
                                     .onSuccess {
                                         applicationScope.launch {
                                             eventPendingSyncDao.deleteEventPendingSyncEntity(
-                                                eventId = it.id,
+                                                eventId = it.event.id,
                                                 operations = listOf(SyncOperation.CREATE)
                                             )
                                         }.join()
@@ -136,7 +179,7 @@ class OfflineFirstEventRepository(
                                     .onSuccess {
                                         applicationScope.launch {
                                             eventPendingSyncDao.deleteEventPendingSyncEntity(
-                                                eventId = it.id,
+                                                eventId = it.event.id,
                                                 operations = listOf(SyncOperation.UPDATE)
                                             )
                                         }.join()

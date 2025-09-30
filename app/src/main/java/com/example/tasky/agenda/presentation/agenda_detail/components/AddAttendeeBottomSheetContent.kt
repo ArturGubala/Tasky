@@ -107,22 +107,19 @@ fun AddAttendeeBottomSheetContent(
                     modifier = modifier,
                     contentAlignment = Alignment.Center
                 ) {
-                    when (enabled) {
-                        true -> {
-                            Text(
-                                text = stringResource(R.string.add),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-
-                        false -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(size = 24.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
+                    if (enabled) {
+                        Text(
+                            text = stringResource(R.string.add),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    } else {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(size = 24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
+
                 }
             }
         }

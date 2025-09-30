@@ -38,6 +38,9 @@ class RoomLocalEventDataSource(
             val attendeesEntities = event.toAttendeeEntities()
             val photosEntities = event.toPhotoEntities()
 
+            // Temporary, until figure out, how to not save local photos to db
+            eventDao.deletePhotos(event.id)
+            //
             eventDao.upsertEventWithRelations(
                 event = eventEntity,
                 attendees = attendeesEntities,
@@ -70,5 +73,9 @@ class RoomLocalEventDataSource(
 
     override suspend fun deleteEvent(id: String) {
         eventDao.deleteEvent(id)
+    }
+
+    override suspend fun deleteAttendee(userId: String, eventId: String) {
+        eventDao.deleteAttendee(userId = userId, eventId = eventId)
     }
 }

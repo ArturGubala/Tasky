@@ -6,16 +6,16 @@ import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -43,10 +43,19 @@ class HttpClientFactory(
                 }
                 level = LogLevel.ALL
             }
-            defaultRequest {
-                contentType(ContentType.Application.Json)
-                header("x-api-key", BuildConfig.API_KEY)
-            }
+            install(createClientPlugin("ConditionalHeaders") {
+                onRequest { request, _ ->
+                    val isS3 = request.url.host.contains("amazonaws.com")
+
+                    // DO NOT SEND HEADERS WHEN UPLOAD PHOTOS
+                    if (!isS3) {
+                        request.contentType(ContentType.Application.Json)
+                        request.headers.append("x-api-key", BuildConfig.API_KEY)
+                        request.headers.append(HttpHeaders.Accept, "application/json")
+                        request.headers.append(HttpHeaders.AcceptCharset, "UTF-8")
+                    }
+                }
+            })
             install(Auth) {
                 bearer {
                     loadTokens {
@@ -84,6 +93,10 @@ class HttpClientFactory(
                                 refreshToken = ""
                             )
                         }
+                    }
+                    // DO NOT SEND BEARER WHEN UPLOAD PHOTOS
+                    sendWithoutRequest { request ->
+                        !request.url.host.contains("amazonaws.com")
                     }
                 }
             }

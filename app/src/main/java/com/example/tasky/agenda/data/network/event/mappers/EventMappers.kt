@@ -16,8 +16,8 @@ import com.example.tasky.agenda.domain.model.Photo
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-fun EventDto.toEvent(): Event {
-    val remindAt = attendees.firstOrNull()?.remindAt
+fun EventDto.toEvent(userId: String = ""): Event {
+    val attendeeRemindAt = attendees.firstOrNull { it.userId == userId }?.remindAt
         ?: from
 
     return Event(
@@ -26,7 +26,7 @@ fun EventDto.toEvent(): Event {
         description = description,
         timeFrom = Instant.parse(from),
         timeTo = Instant.parse(to),
-        remindAt = Instant.parse(remindAt),
+        remindAt = remindAt?.let { Instant.parse(remindAt) } ?: Instant.parse(attendeeRemindAt),
         updatedAt = updatedAt?.let { Instant.parse(it) },
         hostId = hostId,
         isUserEventCreator = isUserEventCreator,

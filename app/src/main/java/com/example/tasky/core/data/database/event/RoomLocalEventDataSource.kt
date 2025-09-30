@@ -38,6 +38,9 @@ class RoomLocalEventDataSource(
             val attendeesEntities = event.toAttendeeEntities()
             val photosEntities = event.toPhotoEntities()
 
+            // Temporary, until figure out, how to not save local photos to db
+            eventDao.deletePhotos(event.id)
+            //
             eventDao.upsertEventWithRelations(
                 event = eventEntity,
                 attendees = attendeesEntities,

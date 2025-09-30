@@ -55,7 +55,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.tasky.R
-import com.example.tasky.agenda.domain.model.AttendeeBase
+import com.example.tasky.agenda.domain.model.AttendeeMinimal
 import com.example.tasky.agenda.domain.model.EventAttendee
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailAction.OnDescriptionChange
@@ -792,7 +792,7 @@ fun AgendaDetailScreen(
                                         )
                                     }
 
-                                    val allAttendees: List<AttendeeBase> =
+                                    val allAttendees: List<AttendeeMinimal> =
                                         (state.detailsAsEvent()?.lookupAttendees ?: emptyList()) +
                                                 (state.detailsAsEvent()?.eventAttendees
                                                     ?: emptyList())

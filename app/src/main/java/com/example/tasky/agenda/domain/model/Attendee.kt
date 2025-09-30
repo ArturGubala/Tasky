@@ -5,7 +5,7 @@ package com.example.tasky.agenda.domain.model
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-interface AttendeeBase {
+interface AttendeeMinimal {
     val userId: String
     val email: String
     val name: String
@@ -15,7 +15,7 @@ data class LookupAttendee(
     override val userId: String,
     override val email: String,
     override val name: String,
-) : AttendeeBase
+) : AttendeeMinimal
 
 // From event payload (full attendee)
 data class EventAttendee(
@@ -26,4 +26,4 @@ data class EventAttendee(
     val isGoing: Boolean,
     val remindAt: Instant,
     val isCreator: Boolean,
-) : AttendeeBase
+) : AttendeeMinimal

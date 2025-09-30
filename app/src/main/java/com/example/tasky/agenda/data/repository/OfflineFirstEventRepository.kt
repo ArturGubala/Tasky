@@ -22,6 +22,8 @@ import com.example.tasky.core.domain.util.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -60,27 +62,38 @@ class OfflineFirstEventRepository(
                         var uploadedKeys: List<String> = listOf()
 
                         // UPLOAD TO AWS
-                        for (uploadUrl in eventResponse.uploadUrls) {
-                            event.photos.first {
-                                it.id == uploadUrl.photoKey
-                            }.compressedBytes?.let {
-                                eventRemoteDataSource.uploadPhoto(
-                                    url = uploadUrl.url,
-                                    photo = it
-                                ).onSuccess {
-                                    uploadedKeys = uploadedKeys + uploadUrl.uploadKey
+                        val uploaded = coroutineScope {
+                            eventResponse.uploadUrls.map { uploadUrl ->
+                                async {
+                                    val bytes =
+                                        event.photos.first { it.id == uploadUrl.photoKey }.compressedBytes
+                                    if (bytes != null) {
+                                        when (eventRemoteDataSource.uploadPhoto(
+                                            url = uploadUrl.url,
+                                            photo = bytes
+                                        )) {
+                                            is Result.Success -> uploadUrl.uploadKey
+                                            is Result.Error -> null
+                                        }
+                                    } else {
+                                        null
+                                    }
                                 }
-                            }
+                            }.awaitAll().filterNotNull()
                         }
 
+                        uploadedKeys = uploadedKeys + uploaded
+
                         // CONFIRM
-                        eventRemoteDataSource.confirmUpload(
-                            eventId = event.id,
-                            confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
-                        )
-                            .onSuccess { event ->
-                                eventLocalDataSource.upsertEvent(event)
-                            }
+                        applicationScope.launch {
+                            eventRemoteDataSource.confirmUpload(
+                                eventId = event.id,
+                                confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
+                            )
+                                .onSuccess { event ->
+                                    eventLocalDataSource.upsertEvent(event)
+                                }
+                        }.join()
 
                     }.asEmptyDataResult()
             }

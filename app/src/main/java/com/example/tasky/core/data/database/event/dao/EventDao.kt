@@ -71,4 +71,7 @@ interface EventDao {
 
     @Query("DELETE FROM photo WHERE `key` = :key and eventId = :eventId")
     suspend fun deletePhoto(key: String, eventId: String)
+
+    @Query("DELETE FROM photo WHERE eventId = :eventId")
+    suspend fun deletePhotos(eventId: String)
 }

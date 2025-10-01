@@ -37,6 +37,7 @@ import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingAct
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyProfileButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
+import com.example.tasky.core.presentation.designsystem.dialogs.TaskyModalDialog
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
@@ -78,6 +79,14 @@ fun AgendaScreenRoot(
                     event.agendaDetailView,
                     event.agendaId
                 )
+            }
+            is AgendaEvent.DeleteAgendaItemFailure -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+                onSuccessfulLogout()
             }
         }
     }
@@ -216,7 +225,7 @@ private fun AgendaScreen(
                                         )
                                     }
                                     Button(
-                                        onClick = {}
+                                        onClick = { onAction(AgendaAction.OnDeleteMenuOptionClick(id = item.id)) }
                                     ) {
                                         Text(
                                             text = "Delete",
@@ -229,6 +238,14 @@ private fun AgendaScreen(
                     }
                 }
             }
+        }
+
+        if (state.isModalDialogVisible) {
+            TaskyModalDialog(
+                onDismiss = { onAction(AgendaAction.OnDismissModalDialog) },
+                onConfirm = { onAction(AgendaAction.OnConfirmDeleteClick) },
+                isConfirmEnable = !state.isDeleting
+            )
         }
     }
 }

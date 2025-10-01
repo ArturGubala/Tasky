@@ -289,7 +289,8 @@ fun AgendaDetailScreen(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
-    val isEventCreator = state.detailsAsEvent().isUserEventCreator || agendaId.isEmpty()
+    val isEventCreator =
+        agendaItemTypeConfiguration.type != AgendaKind.EVENT || state.detailsAsEvent()?.isUserEventCreator ?: false || agendaId.isEmpty()
     val canEdit = !isReadOnly && isEventCreator
 
     TaskyScaffold(
@@ -530,9 +531,9 @@ fun AgendaDetailScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     TaskyPhotoPicker(
-                                        photos = state.detailsAsEvent().photos.map {
+                                        photos = state.detailsAsEvent()?.photos?.map {
                                             it.toUi()
-                                        },
+                                        } ?: listOf(),
                                         onPhotoClick = { photoId, uriString ->
                                             onAction(
                                                 AgendaDetailAction.OnPhotoClick(
@@ -541,7 +542,8 @@ fun AgendaDetailScreen(
                                             )
                                         },
                                         onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
-                                        imageLoading = state.detailsAsEvent().isImageLoading,
+                                        imageLoading = state.detailsAsEvent()?.isImageLoading
+                                            ?: false,
                                         isReadOnly = !canEdit,
                                         isOnline = state.isOnline,
                                         numberOfPhotoInRow = when (deviceConfiguration) {
@@ -799,8 +801,8 @@ fun AgendaDetailScreen(
                                     }
 
                                     val allAttendees: List<AttendeeMinimal> =
-                                        (state.detailsAsEvent().lookupAttendees) +
-                                                (state.detailsAsEvent().eventAttendees)
+                                        (state.detailsAsEvent()?.lookupAttendees ?: listOf()) +
+                                                (state.detailsAsEvent()?.eventAttendees ?: listOf())
 
                                     val goingAttendees = allAttendees
                                         .filter { attendee ->
@@ -952,13 +954,15 @@ fun AgendaDetailScreen(
                                 onAddClick = {
                                     onAction(
                                         AgendaDetailAction.OnAddOnBottomSheetClick(
-                                            email = state.detailsAsEvent().attendeeEmail
+                                            email = state.detailsAsEvent()?.attendeeEmail ?: ""
                                         )
                                     )
                                 },
-                                attendeeEmail = state.detailsAsEvent().attendeeEmail,
-                                isAttendeeEmailValid = state.detailsAsEvent().isAttendeeEmailValid,
-                                isAttendeeEmailFieldFocused = state.detailsAsEvent().isAttendeeEmailFocused,
+                                attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
+                                isAttendeeEmailValid = state.detailsAsEvent()?.isAttendeeEmailValid
+                                    ?: false,
+                                isAttendeeEmailFieldFocused = state.detailsAsEvent()?.isAttendeeEmailFocused
+                                    ?: false,
                                 onAttendeeEmailChange = { email ->
                                     onAction(AgendaDetailAction.OnAttendeeEmailValueChanged(email = email))
                                 },
@@ -967,8 +971,9 @@ fun AgendaDetailScreen(
                                         hasFocus = hasFocus
                                     ))
                                 },
-                                errors = state.detailsAsEvent().errors,
-                                enabled = state.detailsAsEvent().isAttendeeOperationInProgress.not()
+                                errors = state.detailsAsEvent()?.errors ?: listOf(),
+                                enabled = state.detailsAsEvent()?.isAttendeeOperationInProgress?.not()
+                                    ?: false
                             )
                         }
 

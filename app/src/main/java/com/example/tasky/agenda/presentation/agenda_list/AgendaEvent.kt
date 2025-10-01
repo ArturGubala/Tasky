@@ -12,4 +12,5 @@ interface AgendaEvent {
         val agendaDetailView: AgendaDetailView,
         val agendaId: String = "",
     ) : AgendaEvent
+    data class DeleteAgendaItemFailure(val error: UiText) : AgendaEvent
 }

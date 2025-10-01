@@ -5,6 +5,8 @@ package com.example.tasky.agenda.presentation.agenda_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.data.EventRepository
+import com.example.tasky.agenda.domain.data.ReminderRepository
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.TaskyRepository
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
@@ -18,7 +20,10 @@ import com.example.tasky.core.data.database.task.RoomLocalTaskDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.domain.util.onError
+import com.example.tasky.core.domain.util.onSuccess
 import com.example.tasky.core.presentation.ui.UiText
+import com.example.tasky.core.presentation.ui.asUiText
 import com.example.tasky.core.presentation.util.MenuOptionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -40,6 +45,8 @@ class AgendaViewModel(
     private val authRepository: AuthRepository,
     private val sessionStorage: SessionStorage,
     private val taskRepository: TaskRepository,
+    private val eventRepository: EventRepository,
+    private val reminderRepository: ReminderRepository,
     private val taskyRepository: TaskyRepository,
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
     private val localTaskDataSource: RoomLocalTaskDataSource,
@@ -167,6 +174,20 @@ class AgendaViewModel(
                     )
                 }
             }
+            AgendaAction.OnDismissModalDialog -> {
+                _state.update { it.copy(isModalDialogVisible = false) }
+            }
+
+            is AgendaAction.OnDeleteMenuOptionClick -> {
+                _state.update {
+                    it.copy(
+                        isModalDialogVisible = true,
+                        agendaItemIdToDelete = action.id
+                    )
+                }
+            }
+
+            AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem()
         }
     }
 
@@ -210,6 +231,50 @@ class AgendaViewModel(
             it.copy(
                 profileButtonMenuOptions = updatedProfileOptions
             )
+        }
+    }
+
+    private fun deleteAgendaItem() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isDeleting = true,
+                    isModalDialogVisible = true
+                )
+            }
+            val agendaItemToDelete =
+                _state.value.agendaItems.firstOrNull { it.id == _state.value.agendaItemIdToDelete }
+            if (agendaItemToDelete == null) {
+                _state.update {
+                    it.copy(
+                        isDeleting = false,
+                        isModalDialogVisible = false,
+                        agendaItemIdToDelete = null
+                    )
+                }
+                return@launch
+            }
+
+            val result = when (agendaItemToDelete.agendaKind) {
+                AgendaKind.TASK -> taskRepository.deleteTask(id = agendaItemToDelete.id)
+                AgendaKind.EVENT -> eventRepository.deleteEvent(id = agendaItemToDelete.id)
+                AgendaKind.REMINDER -> reminderRepository.deleteReminder(id = agendaItemToDelete.id)
+            }
+
+            result
+                .onError { error ->
+                    eventChannel.send(AgendaEvent.LogoutFailure(error = error.asUiText()))
+                }
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isDeleting = false,
+                            isModalDialogVisible = false,
+                            agendaItemIdToDelete = null
+                        )
+                    }
+                }
+
         }
     }
 }

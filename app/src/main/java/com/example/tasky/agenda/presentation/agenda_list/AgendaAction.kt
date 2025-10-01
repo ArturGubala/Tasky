@@ -12,4 +12,7 @@ interface AgendaAction {
         val agendaDetailView: AgendaDetailView,
         val agendaId: String = "",
     ) : AgendaAction
+    data object OnDismissModalDialog : AgendaAction
+    data class OnDeleteMenuOptionClick(val id: String) : AgendaAction
+    data object OnConfirmDeleteClick : AgendaAction
 }

@@ -25,7 +25,9 @@ fun EventEntity.toEvent(): Event {
         isUserEventCreator = isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = listOf(),
-        photos = listOf()
+        photos = listOf(),
+        newPhotosIds = listOf(),
+        deletedPhotosIds = listOf(),
     )
 }
 
@@ -43,8 +45,8 @@ fun Event.toEventEntity(): EventEntity {
     )
 }
 
-fun EventWithRelations.toEvent(): Event {
-    return Event(
+fun EventWithRelations.toEvent(userId: String): Event {
+    val event = Event(
         id = event.id,
         title = event.title,
         description = event.description,
@@ -56,8 +58,13 @@ fun EventWithRelations.toEvent(): Event {
         isUserEventCreator = event.isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = attendees.map { it.toAttendee() },
-        photos = photos.map { it.toPhoto() }
+        photos = photos.map { it.toPhoto() },
+        newPhotosIds = listOf(),
+        deletedPhotosIds = listOf()
     )
+
+    val attendeeRemindAt = event.eventAttendees.first { it.userId == userId }.remindAt
+    return event.copy(remindAt = attendeeRemindAt)
 }
 
 fun AttendeeEntity.toAttendee(): EventAttendee {

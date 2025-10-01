@@ -17,6 +17,7 @@ import com.example.tasky.core.data.networking.delete
 import com.example.tasky.core.data.networking.get
 import com.example.tasky.core.data.networking.post
 import com.example.tasky.core.data.networking.put
+import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.DataError
 import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
@@ -26,13 +27,15 @@ import io.ktor.http.ContentType
 
 class KtorEventDataSource(
     private val httpClient: HttpClient,
+    private val sessionStorage: SessionStorage,
 ) : EventRemoteDataSource {
 
     // EVENT
     override suspend fun getEvent(id: String): Result<Event, DataError.Network> {
+        val userId = sessionStorage.get()?.userId ?: ""
         return httpClient.get<EventDto>(
             route = "/event/$id",
-        ).map { it.toEvent() }
+        ).map { it.toEvent(userId = userId) }
     }
 
     override suspend fun createEvent(event: Event): Result<UpsertEventResponseDto, DataError.Network> {

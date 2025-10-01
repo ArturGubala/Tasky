@@ -289,6 +289,8 @@ fun AgendaDetailScreen(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
+    val isEventCreator = state.detailsAsEvent().isUserEventCreator || agendaId.isEmpty()
+    val canEdit = !isReadOnly && isEventCreator
 
     TaskyScaffold(
         topBar = {
@@ -307,14 +309,16 @@ fun AgendaDetailScreen(
                             }
                         },
                         rightActions = {
-                            TaskyTextButton(
-                                onClick =  { onAction(AgendaDetailAction.OnEditClick) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit icon",
-                                    tint = MaterialTheme.colorScheme.onBackground
-                                )
+                            if (isEventCreator) {
+                                TaskyTextButton(
+                                    onClick = { onAction(AgendaDetailAction.OnEditClick) }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = "Edit icon",
+                                        tint = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
                             }
                         },
                         modifier = Modifier
@@ -347,20 +351,22 @@ fun AgendaDetailScreen(
                             }
                         },
                         rightActions = {
-                            TaskyTextButton(
-                                onClick = {
-                                    onAction(
-                                        AgendaDetailAction.OnSaveClick(
-                                            agendaKind = agendaItemTypeConfiguration.type
+                            if (isEventCreator) {
+                                TaskyTextButton(
+                                    onClick = {
+                                        onAction(
+                                            AgendaDetailAction.OnSaveClick(
+                                                agendaKind = agendaItemTypeConfiguration.type
+                                            )
                                         )
+                                    }
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.save),
+                                        color = MaterialTheme.colorScheme.extended.success,
+                                        style = MaterialTheme.typography.headlineSmall
                                     )
                                 }
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.save),
-                                    color = MaterialTheme.colorScheme.extended.success,
-                                    style = MaterialTheme.typography.headlineSmall
-                                )
                             }
                         },
                         modifier = Modifier
@@ -449,7 +455,7 @@ fun AgendaDetailScreen(
                                         )
                                     }
                                 )
-                                if (!isReadOnly) {
+                                if (canEdit) {
                                     TaskyTextButton(
                                         onClick = {
                                             onAction(
@@ -484,7 +490,7 @@ fun AgendaDetailScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
-                                if (!isReadOnly) {
+                                if (canEdit) {
                                     TaskyTextButton(
                                         onClick = {
                                             onAction(
@@ -524,9 +530,9 @@ fun AgendaDetailScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     TaskyPhotoPicker(
-                                        photos = state.detailsAsEvent()?.photos?.map {
+                                        photos = state.detailsAsEvent().photos.map {
                                             it.toUi()
-                                        } ?: listOf(),
+                                        },
                                         onPhotoClick = { photoId, uriString ->
                                             onAction(
                                                 AgendaDetailAction.OnPhotoClick(
@@ -535,8 +541,8 @@ fun AgendaDetailScreen(
                                             )
                                         },
                                         onAddClick = { onAction(AgendaDetailAction.OnAddPhotoClick) },
-                                        imageLoading = state.detailsAsEvent()?.isImageLoading ?: false,
-                                        isReadOnly = isReadOnly,
+                                        imageLoading = state.detailsAsEvent().isImageLoading,
+                                        isReadOnly = !canEdit,
                                         isOnline = state.isOnline,
                                         numberOfPhotoInRow = when (deviceConfiguration) {
                                             DeviceConfiguration.MOBILE_PORTRAIT -> 5
@@ -581,7 +587,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(120.dp),
-                                            isReadOnly = isReadOnly
+                                            isReadOnly = !canEdit
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
@@ -594,7 +600,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(156.dp),
-                                            isReadOnly = isReadOnly
+                                            isReadOnly = !canEdit
                                         )
                                     }
                                 }
@@ -632,7 +638,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(120.dp),
-                                            isReadOnly = isReadOnly
+                                            isReadOnly = !canEdit
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
@@ -646,7 +652,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(156.dp),
-                                            isReadOnly = isReadOnly
+                                            isReadOnly = !canEdit
                                         )
                                     }
                                 }
@@ -679,7 +685,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(120.dp),
-                                            isReadOnly = isReadOnly
+                                            isReadOnly = canEdit
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
@@ -692,7 +698,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(156.dp),
-                                            isReadOnly = isReadOnly
+                                            isReadOnly = canEdit
                                         )
                                     }
                                 }
@@ -719,7 +725,7 @@ fun AgendaDetailScreen(
                                             AgendaDetailAction.OnAgendaItemIntervalSelect(reminder = it)
                                         )
                                     },
-                                    enabled = !isReadOnly,
+                                    enabled = canEdit || !isEventCreator,
                                     textAlignment = when (deviceConfiguration) {
                                         DeviceConfiguration.MOBILE_PORTRAIT -> DropdownTextAlignment.Start
                                         else -> DropdownTextAlignment.End
@@ -750,7 +756,7 @@ fun AgendaDetailScreen(
                                             color = MaterialTheme.colorScheme.primary,
                                             style = MaterialTheme.typography.headlineMedium
                                         )
-                                        if (state.isOnline && !isReadOnly) {
+                                        if (state.isOnline && canEdit) {
                                             TaskyTextButton(
                                                 onClick = { onAction(AgendaDetailAction.OnAddAttendeeClick) }
                                             ) {
@@ -765,7 +771,7 @@ fun AgendaDetailScreen(
                                                     )
                                                 }
                                             }
-                                        } else if (!state.isOnline && !isReadOnly) {
+                                        } else if (!state.isOnline && canEdit) {
                                             Icon(
                                                 painter = painterResource(id = R.drawable.ic_offline),
                                                 contentDescription = stringResource(R.string.offline_icon),
@@ -793,9 +799,8 @@ fun AgendaDetailScreen(
                                     }
 
                                     val allAttendees: List<AttendeeMinimal> =
-                                        (state.detailsAsEvent()?.lookupAttendees ?: emptyList()) +
-                                                (state.detailsAsEvent()?.eventAttendees
-                                                    ?: emptyList())
+                                        (state.detailsAsEvent().lookupAttendees) +
+                                                (state.detailsAsEvent().eventAttendees)
 
                                     val goingAttendees = allAttendees
                                         .filter { attendee ->
@@ -831,7 +836,7 @@ fun AgendaDetailScreen(
                                                             )
                                                         )
                                                     },
-                                                    canEdit = state.isOnline && !isReadOnly
+                                                    canEdit = state.isOnline && canEdit
                                                 )
                                             }
                                         }
@@ -866,7 +871,7 @@ fun AgendaDetailScreen(
                                                             )
                                                         )
                                                     },
-                                                    canEdit = state.isOnline && !isReadOnly
+                                                    canEdit = state.isOnline && canEdit
                                                 )
                                             }
                                         }
@@ -875,28 +880,30 @@ fun AgendaDetailScreen(
                             }
                         }
                     }
-                    Column {
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.extended.surfaceHigher
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            TaskyTextButton(
-                                onClick = { onAction(AgendaDetailAction.OnDeleteAgendaItemClick) }
+                    if (isEventCreator) {
+                        Column {
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.extended.surfaceHigher
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
                             ) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.delete_context,
-                                        agendaItemTypeConfiguration.displayName.uppercase()
-                                    ),
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                                TaskyTextButton(
+                                    onClick = { onAction(AgendaDetailAction.OnDeleteAgendaItemClick) }
+                                ) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.delete_context,
+                                            agendaItemTypeConfiguration.displayName.uppercase()
+                                        ),
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }
@@ -945,13 +952,13 @@ fun AgendaDetailScreen(
                                 onAddClick = {
                                     onAction(
                                         AgendaDetailAction.OnAddOnBottomSheetClick(
-                                            email = state.detailsAsEvent()?.attendeeEmail ?: ""
+                                            email = state.detailsAsEvent().attendeeEmail
                                         )
                                     )
                                 },
-                                attendeeEmail = state.detailsAsEvent()?.attendeeEmail ?: "",
-                                isAttendeeEmailValid = state.detailsAsEvent()?.isAttendeeEmailValid ?: false,
-                                isAttendeeEmailFieldFocused = state.detailsAsEvent()?.isAttendeeEmailFocused ?: false,
+                                attendeeEmail = state.detailsAsEvent().attendeeEmail,
+                                isAttendeeEmailValid = state.detailsAsEvent().isAttendeeEmailValid,
+                                isAttendeeEmailFieldFocused = state.detailsAsEvent().isAttendeeEmailFocused,
                                 onAttendeeEmailChange = { email ->
                                     onAction(AgendaDetailAction.OnAttendeeEmailValueChanged(email = email))
                                 },
@@ -960,9 +967,8 @@ fun AgendaDetailScreen(
                                         hasFocus = hasFocus
                                     ))
                                 },
-                                errors = state.detailsAsEvent()?.errors ?: emptyList(),
-                                enabled = state.detailsAsEvent()?.isAttendeeOperationInProgress?.not()
-                                    ?: false
+                                errors = state.detailsAsEvent().errors,
+                                enabled = state.detailsAsEvent().isAttendeeOperationInProgress.not()
                             )
                         }
 

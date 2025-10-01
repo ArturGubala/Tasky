@@ -36,12 +36,15 @@ sealed interface AgendaItemDetails {
         val lookupAttendees: List<LookupAttendee> = listOf(),
         val eventAttendees: List<EventAttendee> = listOf(),
         val photos: List<Photo> = emptyList(),
+        val newPhotosIds: List<String> = emptyList(),
+        val deletedPhotosIds: List<String> = emptyList(),
         val isImageLoading: Boolean = false,
         val attendeeEmail: String = "",
         val isAttendeeEmailValid: Boolean = false,
         val isAttendeeEmailFocused: Boolean = false,
         val errors: List<ValidationItem> = emptyList(),
         val isAttendeeOperationInProgress: Boolean = false,
+        val isUserEventCreator: Boolean = false,
 
         ) : AgendaItemDetails
 
@@ -52,12 +55,12 @@ sealed interface AgendaItemDetails {
     data object Reminder: AgendaItemDetails
 }
 
-fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event? {
-    return details as? AgendaItemDetails.Event
+fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event {
+    return details as AgendaItemDetails.Event
 }
 
-fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task? {
-    return details as? AgendaItemDetails.Task
+fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task {
+    return details as AgendaItemDetails.Task
 }
 
 fun AgendaDetailState.isReminder(): Boolean {

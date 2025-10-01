@@ -16,8 +16,8 @@ import com.example.tasky.agenda.domain.model.Photo
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-fun EventDto.toEvent(): Event {
-    val remindAt = attendees.firstOrNull()?.remindAt
+fun EventDto.toEvent(userId: String = ""): Event {
+    val attendeeRemindAt = attendees.firstOrNull { it.userId == userId }?.remindAt
         ?: from
 
     return Event(
@@ -26,13 +26,15 @@ fun EventDto.toEvent(): Event {
         description = description,
         timeFrom = Instant.parse(from),
         timeTo = Instant.parse(to),
-        remindAt = Instant.parse(remindAt),
+        remindAt = remindAt?.let { Instant.parse(remindAt) } ?: Instant.parse(attendeeRemindAt),
         updatedAt = updatedAt?.let { Instant.parse(it) },
         hostId = hostId,
         isUserEventCreator = isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = attendees.map { it.toEventAttendee(hostId = hostId) },
-        photos = photoKeys.map { it.toPhoto() }
+        photos = photoKeys.map { it.toPhoto() },
+        newPhotosIds = emptyList(),
+        deletedPhotosIds = emptyList()
     )
 }
 
@@ -50,7 +52,9 @@ fun UpsertEventResponseDto.toEvent(): Event {
         isUserEventCreator = event.isUserEventCreator,
         lookupAttendees = listOf(),
         eventAttendees = event.attendees.map { it.toEventAttendee(hostId = event.hostId) },
-        photos = emptyList()
+        photos = emptyList(),
+        newPhotosIds = emptyList(),
+        deletedPhotosIds = emptyList()
     )
 }
 
@@ -77,9 +81,10 @@ fun Event.toUpdateEventRequest(): UpdateEventRequest {
         to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendeeIds = listOf(lookupAttendees, eventAttendees).flatten().map { it.userId },
-        newPhotoKeys = listOf(),
-        deletedPhotoKeys = listOf(),
+        attendeeIds = listOf(lookupAttendees, eventAttendees.filterNot { it.isCreator })
+            .flatten().map { it.userId },
+        newPhotoKeys = newPhotosIds,
+        deletedPhotoKeys = deletedPhotosIds,
         isGoing = true,
     )
 }

@@ -163,7 +163,9 @@ class AgendaDetailViewModel(
 
     private fun getEvent(eventId: String) {
         viewModelScope.launch {
-            eventLocalDataSource.getEvent(id = eventId).firstOrNull()?.let { event ->
+            val userId = sessionStorage.get()?.userId ?: ""
+            eventLocalDataSource.getEvent(id = eventId, userId = userId).firstOrNull()
+                ?.let { event ->
                 val duration = event.timeFrom - event.remindAt
                 _state.update {
                     it.copy(
@@ -184,7 +186,9 @@ class AgendaDetailViewModel(
                         ),
                         lookupAttendees = event.lookupAttendees,
                         eventAttendees = event.eventAttendees,
-                        photos = event.photos
+                        photos = event.photos,
+                        isUserEventCreator = event.eventAttendees
+                            .first { attendee -> attendee.userId == userId }.isCreator
                     )
                 }
             }
@@ -193,14 +197,14 @@ class AgendaDetailViewModel(
 
     fun onAction(action: AgendaDetailAction) {
         when(action) {
-           is AgendaDetailAction.OnAgendaItemIntervalSelect -> onAgendaItemIntervalSelect(
-               reminder = action.reminder
-           )
-           is AgendaDetailAction.OnTimeFromPick -> {
+            is AgendaDetailAction.OnAgendaItemIntervalSelect ->
+                onAgendaItemIntervalSelect(reminder = action.reminder)
+
+            is AgendaDetailAction.OnTimeFromPick -> {
                val updatedTimestamp = updateUtcTime(currentTimestamp = _state.value.fromTime,
                    hour = action.hour, minutes = action.minute)
 
-               _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
+                _state.value.detailsAsEvent().toTime.let { currentToTimestamp ->
                    if (updatedTimestamp >= currentToTimestamp) {
                        updateDetails<AgendaItemDetails.Event> { event ->
                            event.copy(
@@ -220,7 +224,7 @@ class AgendaDetailViewModel(
                 val updatedTimestamp = updateUtcDate(currentTimestamp = _state.value.fromTime,
                     dateMillis = action.dateMillis)
 
-                _state.value.detailsAsEvent()?.toTime?.let { currentToTimestamp ->
+                _state.value.detailsAsEvent().toTime.let { currentToTimestamp ->
                     if (updatedTimestamp >= currentToTimestamp) {
                         updateDetails<AgendaItemDetails.Event> { event ->
                             event.copy(
@@ -237,7 +241,7 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnTimeToPick -> {
-                _state.value.detailsAsEvent()?.toTime?.let { currentTimestamp ->
+                _state.value.detailsAsEvent().toTime.let { currentTimestamp ->
                     val updatedTimestamp = updateUtcTime(currentTimestamp = currentTimestamp,
                         hour = action.hour, minutes = action.minute)
 
@@ -253,7 +257,7 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnDateToPick -> {
-                _state.value.detailsAsEvent()?.toTime?.let { currentTimestamp ->
+                _state.value.detailsAsEvent().toTime.let { currentTimestamp ->
                     val updatedTimestamp = updateUtcDate(currentTimestamp = currentTimestamp,
                         dateMillis = action.dateMillis)
 
@@ -300,7 +304,8 @@ class AgendaDetailViewModel(
                             )
                             updateDetails<AgendaItemDetails.Event> { event ->
                                 event.copy(
-                                    photos = event.photos + photo
+                                    photos = event.photos + photo,
+                                    newPhotosIds = event.newPhotosIds + photo.id
                                 )
                             }
                         }
@@ -332,7 +337,8 @@ class AgendaDetailViewModel(
                     event.copy(
                         photos = event.photos.filterNot { photo ->
                             photo.id == action.photoId
-                        }
+                        },
+                        deletedPhotosIds = event.deletedPhotosIds + action.photoId
                     )
                 }
             }
@@ -359,7 +365,7 @@ class AgendaDetailViewModel(
                 }
             }
             is AgendaDetailAction.OnAttendeeEmailFieldFocusChanged -> {
-                val email = _state.value.detailsAsEvent()?.attendeeEmail ?: ""
+                val email = _state.value.detailsAsEvent().attendeeEmail
                 val isEmailValid = if (!action.hasFocus) {
                     validateEmail(email)
                 } else false
@@ -443,7 +449,7 @@ class AgendaDetailViewModel(
                     .apply(_state.value.selectedAgendaReminderInterval)
                     .toKotlinInstant(),
                 updatedAt = currentTimestamp.toKotlinInstant(),
-                isDone = _state.value.detailsAsTask()?.isDone ?: false
+                isDone = _state.value.detailsAsTask().isDone
             )
 
             val syncOperation =
@@ -508,16 +514,18 @@ class AgendaDetailViewModel(
                 title = _state.value.title,
                 description = _state.value.description,
                 timeFrom = _state.value.fromTime.toKotlinInstant(),
-                timeTo = _state.value.detailsAsEvent()?.toTime!!.toKotlinInstant(),
+                timeTo = _state.value.detailsAsEvent().toTime.toKotlinInstant(),
                 remindAt = _state.value.fromTime
                     .apply(_state.value.selectedAgendaReminderInterval)
                     .toKotlinInstant(),
                 updatedAt = currentTimestamp.toKotlinInstant(),
                 hostId = sessionStorage.get()?.userId ?: "",
                 isUserEventCreator = true,
-                lookupAttendees = _state.value.detailsAsEvent()?.lookupAttendees ?: listOf(),
-                eventAttendees = _state.value.detailsAsEvent()?.eventAttendees ?: listOf(),
-                photos = _state.value.detailsAsEvent()?.photos ?: listOf(),
+                lookupAttendees = _state.value.detailsAsEvent().lookupAttendees,
+                eventAttendees = _state.value.detailsAsEvent().eventAttendees,
+                photos = _state.value.detailsAsEvent().photos,
+                newPhotosIds = _state.value.detailsAsEvent().newPhotosIds,
+                deletedPhotosIds = _state.value.detailsAsEvent().deletedPhotosIds,
             )
 
             val syncOperation =

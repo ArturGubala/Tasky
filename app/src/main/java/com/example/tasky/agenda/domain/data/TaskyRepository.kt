@@ -6,4 +6,5 @@ import com.example.tasky.core.domain.util.EmptyResult
 interface TaskyRepository {
 
     suspend fun fetchFullAgenda(): EmptyResult<DataError>
+    suspend fun cleanUpLocalData()
 }

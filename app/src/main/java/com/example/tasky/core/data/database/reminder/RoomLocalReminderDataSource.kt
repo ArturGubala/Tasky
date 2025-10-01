@@ -54,4 +54,8 @@ class RoomLocalReminderDataSource(
     override suspend fun deleteReminder(id: String) {
         reminderDao.deleteReminder(id)
     }
+
+    override suspend fun deleteReminders() {
+        reminderDao.deleteReminders()
+    }
 }

@@ -12,4 +12,5 @@ interface TaskLocalDataSource {
 
     suspend fun insertTasks(tasks: List<Task>): EmptyResult<DataError.Local>
     suspend fun deleteTask(id: String)
+    suspend fun deleteTasks()
 }

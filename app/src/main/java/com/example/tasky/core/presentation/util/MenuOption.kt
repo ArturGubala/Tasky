@@ -2,6 +2,7 @@ package com.example.tasky.core.presentation.util
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.tasky.core.presentation.ui.UiText
 
 sealed class MenuOptionType {
     object Event : MenuOptionType()
@@ -12,10 +13,10 @@ sealed class MenuOptionType {
 
 data class MenuOption(
     val type: MenuOptionType,
-    val displayName: String,
+    val displayName: UiText,
     val iconRes: Int? = null,
-    val contentDescription: String? = null,
+    val contentDescription: UiText? = null,
     val iconSize: Dp = 20.dp,
     val onClick: () -> Unit,
-    val enable: Boolean = true
+    val enable: Boolean = true,
 )

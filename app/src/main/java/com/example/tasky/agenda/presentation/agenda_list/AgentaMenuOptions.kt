@@ -2,6 +2,7 @@ package com.example.tasky.agenda.presentation.agenda_list
 
 import androidx.compose.ui.unit.dp
 import com.example.tasky.R
+import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.MenuOption
 import com.example.tasky.core.presentation.util.MenuOptionType
 
@@ -13,25 +14,25 @@ object DefaultMenuOptions {
     ): List<MenuOption> = listOf(
         MenuOption(
             type = MenuOptionType.Event,
-            displayName = "Event",
+            displayName = UiText.StringResource(R.string.event),
             iconRes = R.drawable.ic_calendar_today,
-            contentDescription = "Create event",
+            contentDescription = UiText.StringResource(R.string.create_event),
             iconSize = 20.dp,
             onClick = onEventClick
         ),
         MenuOption(
             type = MenuOptionType.Task,
-            displayName = "Task",
+            displayName = UiText.StringResource(R.string.task),
             iconRes = R.drawable.ic_check,
-            contentDescription = "Create task",
+            contentDescription = UiText.StringResource(R.string.create_task),
             iconSize = 20.dp,
             onClick = onTaskClick
         ),
         MenuOption(
             type = MenuOptionType.Reminder,
-            displayName = "Reminder",
+            displayName = UiText.StringResource(R.string.reminder),
             iconRes = R.drawable.ic_bell,
-            contentDescription = "Create reminder",
+            contentDescription = UiText.StringResource(R.string.create_reminder),
             iconSize = 20.dp,
             onClick = onReminderClick
         )
@@ -42,9 +43,9 @@ object DefaultMenuOptions {
     ): List<MenuOption> = listOf(
         MenuOption(
             type = MenuOptionType.Logout,
-            displayName = "Log out",
+            displayName = UiText.StringResource(R.string.log_out),
             iconRes = R.drawable.ic_offline,
-            contentDescription = "Offline icon",
+            contentDescription = UiText.StringResource(R.string.offline_icon),
             iconSize = 20.dp,
             onClick = onLogoutClick
         )

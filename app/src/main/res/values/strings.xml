@@ -79,4 +79,11 @@
     <string name="delete_successful">Delete successful</string>
     <string name="visitor_added_successfully">Visitor added successfully</string>
     <string name="are_you_sure">Are you sure?</string>
+    <string name="log_out">Log out</string>
+    <string name="event">Event</string>
+    <string name="task">Task</string>
+    <string name="reminder">Reminder</string>
+    <string name="create_event">Create event</string>
+    <string name="create_task">Create task</string>
+    <string name="create_reminder">Create reminder</string>
 </resources>

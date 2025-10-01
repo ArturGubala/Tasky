@@ -44,6 +44,7 @@ sealed interface AgendaItemDetails {
         val isAttendeeEmailFocused: Boolean = false,
         val errors: List<ValidationItem> = emptyList(),
         val isAttendeeOperationInProgress: Boolean = false,
+        val isUserEventCreator: Boolean = false,
 
         ) : AgendaItemDetails
 
@@ -54,12 +55,12 @@ sealed interface AgendaItemDetails {
     data object Reminder: AgendaItemDetails
 }
 
-fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event? {
-    return details as? AgendaItemDetails.Event
+fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event {
+    return details as AgendaItemDetails.Event
 }
 
-fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task? {
-    return details as? AgendaItemDetails.Task
+fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task {
+    return details as AgendaItemDetails.Task
 }
 
 fun AgendaDetailState.isReminder(): Boolean {

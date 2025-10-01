@@ -81,7 +81,8 @@ fun Event.toUpdateEventRequest(): UpdateEventRequest {
         to = timeTo.toString(),
         remindAt = remindAt.toString(),
         updatedAt = updatedAt?.toString(),
-        attendeeIds = listOf(lookupAttendees, eventAttendees).flatten().map { it.userId },
+        attendeeIds = listOf(lookupAttendees, eventAttendees.filterNot { it.isCreator })
+            .flatten().map { it.userId },
         newPhotoKeys = newPhotosIds,
         deletedPhotoKeys = deletedPhotosIds,
         isGoing = true,

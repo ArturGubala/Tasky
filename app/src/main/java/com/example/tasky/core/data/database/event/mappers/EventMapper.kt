@@ -60,7 +60,7 @@ fun EventWithRelations.toEvent(userId: String): Event {
         eventAttendees = attendees.map { it.toAttendee() },
         photos = photos.map { it.toPhoto() },
         newPhotosIds = listOf(),
-        deletedPhotosIds = listOf(),
+        deletedPhotosIds = listOf()
     )
 
     val attendeeRemindAt = event.eventAttendees.first { it.userId == userId }.remindAt

@@ -54,4 +54,8 @@ class RoomLocalTaskDataSource(
     override suspend fun deleteTask(id: String) {
         taskDao.deleteTask(id)
     }
+
+    override suspend fun deleteTasks() {
+        taskDao.deleteTasks()
+    }
 }

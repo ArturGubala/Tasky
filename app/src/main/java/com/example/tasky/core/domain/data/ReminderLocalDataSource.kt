@@ -11,4 +11,5 @@ interface ReminderLocalDataSource {
     suspend fun upsertReminder(reminder: Reminder): EmptyResult<DataError.Local>
     suspend fun insertReminders(reminders: List<Reminder>): EmptyResult<DataError.Local>
     suspend fun deleteReminder(id: String)
+    suspend fun deleteReminders()
 }

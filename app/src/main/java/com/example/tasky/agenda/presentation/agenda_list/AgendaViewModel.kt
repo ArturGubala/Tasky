@@ -123,7 +123,7 @@ class AgendaViewModel(
     private fun observeAgendaItems() {
         // TODO just for test before implement date picking
         val startOfDay = 1758326400000L
-        val endOfDay = 1759276799000L
+        val endOfDay = 1759976799000L
 
         combine(
             localTaskDataSource.getTasksForDay(startOfDay, endOfDay),
@@ -189,6 +189,7 @@ class AgendaViewModel(
                     ))
                 }
                 is Result.Success -> {
+                    taskyRepository.cleanUpLocalData()
                     eventChannel.send(AgendaEvent.LogoutSuccessful)
                 }
             }

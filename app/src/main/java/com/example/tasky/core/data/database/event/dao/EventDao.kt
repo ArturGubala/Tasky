@@ -56,6 +56,9 @@ interface EventDao {
     @Query("DELETE FROM Event WHERE id = :id")
     suspend fun deleteEvent(id: String)
 
+    @Query("DELETE FROM event")
+    suspend fun deleteEvents()
+
 
     // ATTENDEE
     @Upsert
@@ -63,7 +66,6 @@ interface EventDao {
 
     @Query("DELETE FROM attendee WHERE userId = :userId and eventId = :eventId")
     suspend fun deleteAttendee(userId: String, eventId: String)
-
 
     // PHOTO
     @Upsert
@@ -73,5 +75,5 @@ interface EventDao {
     suspend fun deletePhoto(key: String, eventId: String)
 
     @Query("DELETE FROM photo WHERE eventId = :eventId")
-    suspend fun deletePhotos(eventId: String)
+    suspend fun deletePhotosForEvent(eventId: String)
 }

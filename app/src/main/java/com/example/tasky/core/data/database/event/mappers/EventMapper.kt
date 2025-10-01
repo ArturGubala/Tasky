@@ -45,8 +45,8 @@ fun Event.toEventEntity(): EventEntity {
     )
 }
 
-fun EventWithRelations.toEvent(): Event {
-    return Event(
+fun EventWithRelations.toEvent(userId: String): Event {
+    val event = Event(
         id = event.id,
         title = event.title,
         description = event.description,
@@ -62,6 +62,9 @@ fun EventWithRelations.toEvent(): Event {
         newPhotosIds = listOf(),
         deletedPhotosIds = listOf(),
     )
+
+    val attendeeRemindAt = event.eventAttendees.first { it.userId == userId }.remindAt
+    return event.copy(remindAt = attendeeRemindAt)
 }
 
 fun AttendeeEntity.toAttendee(): EventAttendee {

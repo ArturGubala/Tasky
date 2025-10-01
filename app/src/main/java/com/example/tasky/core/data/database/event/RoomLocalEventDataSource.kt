@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.map
 class RoomLocalEventDataSource(
     private val eventDao: EventDao,
 ) : EventLocalDataSource {
-    override fun getEvent(id: String): Flow<Event> {
+    override fun getEvent(id: String, userId: String): Flow<Event> {
         return eventDao.getEvent(id = id)
-            .map { it.toEvent() }
+            .map { it.toEvent(userId = userId) }
     }
 
     override fun getEventForDay(
@@ -39,7 +39,7 @@ class RoomLocalEventDataSource(
             val photosEntities = event.toPhotoEntities()
 
             // Temporary, until figure out, how to not save local photos to db
-            eventDao.deletePhotos(event.id)
+            eventDao.deletePhotosForEvent(event.id)
             //
             eventDao.upsertEventWithRelations(
                 event = eventEntity,
@@ -74,6 +74,11 @@ class RoomLocalEventDataSource(
     override suspend fun deleteEvent(id: String) {
         eventDao.deleteEvent(id)
     }
+
+    override suspend fun deleteEvents() {
+        eventDao.deleteEvents()
+    }
+
 
     override suspend fun deleteAttendee(userId: String, eventId: String) {
         eventDao.deleteAttendee(userId = userId, eventId = eventId)

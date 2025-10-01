@@ -83,16 +83,20 @@ class OfflineFirstEventRepository(
 
                         uploadedKeys = uploadedKeys + uploaded
 
-                        // CONFIRM
-                        applicationScope.launch {
-                            eventRemoteDataSource.confirmUpload(
-                                eventId = event.id,
-                                confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
-                            )
-                                .onSuccess { event ->
-                                    eventLocalDataSource.upsertEvent(event)
-                                }
-                        }.join()
+                        if (uploadedKeys.isEmpty()) {
+                            eventLocalDataSource.upsertEvent(event)
+                        } else {
+                            // CONFIRM
+                            applicationScope.launch {
+                                eventRemoteDataSource.confirmUpload(
+                                    eventId = event.id,
+                                    confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
+                                )
+                                    .onSuccess { event ->
+                                        eventLocalDataSource.upsertEvent(event)
+                                    }
+                            }.join()
+                        }
                     }.asEmptyDataResult()
             }
 
@@ -134,16 +138,20 @@ class OfflineFirstEventRepository(
 
                         uploadedKeys = uploadedKeys + uploaded
 
-                        // CONFIRM
-                        applicationScope.launch {
-                            eventRemoteDataSource.confirmUpload(
-                                eventId = event.id,
-                                confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
-                            )
-                                .onSuccess { event ->
-                                    eventLocalDataSource.upsertEvent(event)
-                                }
-                        }.join()
+                        if (uploadedKeys.isEmpty()) {
+                            eventLocalDataSource.upsertEvent(event)
+                        } else {
+                            // CONFIRM
+                            applicationScope.launch {
+                                eventRemoteDataSource.confirmUpload(
+                                    eventId = event.id,
+                                    confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
+                                )
+                                    .onSuccess { event ->
+                                        eventLocalDataSource.upsertEvent(event)
+                                    }
+                            }.join()
+                        }
                     }.asEmptyDataResult()
             }
         }

@@ -163,7 +163,9 @@ class AgendaDetailViewModel(
 
     private fun getEvent(eventId: String) {
         viewModelScope.launch {
-            eventLocalDataSource.getEvent(id = eventId).firstOrNull()?.let { event ->
+            val userId = sessionStorage.get()?.userId ?: ""
+            eventLocalDataSource.getEvent(id = eventId, userId = userId).firstOrNull()
+                ?.let { event ->
                 val duration = event.timeFrom - event.remindAt
                 _state.update {
                     it.copy(

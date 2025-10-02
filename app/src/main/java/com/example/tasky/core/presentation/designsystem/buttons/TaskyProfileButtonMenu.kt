@@ -58,7 +58,7 @@ fun TaskyProfileButtonMenu(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = menuOption.displayName,
+                            text = menuOption.displayName.asString(),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
@@ -71,7 +71,7 @@ fun TaskyProfileButtonMenu(
                             if (!menuOption.enable) {
                                 Icon(
                                     painter = painterResource(id = it),
-                                    contentDescription = menuOption.contentDescription,
+                                    contentDescription = menuOption.contentDescription?.asString(),
                                     modifier = Modifier.size(menuOption.iconSize),
                                 )
                             }

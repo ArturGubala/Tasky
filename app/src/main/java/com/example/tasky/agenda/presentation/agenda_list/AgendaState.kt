@@ -9,4 +9,8 @@ data class AgendaState(
     val fabButtonMenuOptions: List<MenuOption> = listOf(),
     val profileButtonMenuOptions: List<MenuOption> = listOf(),
     val agendaItems: List<AgendaItemUi> = listOf(),
+    val isModalDialogVisible: Boolean = false,
+    val agendaItemIdToDelete: String? = null,
+    val isDeleting: Boolean = false,
+    val expandedMenuItemId: String? = null,
 )

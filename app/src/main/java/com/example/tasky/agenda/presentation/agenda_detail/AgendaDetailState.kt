@@ -25,7 +25,7 @@ data class AgendaDetailState(
     val selectedAgendaReminderInterval: AgendaItemInterval = defaultAgendaItemIntervals().first(),
     val fromTime: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS),
     val selectedAttendeeStatus: AgendaItemAttendeesStatus = AgendaItemAttendeesStatus.ALL,
-    val details: AgendaItemDetails? = AgendaItemDetails.Event(),
+    val details: AgendaItemDetails = AgendaItemDetails.None,
     val agendaDetailBottomSheetType: AgendaDetailBottomSheetType = AgendaDetailBottomSheetType.NONE,
 )
 
@@ -53,14 +53,15 @@ sealed interface AgendaItemDetails {
     ): AgendaItemDetails
 
     data object Reminder: AgendaItemDetails
+    data object None : AgendaItemDetails
 }
 
-fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event {
-    return details as AgendaItemDetails.Event
+fun AgendaDetailState.detailsAsEvent(): AgendaItemDetails.Event? {
+    return details as? AgendaItemDetails.Event
 }
 
-fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task {
-    return details as AgendaItemDetails.Task
+fun AgendaDetailState.detailsAsTask(): AgendaItemDetails.Task? {
+    return details as? AgendaItemDetails.Task
 }
 
 fun AgendaDetailState.isReminder(): Boolean {

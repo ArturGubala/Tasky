@@ -5,6 +5,8 @@ package com.example.tasky.agenda.presentation.agenda_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasky.R
+import com.example.tasky.agenda.domain.data.EventRepository
+import com.example.tasky.agenda.domain.data.ReminderRepository
 import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.TaskyRepository
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
@@ -12,19 +14,24 @@ import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.RoomLocalEventDataSource
 import com.example.tasky.core.data.database.reminder.RoomLocalReminderDataSource
 import com.example.tasky.core.data.database.task.RoomLocalTaskDataSource
 import com.example.tasky.core.domain.datastore.SessionStorage
 import com.example.tasky.core.domain.util.ConnectivityObserver
 import com.example.tasky.core.domain.util.Result
+import com.example.tasky.core.domain.util.onError
+import com.example.tasky.core.domain.util.onSuccess
 import com.example.tasky.core.presentation.ui.UiText
+import com.example.tasky.core.presentation.ui.asUiText
 import com.example.tasky.core.presentation.util.MenuOptionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -32,6 +39,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
@@ -40,6 +49,8 @@ class AgendaViewModel(
     private val authRepository: AuthRepository,
     private val sessionStorage: SessionStorage,
     private val taskRepository: TaskRepository,
+    private val eventRepository: EventRepository,
+    private val reminderRepository: ReminderRepository,
     private val taskyRepository: TaskyRepository,
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
     private val localTaskDataSource: RoomLocalTaskDataSource,
@@ -167,6 +178,32 @@ class AgendaViewModel(
                     )
                 }
             }
+            AgendaAction.OnDismissModalDialog -> {
+                _state.update { it.copy(isModalDialogVisible = false) }
+            }
+            is AgendaAction.OnDeleteMenuOptionClick -> {
+                _state.update {
+                    it.copy(
+                        isModalDialogVisible = true,
+                        agendaItemIdToDelete = action.id
+                    )
+                }
+            }
+            AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem()
+            is AgendaAction.OnAgendaItemMenuClick -> {
+                _state.update { it.copy(expandedMenuItemId = action.id) }
+            }
+
+            is AgendaAction.OnDismissAgendaItemMenu -> {
+                if (_state.value.expandedMenuItemId == action.id) {
+                    _state.update { it.copy(expandedMenuItemId = null) }
+                }
+            }
+
+            is AgendaAction.OnCompleteTaskClick -> updateTask(
+                taskId = action.id,
+                isDone = action.isDone
+            )
         }
     }
 
@@ -209,6 +246,64 @@ class AgendaViewModel(
         _state.update {
             it.copy(
                 profileButtonMenuOptions = updatedProfileOptions
+            )
+        }
+    }
+
+    private fun deleteAgendaItem() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isDeleting = true,
+                    isModalDialogVisible = true
+                )
+            }
+            val agendaItemToDelete =
+                _state.value.agendaItems.firstOrNull { it.id == _state.value.agendaItemIdToDelete }
+            if (agendaItemToDelete == null) {
+                _state.update {
+                    it.copy(
+                        isDeleting = false,
+                        isModalDialogVisible = false,
+                        agendaItemIdToDelete = null
+                    )
+                }
+                return@launch
+            }
+
+            val result = when (agendaItemToDelete.agendaKind) {
+                AgendaKind.TASK -> taskRepository.deleteTask(id = agendaItemToDelete.id)
+                AgendaKind.EVENT -> eventRepository.deleteEvent(id = agendaItemToDelete.id)
+                AgendaKind.REMINDER -> reminderRepository.deleteReminder(id = agendaItemToDelete.id)
+            }
+
+            result
+                .onError { error ->
+                    eventChannel.send(AgendaEvent.LogoutFailure(error = error.asUiText()))
+                }
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isDeleting = false,
+                            isModalDialogVisible = false,
+                            agendaItemIdToDelete = null
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun updateTask(taskId: String, isDone: Boolean) {
+        viewModelScope.launch {
+            val task = localTaskDataSource.getTask(taskId).firstOrNull()
+            if (task == null) return@launch
+
+            taskRepository.upsertTask(
+                task = task.copy(
+                    updatedAt = ZonedDateTime.now(ZoneId.of("UTC")).toKotlinInstant(),
+                    isDone = isDone
+                ),
+                syncOperation = SyncOperation.UPDATE
             )
         }
     }

@@ -72,7 +72,7 @@ fun TaskyFloatingActionButtonMenu(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = menuOption.displayName,
+                            text = menuOption.displayName.asString(),
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -84,7 +84,7 @@ fun TaskyFloatingActionButtonMenu(
                         menuOption.iconRes?.let {
                             Icon(
                                 painter = painterResource(id = it),
-                                contentDescription = menuOption.contentDescription,
+                                contentDescription = menuOption.contentDescription?.asString(),
                                 modifier = Modifier.size(menuOption.iconSize),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -107,7 +107,8 @@ private fun TaskyFloatingActionButtonMenuPreview() {
         var expanded by remember { mutableStateOf(true) }
         Box(
             modifier = Modifier
-                .fillMaxSize().padding(16.dp),
+                .fillMaxSize()
+                .padding(16.dp),
             contentAlignment = Alignment.BottomEnd
         ) {
             TaskyFloatingActionButtonMenu(

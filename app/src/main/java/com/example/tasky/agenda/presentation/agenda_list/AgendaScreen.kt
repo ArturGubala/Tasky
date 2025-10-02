@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRight
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,14 +37,16 @@ import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyProfileButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyTextButton
+import com.example.tasky.core.presentation.designsystem.cards.TaskyAgendaItemCard
 import com.example.tasky.core.presentation.designsystem.containers.TaskyContentBox
+import com.example.tasky.core.presentation.designsystem.dialogs.TaskyModalDialog
 import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
-import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-// TODO test implementation for testing navigation and context menu
 @Composable
 fun AgendaScreenRoot(
     onSuccessfulLogout: () -> Unit,
@@ -79,6 +82,14 @@ fun AgendaScreenRoot(
                     event.agendaId
                 )
             }
+            is AgendaEvent.DeleteAgendaItemFailure -> {
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+                onSuccessfulLogout()
+            }
         }
     }
 
@@ -97,6 +108,8 @@ private fun AgendaScreen(
     onOpenClick: (AgendaKind, AgendaDetailView, String) -> Unit,
     onEditClick: (AgendaKind, AgendaDetailView, String) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+
     TaskyScaffold(
         topBar = {
             TaskyTopAppBar(
@@ -161,74 +174,85 @@ private fun AgendaScreen(
                 contentAlignment = Alignment.TopCenter
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
                 ) {
-                    LazyColumn {
-                        items(state.agendaItems) { item ->
-                            Column {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = item.agendaKind.name,
-                                            color = MaterialTheme.colorScheme.error
-                                        )
-                                        Text(
-                                            text = item.id,
-                                            color = MaterialTheme.colorScheme.extended.success
-                                        )
-                                        Text(
-                                            text = item.title,
-                                            color = MaterialTheme.colorScheme.extended.success
-                                        )
-                                    }
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            onOpenClick(
-                                                item.agendaKind,
-                                                AgendaDetailView.READ_ONLY,
-                                                item.id
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = state.agendaItems,
+                            key = { it.id },
+                            contentType = { it.agendaKind }
+                        ) { item ->
+                            TaskyAgendaItemCard(
+                                title = item.title,
+                                menuOptions = DefaultMenuOptions
+                                    .getTaskyAgendaItemMenuOptions(
+                                        onOpenClick = {
+                                            scope.launch {
+                                                onAction(AgendaAction.OnDismissAgendaItemMenu(id = item.id))
+                                                delay(100)
+                                                onOpenClick(
+                                                    item.agendaKind,
+                                                    AgendaDetailView.READ_ONLY,
+                                                    item.id
+                                                )
+                                            }
+                                        },
+                                        onEditClick = {
+                                            scope.launch {
+                                                onAction(AgendaAction.OnDismissAgendaItemMenu(id = item.id))
+                                                delay(100)
+                                                onEditClick(
+                                                    item.agendaKind,
+                                                    AgendaDetailView.EDIT,
+                                                    item.id
+                                                )
+                                            }
+                                        },
+                                        onDeleteClick = {
+                                            onAction(AgendaAction.OnDismissAgendaItemMenu(id = item.id))
+                                            onAction(
+                                                AgendaAction.OnDeleteMenuOptionClick(id = item.id)
                                             )
                                         }
-                                    ) {
-                                        Text(
-                                            text = "Open",
-                                            color = MaterialTheme.colorScheme.extended.success
+                                    ),
+                                dates = item.getFormattedDates(),
+                                expanded = state.expandedMenuItemId == item.id,
+                                onMenuClick = {
+                                    onAction(AgendaAction.OnAgendaItemMenuClick(id = item.id))
+                                },
+                                onDismissRequest = {
+                                    onAction(AgendaAction.OnDismissAgendaItemMenu(id = item.id))
+                                },
+                                backgroundColor = item.colorProvider.invoke(),
+                                modifier = Modifier
+                                    .requiredHeight(125.dp),
+                                isDone = if (item.isCompletable) item.isCompleted else null,
+                                onCompleteTaskClick = {
+                                    onAction(
+                                        AgendaAction.OnCompleteTaskClick(
+                                            id = item.id,
+                                            isDone = !item.isCompleted
                                         )
-                                    }
-                                    Button(
-                                        onClick = {
-                                            onEditClick(
-                                                item.agendaKind,
-                                                AgendaDetailView.EDIT,
-                                                item.id
-                                            )
-                                        }
-                                    ) {
-                                        Text(
-                                            text = "Edit",
-                                            color = MaterialTheme.colorScheme.extended.success
-                                        )
-                                    }
-                                    Button(
-                                        onClick = {}
-                                    ) {
-                                        Text(
-                                            text = "Delete",
-                                            color = MaterialTheme.colorScheme.extended.success
-                                        )
-                                    }
-                                }
-                            }
+                                    )
+                                },
+                                description = item.description ?: ""
+                            )
                         }
                     }
                 }
             }
+        }
+
+        if (state.isModalDialogVisible) {
+            TaskyModalDialog(
+                onDismiss = { onAction(AgendaAction.OnDismissModalDialog) },
+                onConfirm = { onAction(AgendaAction.OnConfirmDeleteClick) },
+                isConfirmEnable = !state.isDeleting
+            )
         }
     }
 }
@@ -240,8 +264,8 @@ private fun AgendaScreenPreview() {
         AgendaScreen(
             state = AgendaState(),
             onAction = {},
-            onOpenClick = {} as (AgendaKind, AgendaDetailView, String) -> Unit,
-            onEditClick = {} as (AgendaKind, AgendaDetailView, String) -> Unit
+            onOpenClick = { _, _, _ -> },
+            onEditClick = { _, _, _ -> }
         )
     }
 }

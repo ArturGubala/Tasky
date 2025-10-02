@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTime::class)
+@file:OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
 
 package com.example.tasky.agenda.presentation.agenda_list
 
@@ -27,13 +27,17 @@ import com.example.tasky.core.domain.util.onSuccess
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText
 import com.example.tasky.core.presentation.util.MenuOptionType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -122,6 +126,7 @@ class AgendaViewModel(
             .launchIn(viewModelScope)
     }
 
+
     private fun initializeData() {
         viewModelScope.launch {
             syncAgendaItemScheduler.scheduleSync(
@@ -135,24 +140,39 @@ class AgendaViewModel(
     }
 
     private fun observeAgendaItems() {
-        // TODO just for test before implement date picking
-        val startOfDay = 1758326400000L
-        val endOfDay = 1759976799000L
+        _state
+            .map { it.selectedDate }
+            .distinctUntilChanged()
+            .flatMapLatest { selectedDateUtc ->
+                val selectedDateLocal = selectedDateUtc.withZoneSameInstant(ZoneId.systemDefault())
 
-        combine(
-            localTaskDataSource.getTasksForDay(startOfDay, endOfDay),
-            localReminderDataSource.getReminderForDay(startOfDay, endOfDay),
-            localEventDataSource.getEventForDay(startOfDay, endOfDay)
-        ) { tasks, reminders, events ->
-            val allItems = buildList {
-                addAll(tasks.map { AgendaItemUi.TaskItem(it) })
-                addAll(reminders.map { AgendaItemUi.ReminderItem(it) })
-                addAll(events.map { AgendaItemUi.EventItem(it) })
+                val startOfDayLocal = selectedDateLocal.toLocalDate()
+                    .atStartOfDay(ZoneId.systemDefault())
+                val endOfDayLocal = startOfDayLocal.plusDays(1).minusNanos(1)
+
+                val startOfDayUtc = startOfDayLocal.withZoneSameInstant(ZoneId.of("UTC"))
+                val endOfDayUtc = endOfDayLocal.withZoneSameInstant(ZoneId.of("UTC"))
+
+                val startOfDayMillis = startOfDayUtc.toInstant().toEpochMilli()
+                val endOfDayMillis = endOfDayUtc.toInstant().toEpochMilli()
+
+                combine(
+                    localTaskDataSource.getTasksForDay(startOfDayMillis, endOfDayMillis),
+                    localReminderDataSource.getReminderForDay(startOfDayMillis, endOfDayMillis),
+                    localEventDataSource.getEventForDay(startOfDayMillis, endOfDayMillis)
+                ) { tasks, reminders, events ->
+                    val allItems = buildList {
+                        addAll(tasks.map { AgendaItemUi.TaskItem(it) })
+                        addAll(reminders.map { AgendaItemUi.ReminderItem(it) })
+                        addAll(events.map { AgendaItemUi.EventItem(it) })
+                    }
+                    allItems.sortedBy { it.time.toKotlinInstant().toEpochMilliseconds() }
+                }
             }
-            allItems.sortedBy { it.time.toKotlinInstant().toEpochMilliseconds() }
-        }.onEach { sortedAgendaItems ->
-            _state.update { it.copy(agendaItems = sortedAgendaItems) }
-        }.launchIn(viewModelScope)
+            .onEach { sortedAgendaItems ->
+                _state.update { it.copy(agendaItems = sortedAgendaItems) }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onAction(action: AgendaAction) {

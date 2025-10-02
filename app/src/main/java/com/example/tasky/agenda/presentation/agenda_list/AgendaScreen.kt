@@ -42,6 +42,7 @@ import com.example.tasky.R
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.fromEpochMillis
+import com.example.tasky.agenda.presentation.util.toInitials
 import com.example.tasky.agenda.presentation.util.toLocal
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
@@ -157,7 +158,7 @@ private fun AgendaScreen(
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                         TaskyProfileButtonMenu(
-                            text = "AG",
+                            text = state.userFullName.toInitials(),
                             onClick = { onAction(AgendaAction.OnProfileButtonClick) },
                             expanded = state.profileMenuExpanded,
                             menuOptions = state.profileButtonMenuOptions

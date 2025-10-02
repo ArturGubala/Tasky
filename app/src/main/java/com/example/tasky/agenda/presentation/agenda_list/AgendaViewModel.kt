@@ -65,13 +65,12 @@ class AgendaViewModel(
 ) : ViewModel() {
 
     private var initialized = false
-    private val _state = MutableStateFlow(AgendaState(isLoadingData = true))
+    private val _state = MutableStateFlow(AgendaState())
     val state = _state
         .onStart {
             if (!initialized) {
                 initializeData()
                 initialized = true
-                _state.update { it.copy(isLoadingData = false) }
             }
             initializeMenuOptions()
             observeConnectivity()
@@ -80,7 +79,7 @@ class AgendaViewModel(
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
-            AgendaState(isLoadingData = true),
+            AgendaState(),
         )
     private val eventChannel = Channel<AgendaEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -129,6 +128,10 @@ class AgendaViewModel(
 
     private fun initializeData() {
         viewModelScope.launch {
+            val authInfo = sessionStorage.get()
+            _state.update {
+                it.copy(userFullName = authInfo?.userName ?: "")
+            }
             syncAgendaItemScheduler.scheduleSync(
                 type = SyncAgendaItemScheduler.SyncType.FetchAgendaItems(
                     interval = 30.minutes
@@ -136,6 +139,7 @@ class AgendaViewModel(
             )
             taskRepository.syncPendingTask()
             taskyRepository.fetchFullAgenda()
+
         }
     }
 

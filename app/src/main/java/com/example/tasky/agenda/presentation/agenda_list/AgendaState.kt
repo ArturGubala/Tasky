@@ -18,4 +18,5 @@ data class AgendaState(
     val expandedMenuItemId: String? = null,
     val selectedDate: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")),
     val showDatePicker: Boolean = false,
+    val userFullName: String = "",
 )

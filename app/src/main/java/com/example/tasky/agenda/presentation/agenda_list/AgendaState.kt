@@ -12,4 +12,5 @@ data class AgendaState(
     val isModalDialogVisible: Boolean = false,
     val agendaItemIdToDelete: String? = null,
     val isDeleting: Boolean = false,
+    val expandedMenuItemId: String? = null,
 )

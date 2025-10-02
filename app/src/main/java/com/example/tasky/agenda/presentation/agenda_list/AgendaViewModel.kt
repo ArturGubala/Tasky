@@ -14,6 +14,7 @@ import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.auth.domain.AuthRepository
+import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.RoomLocalEventDataSource
 import com.example.tasky.core.data.database.reminder.RoomLocalReminderDataSource
 import com.example.tasky.core.data.database.task.RoomLocalTaskDataSource
@@ -30,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -37,6 +39,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
@@ -177,7 +181,6 @@ class AgendaViewModel(
             AgendaAction.OnDismissModalDialog -> {
                 _state.update { it.copy(isModalDialogVisible = false) }
             }
-
             is AgendaAction.OnDeleteMenuOptionClick -> {
                 _state.update {
                     it.copy(
@@ -186,8 +189,21 @@ class AgendaViewModel(
                     )
                 }
             }
-
             AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem()
+            is AgendaAction.OnAgendaItemMenuClick -> {
+                _state.update { it.copy(expandedMenuItemId = action.id) }
+            }
+
+            is AgendaAction.OnDismissAgendaItemMenu -> {
+                if (_state.value.expandedMenuItemId == action.id) {
+                    _state.update { it.copy(expandedMenuItemId = null) }
+                }
+            }
+
+            is AgendaAction.OnCompleteTaskClick -> updateTask(
+                taskId = action.id,
+                isDone = action.isDone
+            )
         }
     }
 
@@ -274,7 +290,21 @@ class AgendaViewModel(
                         )
                     }
                 }
+        }
+    }
 
+    private fun updateTask(taskId: String, isDone: Boolean) {
+        viewModelScope.launch {
+            val task = localTaskDataSource.getTask(taskId).firstOrNull()
+            if (task == null) return@launch
+
+            taskRepository.upsertTask(
+                task = task.copy(
+                    updatedAt = ZonedDateTime.now(ZoneId.of("UTC")).toKotlinInstant(),
+                    isDone = isDone
+                ),
+                syncOperation = SyncOperation.UPDATE
+            )
         }
     }
 }

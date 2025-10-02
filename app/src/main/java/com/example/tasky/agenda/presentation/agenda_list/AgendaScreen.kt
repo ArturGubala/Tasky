@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTime::class
+)
 
 package com.example.tasky.agenda.presentation.agenda_list
 
@@ -8,14 +11,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRight
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,7 +48,9 @@ import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.fromEpochMillis
 import com.example.tasky.agenda.presentation.util.toInitials
+import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.toLocal
+import com.example.tasky.core.presentation.designsystem.TimeNeedleIndicator
 import com.example.tasky.core.presentation.designsystem.app_bars.TaskyTopAppBar
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyFloatingActionButtonMenu
 import com.example.tasky.core.presentation.designsystem.buttons.TaskyProfileButtonMenu
@@ -59,6 +66,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.ZonedDateTime
+import kotlin.time.Clock.System.now
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun AgendaScreenRoot(
@@ -158,7 +167,7 @@ private fun AgendaScreen(
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                         TaskyProfileButtonMenu(
-                            text = state.userFullName.toInitials(),
+                            text = state.userName.toInitials(),
                             onClick = { onAction(AgendaAction.OnProfileButtonClick) },
                             expanded = state.profileMenuExpanded,
                             menuOptions = state.profileButtonMenuOptions
@@ -215,11 +224,27 @@ private fun AgendaScreen(
                                 .padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(
+                            itemsIndexed(
                                 items = state.agendaItems,
-                                key = { it.id },
-                                contentType = { it.agendaKind }
-                            ) { item ->
+                                key = { _, item -> item.id },
+                                contentType = { _, item -> item.agendaKind }
+                            ) { index: Int, item: AgendaItemUi ->
+                                val shouldShowNeedleBefore = when {
+                                    state.agendaItems.isEmpty() -> false
+                                    index == 0 -> now() < item.time.toKotlinInstant()
+                                    else -> {
+                                        val previousItem = state.agendaItems[index - 1]
+                                        now() > previousItem.time.toKotlinInstant() &&
+                                                now() < item.time.toKotlinInstant()
+                                    }
+                                }
+
+                                if (shouldShowNeedleBefore) {
+                                    TimeNeedleIndicator(
+                                        modifier = Modifier.offset(y = (-6).dp)
+                                    )
+                                }
+
                                 TaskyAgendaItemCard(
                                     title = item.title,
                                     menuOptions = DefaultMenuOptions
@@ -283,6 +308,19 @@ private fun AgendaScreen(
                                     },
                                     description = item.description ?: ""
                                 )
+
+                                if (index == state.agendaItems.lastIndex &&
+                                    now() > item.time.toKotlinInstant()
+                                ) {
+                                    Spacer(modifier = Modifier.height(5.dp))
+                                    TimeNeedleIndicator()
+                                }
+                            }
+
+                            if (state.agendaItems.isEmpty()) {
+                                item {
+                                    TimeNeedleIndicator()
+                                }
                             }
                         }
                     }

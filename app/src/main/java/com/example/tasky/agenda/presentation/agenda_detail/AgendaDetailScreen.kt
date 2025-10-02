@@ -687,7 +687,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(120.dp),
-                                            isReadOnly = canEdit
+                                            isReadOnly = !canEdit
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
@@ -700,7 +700,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(156.dp),
-                                            isReadOnly = canEdit
+                                            isReadOnly = !canEdit
                                         )
                                     }
                                 }

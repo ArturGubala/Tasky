@@ -130,7 +130,7 @@ class AgendaViewModel(
         viewModelScope.launch {
             val authInfo = sessionStorage.get()
             _state.update {
-                it.copy(userFullName = authInfo?.userName ?: "")
+                it.copy(userName = authInfo?.userName ?: "")
             }
             syncAgendaItemScheduler.scheduleSync(
                 type = SyncAgendaItemScheduler.SyncType.FetchAgendaItems(

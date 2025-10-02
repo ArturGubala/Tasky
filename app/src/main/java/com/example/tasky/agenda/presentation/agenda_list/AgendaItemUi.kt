@@ -2,10 +2,15 @@
 
 package com.example.tasky.agenda.presentation.agenda_list
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.agenda.domain.model.Reminder
 import com.example.tasky.agenda.domain.model.Task
 import com.example.tasky.agenda.domain.util.AgendaKind
+import com.example.tasky.core.presentation.designsystem.theme.extended
+import com.example.tasky.core.presentation.util.DateTimeFormatter
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlin.time.ExperimentalTime
@@ -20,6 +25,7 @@ sealed interface AgendaItemUi {
     val isCompletable: Boolean get() = false
     val isCompleted: Boolean get() = false
     val toTime: ZonedDateTime? get() = null
+    val colorProvider: @Composable () -> Color
 
     data class TaskItem(val task: Task) : AgendaItemUi {
         override val id: String = task.id
@@ -30,6 +36,8 @@ sealed interface AgendaItemUi {
         override val agendaKind: AgendaKind = AgendaKind.TASK
         override val isCompletable: Boolean = true
         override val isCompleted: Boolean = task.isDone
+        override val colorProvider: @Composable () -> Color =
+            { MaterialTheme.colorScheme.secondary }
     }
 
     data class EventItem(val event: Event) : AgendaItemUi {
@@ -41,6 +49,7 @@ sealed interface AgendaItemUi {
         override val agendaKind: AgendaKind = AgendaKind.EVENT
         override val toTime: ZonedDateTime =
             ZonedDateTime.ofInstant(event.timeTo.toJavaInstant(), ZoneId.systemDefault())
+        override val colorProvider: @Composable () -> Color = { MaterialTheme.colorScheme.tertiary }
     }
 
     data class ReminderItem(val reminder: Reminder) : AgendaItemUi {
@@ -50,5 +59,15 @@ sealed interface AgendaItemUi {
         override val title: String = reminder.title
         override val description: String? = reminder.description
         override val agendaKind: AgendaKind = AgendaKind.REMINDER
+        override val colorProvider: @Composable () -> Color =
+            { MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70 }
+    }
+
+}
+
+fun AgendaItemUi.getFormattedDates(): String {
+    return when (this) {
+        is AgendaItemUi.EventItem -> DateTimeFormatter.formatTaskyAgendaCardDateRange(time, toTime)
+        else -> DateTimeFormatter.formatTaskyAgendaCardDate(time)
     }
 }

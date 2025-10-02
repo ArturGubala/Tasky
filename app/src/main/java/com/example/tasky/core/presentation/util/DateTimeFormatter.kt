@@ -32,10 +32,28 @@ object DateTimeFormatter {
             ZoneId.systemDefault())
         )
     }
+
+    @SuppressLint("ConstantLocale")
+    private val taskyAgendaCardDateFormat =
+        DateTimeFormatter.ofPattern(DateTimeFormats.TASKY_AGENDA_CARD_DATE)
+
+    fun formatTaskyAgendaCardDate(dateTime: ZonedDateTime): String {
+        return taskyAgendaCardDateFormat.format(dateTime)
+    }
+
+    fun formatTaskyAgendaCardDateRange(
+        fromDateTime: ZonedDateTime,
+        toDateTime: ZonedDateTime,
+    ): String {
+        val fromFormatted = taskyAgendaCardDateFormat.format(fromDateTime)
+        val toFormatted = taskyAgendaCardDateFormat.format(toDateTime)
+        return "$fromFormatted - $toFormatted"
+    }
 }
 
 object DateTimeFormats {
     const val TASKY_DETAIL_PICKER_TIME = "%02d:%02d"
     const val TASKY_DETAIL_PICKER_DATE = "MMM dd, yyyy"
     const val TASKY_DETAIL_TITLE_DATE = "dd MMMM yyyy"
+    const val TASKY_AGENDA_CARD_DATE = "MMM d, HH:mm"
 }

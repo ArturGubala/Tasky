@@ -9,6 +9,7 @@ sealed class MenuOptionType {
     object Task : MenuOptionType()
     object Reminder : MenuOptionType()
     object Logout : MenuOptionType()
+    object CardMenuOption : MenuOptionType()
 }
 
 data class MenuOption(

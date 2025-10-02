@@ -50,4 +50,35 @@ object DefaultMenuOptions {
             onClick = onLogoutClick
         )
     )
+
+    internal fun getTaskyAgendaItemMenuOptions(
+        onOpenClick: () -> Unit = {},
+        onEditClick: () -> Unit = {},
+        onDeleteClick: () -> Unit = {},
+    ): List<MenuOption> = listOf(
+        MenuOption(
+            type = MenuOptionType.CardMenuOption,
+            displayName = UiText.StringResource(R.string.open),
+            iconRes = null,
+            contentDescription = UiText.StringResource(R.string.create_event),
+            iconSize = 20.dp,
+            onClick = onOpenClick
+        ),
+        MenuOption(
+            type = MenuOptionType.CardMenuOption,
+            displayName = UiText.StringResource(R.string.edit),
+            iconRes = null,
+            contentDescription = UiText.StringResource(R.string.create_task),
+            iconSize = 20.dp,
+            onClick = onEditClick
+        ),
+        MenuOption(
+            type = MenuOptionType.CardMenuOption,
+            displayName = UiText.StringResource(R.string.delete),
+            iconRes = null,
+            contentDescription = UiText.StringResource(R.string.create_reminder),
+            iconSize = 20.dp,
+            onClick = onDeleteClick
+        )
+    )
 }

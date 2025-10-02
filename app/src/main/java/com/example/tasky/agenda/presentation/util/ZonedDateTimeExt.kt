@@ -27,6 +27,18 @@ fun ZonedDateTime.updateUtcDate(dateMillis: Long): ZonedDateTime {
 fun ZonedDateTime.toLocal(): ZonedDateTime =
     withZoneSameInstant(ZoneId.systemDefault())
 
+fun ZonedDateTime.toUtc(): ZonedDateTime =
+    withZoneSameInstant(ZoneId.of("UTC"))
+
+fun ZonedDateTime.fromEpochMillis(
+    epochMillis: Long,
+    zoneId: ZoneId = ZoneId.of("UTC"),
+): ZonedDateTime {
+    return this
+        .with(epochMillisToLocalDate(epochMillis))
+        .withZoneSameInstant(zoneId)
+}
+
 fun ZonedDateTime.toKotlinInstant(): KotlinInstant {
     return KotlinInstant.fromEpochSeconds(this.toEpochSecond())
 }

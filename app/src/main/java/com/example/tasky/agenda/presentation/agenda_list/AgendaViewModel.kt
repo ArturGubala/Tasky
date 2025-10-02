@@ -13,6 +13,7 @@ import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
+import com.example.tasky.agenda.presentation.util.toUtc
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.RoomLocalEventDataSource
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
@@ -59,12 +61,13 @@ class AgendaViewModel(
 ) : ViewModel() {
 
     private var initialized = false
-    private val _state = MutableStateFlow(AgendaState())
+    private val _state = MutableStateFlow(AgendaState(isLoadingData = true))
     val state = _state
         .onStart {
             if (!initialized) {
                 initializeData()
                 initialized = true
+                _state.update { it.copy(isLoadingData = false) }
             }
             initializeMenuOptions()
             observeConnectivity()
@@ -73,7 +76,7 @@ class AgendaViewModel(
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
-            AgendaState(),
+            AgendaState(isLoadingData = true),
         )
     private val eventChannel = Channel<AgendaEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -204,6 +207,23 @@ class AgendaViewModel(
                 taskId = action.id,
                 isDone = action.isDone
             )
+            is AgendaAction.OnDateSelect -> {
+                Timber.log(1, _state.value.selectedDate.toString())
+                _state.update { it.copy(selectedDate = action.date.toUtc()) }
+                if (_state.value.showDatePicker) {
+                    _state.update { it.copy(showDatePicker = false) }
+                }
+            }
+
+            AgendaAction.OnDatePickerDismiss -> {
+                _state.update { it.copy(showDatePicker = false) }
+            }
+
+            AgendaAction.OnCalendarIconClick,
+            AgendaAction.OnMonthClick,
+                -> {
+                _state.update { it.copy(showDatePicker = true) }
+            }
         }
     }
 

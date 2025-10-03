@@ -23,15 +23,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.example.tasky.agenda.presentation.agenda_list.DefaultMenuOptions
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
-import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.util.MenuOption
 import com.example.tasky.core.presentation.util.MenuOptionType
 
 @Composable
 fun TaskyAgendaListDropdownMenu(
     expanded: Boolean,
-    options: List<MenuOption>,
+    menuOptions: List<MenuOption<MenuOptionType.AgendaItem>>,
+    onMenuOptionClick: (MenuOption<MenuOptionType.AgendaItem>) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -63,7 +64,7 @@ fun TaskyAgendaListDropdownMenu(
                 shape = RoundedCornerShape(8.dp),
                 containerColor = MaterialTheme.colorScheme.surface
             ) {
-                options.forEach { option ->
+                menuOptions.forEach { option ->
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -73,7 +74,7 @@ fun TaskyAgendaListDropdownMenu(
                             )
                         },
                         onClick = {
-                            option.onClick()
+                            onMenuOptionClick(option)
                         },
                         colors = MenuDefaults.itemColors(
                             textColor = MaterialTheme.colorScheme.onSurface,
@@ -93,14 +94,9 @@ private fun TaskyAgendaListDropdownMenuPreview() {
         var expanded by remember { mutableStateOf(false) }
         TaskyAgendaListDropdownMenu(
             expanded = expanded,
-            options = listOf(
-                MenuOption(
-                    type = MenuOptionType.Event,
-                    displayName = UiText.DynamicString("Option"),
-                    onClick = {},
-                )
-            ),
-            onDismissRequest = {}
+            menuOptions = DefaultMenuOptions.getTaskyAgendaItemMenuOptions(),
+            onMenuOptionClick = { option -> },
+            onDismissRequest = { expanded = false }
         )
     }
 }

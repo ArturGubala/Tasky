@@ -7,78 +7,62 @@ import com.example.tasky.core.presentation.util.MenuOption
 import com.example.tasky.core.presentation.util.MenuOptionType
 
 object DefaultMenuOptions {
-    internal fun getTaskyFabMenuOptions(
-        onEventClick: () -> Unit = {},
-        onTaskClick: () -> Unit = {},
-        onReminderClick: () -> Unit = {}
-    ): List<MenuOption> = listOf(
+    internal fun getTaskyFabMenuOptions(): List<MenuOption<MenuOptionType.Fab>> = listOf(
         MenuOption(
-            type = MenuOptionType.Event,
+            type = MenuOptionType.Fab.Event,
             displayName = UiText.StringResource(R.string.event),
             iconRes = R.drawable.ic_calendar_today,
             contentDescription = UiText.StringResource(R.string.create_event),
-            iconSize = 20.dp,
-            onClick = onEventClick
+            iconSize = 20.dp
         ),
         MenuOption(
-            type = MenuOptionType.Task,
+            type = MenuOptionType.Fab.Task,
             displayName = UiText.StringResource(R.string.task),
             iconRes = R.drawable.ic_check,
             contentDescription = UiText.StringResource(R.string.create_task),
-            iconSize = 20.dp,
-            onClick = onTaskClick
+            iconSize = 20.dp
         ),
         MenuOption(
-            type = MenuOptionType.Reminder,
+            type = MenuOptionType.Fab.Reminder,
             displayName = UiText.StringResource(R.string.reminder),
             iconRes = R.drawable.ic_bell,
             contentDescription = UiText.StringResource(R.string.create_reminder),
-            iconSize = 20.dp,
-            onClick = onReminderClick
+            iconSize = 20.dp
         )
     )
 
-    internal fun getTaskyProfileMenuOptions(
-        onLogoutClick: () -> Unit = {}
-    ): List<MenuOption> = listOf(
+    internal fun getTaskyProfileMenuOptions(): List<MenuOption<MenuOptionType.Profile>> = listOf(
         MenuOption(
-            type = MenuOptionType.Logout,
+            type = MenuOptionType.Profile.Logout,
             displayName = UiText.StringResource(R.string.log_out),
             iconRes = R.drawable.ic_offline,
             contentDescription = UiText.StringResource(R.string.offline_icon),
-            iconSize = 20.dp,
-            onClick = onLogoutClick
+            iconSize = 20.dp
         )
     )
 
-    internal fun getTaskyAgendaItemMenuOptions(
-        onOpenClick: () -> Unit = {},
-        onEditClick: () -> Unit = {},
-        onDeleteClick: () -> Unit = {},
-    ): List<MenuOption> = listOf(
+    internal fun getTaskyAgendaItemMenuOptions(): List<MenuOption<MenuOptionType.AgendaItem>> =
+        listOf(
         MenuOption(
-            type = MenuOptionType.CardMenuOption,
+            type = MenuOptionType.AgendaItem.Open,
             displayName = UiText.StringResource(R.string.open),
             iconRes = null,
-            contentDescription = UiText.StringResource(R.string.create_event),
-            iconSize = 20.dp,
-            onClick = onOpenClick
+            contentDescription = UiText.StringResource(R.string.open_item),
+            iconSize = 20.dp
         ),
         MenuOption(
-            type = MenuOptionType.CardMenuOption,
+            type = MenuOptionType.AgendaItem.Edit,
             displayName = UiText.StringResource(R.string.edit),
             iconRes = null,
-            contentDescription = UiText.StringResource(R.string.create_task),
-            iconSize = 20.dp,
-            onClick = onEditClick
+            contentDescription = UiText.StringResource(R.string.edit_item),
+            iconSize = 20.dp
         ),
         MenuOption(
-            type = MenuOptionType.CardMenuOption,
+            type = MenuOptionType.AgendaItem.Delete,
             displayName = UiText.StringResource(R.string.delete),
             iconRes = null,
-            contentDescription = UiText.StringResource(R.string.create_reminder),
-            iconSize = 20.dp,
-            onClick = onDeleteClick
+            contentDescription = UiText.StringResource(R.string.delete_item),
+            iconSize = 20.dp
         )
     )
 }

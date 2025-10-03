@@ -11,7 +11,6 @@ import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.TaskyRepository
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.util.AgendaKind
-import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
 import com.example.tasky.agenda.presentation.util.toUtc
 import com.example.tasky.auth.domain.AuthRepository
@@ -85,29 +84,10 @@ class AgendaViewModel(
     val events = eventChannel.receiveAsFlow()
 
     private fun initializeMenuOptions() {
-        val fabMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
-            onEventClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaKind = AgendaKind.EVENT,
-                agendaDetailView = AgendaDetailView.EDIT)
-            )},
-            onTaskClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaKind = AgendaKind.TASK,
-                agendaDetailView = AgendaDetailView.EDIT)
-            )},
-            onReminderClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaKind = AgendaKind.REMINDER,
-                agendaDetailView = AgendaDetailView.EDIT)
-            )}
-        )
-
-        val profileMenuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions(
-            onLogoutClick = { onAction(AgendaAction.OnLogoutClick) }
-        )
-
         _state.update {
             it.copy(
-                fabButtonMenuOptions = fabMenuOptions,
-                profileButtonMenuOptions = profileMenuOptions
+                fabButtonMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(),
+                profileButtonMenuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions()
             )
         }
     }
@@ -208,7 +188,7 @@ class AgendaViewModel(
             AgendaAction.OnDismissModalDialog -> {
                 _state.update { it.copy(isModalDialogVisible = false) }
             }
-            is AgendaAction.OnDeleteMenuOptionClick -> {
+            is AgendaAction.OnDeleteItemClick -> {
                 _state.update {
                     it.copy(
                         isModalDialogVisible = true,
@@ -217,18 +197,18 @@ class AgendaViewModel(
                 }
             }
             AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem()
-            is AgendaAction.OnAgendaItemMenuClick -> {
+            is AgendaAction.OnMenuClick -> {
                 _state.update { it.copy(expandedMenuItemId = action.id) }
             }
 
-            is AgendaAction.OnDismissAgendaItemMenu -> {
+            is AgendaAction.OnDismissMenu -> {
                 if (_state.value.expandedMenuItemId == action.id) {
                     _state.update { it.copy(expandedMenuItemId = null) }
                 }
             }
 
-            is AgendaAction.OnCompleteTaskClick -> updateTask(
-                taskId = action.id,
+            is AgendaAction.OnCompleteTaskClick -> updateAgendaItem(
+                id = action.id,
                 isDone = action.isDone
             )
             is AgendaAction.OnDateSelect -> {
@@ -280,7 +260,7 @@ class AgendaViewModel(
     private fun updateMenuOptionsForConnectivity() {
         val updatedProfileOptions = _state.value.profileButtonMenuOptions.map { option ->
             when (option.type) {
-                is MenuOptionType.Logout -> {
+                is MenuOptionType.Profile.Logout -> {
                     option.copy(enable = _state.value.canLogout)
                 }
                 else -> option
@@ -337,9 +317,9 @@ class AgendaViewModel(
         }
     }
 
-    private fun updateTask(taskId: String, isDone: Boolean) {
+    private fun updateAgendaItem(id: String, isDone: Boolean) {
         viewModelScope.launch {
-            val task = localTaskDataSource.getTask(taskId).firstOrNull()
+            val task = localTaskDataSource.getTask(id).firstOrNull()
             if (task == null) return@launch
 
             taskRepository.upsertTask(

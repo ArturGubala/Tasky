@@ -15,10 +15,10 @@ interface AgendaAction {
     ) : AgendaAction
 
     data object OnDismissModalDialog : AgendaAction
-    data class OnDeleteMenuOptionClick(val id: String) : AgendaAction
+    data class OnDeleteItemClick(val id: String) : AgendaAction
     data object OnConfirmDeleteClick : AgendaAction
-    data class OnAgendaItemMenuClick(val id: String) : AgendaAction
-    data class OnDismissAgendaItemMenu(val id: String) : AgendaAction
+    data class OnMenuClick(val id: String) : AgendaAction
+    data class OnDismissMenu(val id: String) : AgendaAction
     data class OnCompleteTaskClick(val id: String, val isDone: Boolean) : AgendaAction
     data class OnDateSelect(val date: ZonedDateTime) : AgendaAction
     data object OnDatePickerDismiss : AgendaAction

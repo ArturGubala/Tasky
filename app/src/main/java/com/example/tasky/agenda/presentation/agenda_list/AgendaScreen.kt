@@ -62,6 +62,7 @@ import com.example.tasky.core.presentation.designsystem.layout.TaskyScaffold
 import com.example.tasky.core.presentation.designsystem.pickers.HorizontalDatePicker
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.ui.ObserveAsEvents
+import com.example.tasky.core.presentation.util.MenuOptionType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -170,7 +171,14 @@ private fun AgendaScreen(
                             text = state.userName.toInitials(),
                             onClick = { onAction(AgendaAction.OnProfileButtonClick) },
                             expanded = state.profileMenuExpanded,
-                            menuOptions = state.profileButtonMenuOptions
+                            menuOptions = state.profileButtonMenuOptions,
+                            onMenuOptionClick = { option ->
+                                when (option.type) {
+                                    MenuOptionType.Profile.Logout -> {
+                                        onAction(AgendaAction.OnLogoutClick)
+                                    }
+                                }
+                            }
                         )
                     }
                 },
@@ -184,7 +192,31 @@ private fun AgendaScreen(
                 onClick = { onAction(AgendaAction.OnFabButtonClick) },
                 menuOptions = state.fabButtonMenuOptions,
                 expanded = state.fabMenuExpanded,
-                modifier = Modifier.offset(x = 0.dp, y = -(25.dp))
+                onMenuOptionClick = { option ->
+                    when (option.type) {
+                        MenuOptionType.Fab.Event -> onAction(
+                            AgendaAction.OnFabMenuOptionClick(
+                                agendaKind = AgendaKind.EVENT,
+                                agendaDetailView = AgendaDetailView.EDIT
+                            )
+                        )
+
+                        MenuOptionType.Fab.Task -> onAction(
+                            AgendaAction.OnFabMenuOptionClick(
+                                agendaKind = AgendaKind.TASK,
+                                agendaDetailView = AgendaDetailView.EDIT
+                            )
+                        )
+
+                        MenuOptionType.Fab.Reminder -> onAction(
+                            AgendaAction.OnFabMenuOptionClick(
+                                agendaKind = AgendaKind.REMINDER,
+                                agendaDetailView = AgendaDetailView.EDIT
+                            )
+                        )
+                    }
+                },
+                modifier = Modifier.offset(x = 0.dp, y = -(25.dp)),
             )
         }
     ) { padding ->
@@ -245,17 +277,16 @@ private fun AgendaScreen(
                                     )
                                 }
 
+                                // Don't know why, but without that delay menu collapse on next screen,
+                                // tried few things, nothing works
                                 TaskyAgendaItemCard(
                                     title = item.title,
-                                    menuOptions = DefaultMenuOptions
-                                        .getTaskyAgendaItemMenuOptions(
-                                            onOpenClick = {
+                                    menuOptions = DefaultMenuOptions.getTaskyAgendaItemMenuOptions(),
+                                    onMenuOptionClick = { option ->
+                                        when (option.type) {
+                                            MenuOptionType.AgendaItem.Open -> {
                                                 scope.launch {
-                                                    onAction(
-                                                        AgendaAction.OnDismissAgendaItemMenu(
-                                                            id = item.id
-                                                        )
-                                                    )
+                                                    onAction(AgendaAction.OnDismissMenu(id = item.id))
                                                     delay(100)
                                                     onOpenClick(
                                                         item.agendaKind,
@@ -263,14 +294,11 @@ private fun AgendaScreen(
                                                         item.id
                                                     )
                                                 }
-                                            },
-                                            onEditClick = {
+                                            }
+
+                                            MenuOptionType.AgendaItem.Edit -> {
                                                 scope.launch {
-                                                    onAction(
-                                                        AgendaAction.OnDismissAgendaItemMenu(
-                                                            id = item.id
-                                                        )
-                                                    )
+                                                    onAction(AgendaAction.OnDismissMenu(id = item.id))
                                                     delay(100)
                                                     onEditClick(
                                                         item.agendaKind,
@@ -278,21 +306,21 @@ private fun AgendaScreen(
                                                         item.id
                                                     )
                                                 }
-                                            },
-                                            onDeleteClick = {
-                                                onAction(AgendaAction.OnDismissAgendaItemMenu(id = item.id))
-                                                onAction(
-                                                    AgendaAction.OnDeleteMenuOptionClick(id = item.id)
-                                                )
                                             }
-                                        ),
+
+                                            MenuOptionType.AgendaItem.Delete -> {
+                                                onAction(AgendaAction.OnDismissMenu(id = item.id))
+                                                onAction(AgendaAction.OnDeleteItemClick(id = item.id))
+                                            }
+                                        }
+                                    },
                                     dates = item.getFormattedDates(),
                                     expanded = state.expandedMenuItemId == item.id,
                                     onMenuClick = {
-                                        onAction(AgendaAction.OnAgendaItemMenuClick(id = item.id))
+                                        onAction(AgendaAction.OnMenuClick(id = item.id))
                                     },
                                     onDismissRequest = {
-                                        onAction(AgendaAction.OnDismissAgendaItemMenu(id = item.id))
+                                        onAction(AgendaAction.OnDismissMenu(id = item.id))
                                     },
                                     backgroundColor = item.colorProvider.invoke(),
                                     modifier = Modifier

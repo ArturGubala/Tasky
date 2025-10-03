@@ -7,6 +7,8 @@ import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.Event
 import com.example.tasky.agenda.domain.model.LookupAttendee
+import com.example.tasky.agenda.domain.notification.NotificationScheduler
+import com.example.tasky.agenda.domain.notification.toNotification
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.dao.EventPendingSyncDao
 import com.example.tasky.core.data.database.event.mappers.toEvent
@@ -33,6 +35,7 @@ class OfflineFirstEventRepository(
     private val eventPendingSyncDao: EventPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
+    private val notificationScheduler: NotificationScheduler,
 ) : EventRepository {
 
     override suspend fun upsertEvent(
@@ -43,6 +46,7 @@ class OfflineFirstEventRepository(
         if (localResult !is Result.Success) {
             return localResult.asEmptyDataResult()
         }
+        notificationScheduler.scheduleNotification(event.toNotification())
 
         when (syncOperation) {
             SyncOperation.CREATE -> {
@@ -93,6 +97,7 @@ class OfflineFirstEventRepository(
                                     confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
                                 )
                                     .onSuccess { event ->
+                                        notificationScheduler.scheduleNotification(event.toNotification())
                                         eventLocalDataSource.upsertEvent(event)
                                     }
                             }.join()
@@ -148,6 +153,7 @@ class OfflineFirstEventRepository(
                                     confirmUploadRequest = ConfirmUploadRequest(uploadedKeys = uploadedKeys)
                                 )
                                     .onSuccess { event ->
+                                        notificationScheduler.scheduleNotification(event.toNotification())
                                         eventLocalDataSource.upsertEvent(event)
                                     }
                             }.join()
@@ -159,6 +165,7 @@ class OfflineFirstEventRepository(
 
     override suspend fun deleteEvent(id: String): EmptyResult<DataError> {
         eventLocalDataSource.deleteEvent(id = id)
+        notificationScheduler.cancelNotification(itemId = id)
 
         return eventRemoteDataSource.deleteEvent(id = id)
             .onError { error ->

@@ -4,6 +4,7 @@ import com.example.tasky.agenda.data.network.event.KtorEventDataSource
 import com.example.tasky.agenda.data.network.reminder.KtorReminderDataSource
 import com.example.tasky.agenda.data.network.task.KtorTaskDataSource
 import com.example.tasky.agenda.data.network.tasky.KtorTaskyDataSource
+import com.example.tasky.agenda.data.notification.NotificationSchedulerImpl
 import com.example.tasky.agenda.data.repository.OfflineFirstEventRepository
 import com.example.tasky.agenda.data.repository.OfflineFirstReminderRepository
 import com.example.tasky.agenda.data.repository.OfflineFirstTaskRepository
@@ -21,6 +22,7 @@ import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.data.network.TaskyRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
+import com.example.tasky.agenda.domain.notification.NotificationScheduler
 import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -42,4 +44,6 @@ val agendaNetworkModule = module {
     workerOf(::FetchAgendaItemsWorker)
 
     singleOf(::SyncAgendaItemWorkerScheduler).bind<SyncAgendaItemScheduler>()
+
+    singleOf(::NotificationSchedulerImpl).bind<NotificationScheduler>()
 }

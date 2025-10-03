@@ -5,6 +5,8 @@ import com.example.tasky.agenda.domain.data.network.TaskRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.Task
+import com.example.tasky.agenda.domain.notification.NotificationScheduler
+import com.example.tasky.agenda.domain.notification.toNotification
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.task.dao.TaskPendingSyncDao
 import com.example.tasky.core.data.database.task.mappers.toTask
@@ -29,6 +31,7 @@ class OfflineFirstTaskRepository(
     private val taskPendingSyncDao: TaskPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
+    private val notificationScheduler: NotificationScheduler,
 ) : TaskRepository {
 
     override suspend fun upsertTask(
@@ -39,10 +42,14 @@ class OfflineFirstTaskRepository(
         if (localResult !is Result.Success) {
             return localResult.asEmptyDataResult()
         }
+        notificationScheduler.scheduleNotification(task.toNotification())
 
         when (syncOperation) {
             SyncOperation.CREATE -> {
                 return taskRemoteDataSource.createTask(task)
+                    .onSuccess { task ->
+                        notificationScheduler.scheduleNotification(task.toNotification())
+                    }
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -57,6 +64,9 @@ class OfflineFirstTaskRepository(
 
             SyncOperation.UPDATE -> {
                 return taskRemoteDataSource.updateTask(task)
+                    .onSuccess {
+                        notificationScheduler.scheduleNotification(task.toNotification())
+                    }
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -73,6 +83,7 @@ class OfflineFirstTaskRepository(
 
     override suspend fun deleteTask(id: String): EmptyResult<DataError> {
         taskLocalDataSource.deleteTask(id = id)
+        notificationScheduler.cancelNotification(id)
 
         return taskRemoteDataSource.deleteTask(id = id)
             .onError { error ->
@@ -106,6 +117,7 @@ class OfflineFirstTaskRepository(
                             SyncOperation.CREATE -> {
                                 taskRemoteDataSource.createTask(task)
                                     .onSuccess {
+                                        notificationScheduler.scheduleNotification(task.toNotification())
                                         applicationScope.launch {
                                             taskPendingSyncDao.deleteTaskPendingSyncEntity(
                                                 taskId = it.id,
@@ -118,6 +130,7 @@ class OfflineFirstTaskRepository(
                             SyncOperation.UPDATE -> {
                                 taskRemoteDataSource.updateTask(task)
                                     .onSuccess {
+                                        notificationScheduler.scheduleNotification(task.toNotification())
                                         applicationScope.launch {
                                             taskPendingSyncDao.deleteTaskPendingSyncEntity(
                                                 taskId = it.id,

@@ -1,6 +1,8 @@
 package com.example.tasky.app
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import com.example.tasky.BuildConfig
 import com.example.tasky.agenda.data.di.agendaNetworkModule
 import com.example.tasky.agenda.di.agendaViewModelModule
@@ -41,5 +43,20 @@ class TaskyApp: Application() {
                 databaseModule
             )
         }
+
+        createNotificationChannel()
+    }
+
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            "reminders",
+            "Agenda Notifications",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Notifications for agenda item"
+        }
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
     }
 }

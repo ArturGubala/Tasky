@@ -11,11 +11,6 @@ fun String.toInitials(): String {
         1 -> {
             nameParts[0].take(2).uppercase()
         }
-
-        2 -> {
-            "${nameParts[0].first()}${nameParts[1].first()}".uppercase()
-        }
-
         else -> {
             "${nameParts.first().first()}${nameParts.last().first()}".uppercase()
         }

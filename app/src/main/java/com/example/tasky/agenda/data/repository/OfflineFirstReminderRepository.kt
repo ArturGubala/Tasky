@@ -5,6 +5,8 @@ import com.example.tasky.agenda.domain.data.network.ReminderRemoteDataSource
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.model.AgendaItem
 import com.example.tasky.agenda.domain.model.Reminder
+import com.example.tasky.agenda.domain.notification.NotificationScheduler
+import com.example.tasky.agenda.domain.notification.toNotification
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.reminder.dao.ReminderPendingSyncDao
 import com.example.tasky.core.data.database.reminder.mappers.toReminder
@@ -29,6 +31,7 @@ class OfflineFirstReminderRepository(
     private val reminderPendingSyncDao: ReminderPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val syncAgendaItemScheduler: SyncAgendaItemScheduler,
+    private val notificationScheduler: NotificationScheduler,
 ) : ReminderRepository {
 
     override suspend fun upsertReminder(
@@ -39,10 +42,14 @@ class OfflineFirstReminderRepository(
         if (localResult !is Result.Success) {
             return localResult.asEmptyDataResult()
         }
+        notificationScheduler.scheduleNotification(reminder.toNotification())
 
         when (syncOperation) {
             SyncOperation.CREATE -> {
                 return reminderRemoteDataSource.createReminder(reminder)
+                    .onSuccess { reminder ->
+                        notificationScheduler.scheduleNotification(reminder.toNotification())
+                    }
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -57,6 +64,9 @@ class OfflineFirstReminderRepository(
 
             SyncOperation.UPDATE -> {
                 return reminderRemoteDataSource.updateReminder(reminder)
+                    .onSuccess { reminder ->
+                        notificationScheduler.scheduleNotification(reminder.toNotification())
+                    }
                     .onError { error ->
                         applicationScope.launch {
                             syncAgendaItemScheduler.scheduleSync(
@@ -73,6 +83,7 @@ class OfflineFirstReminderRepository(
 
     override suspend fun deleteReminder(id: String): EmptyResult<DataError> {
         reminderLocalDataSource.deleteReminder(id = id)
+        notificationScheduler.cancelNotification(id)
 
         return reminderRemoteDataSource.deleteReminder(id = id)
             .onError { error ->
@@ -106,6 +117,7 @@ class OfflineFirstReminderRepository(
                             SyncOperation.CREATE -> {
                                 reminderRemoteDataSource.createReminder(reminder)
                                     .onSuccess {
+                                        notificationScheduler.scheduleNotification(reminder.toNotification())
                                         applicationScope.launch {
                                             reminderPendingSyncDao.deleteReminderPendingSyncEntity(
                                                 reminderId = it.id,
@@ -118,6 +130,7 @@ class OfflineFirstReminderRepository(
                             SyncOperation.UPDATE -> {
                                 reminderRemoteDataSource.updateReminder(reminder)
                                     .onSuccess {
+                                        notificationScheduler.scheduleNotification(reminder.toNotification())
                                         applicationScope.launch {
                                             reminderPendingSyncDao.deleteReminderPendingSyncEntity(
                                                 reminderId = it.id,

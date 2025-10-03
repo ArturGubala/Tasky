@@ -88,4 +88,7 @@
     <string name="open">Open</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="open_item">Open agenda item details</string>
+    <string name="edit_item">Edit agenda item</string>
+    <string name="delete_item">Delete agenda item</string>
 </resources>

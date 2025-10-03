@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTime::class)
+@file:OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
 
 package com.example.tasky.agenda.presentation.agenda_list
 
@@ -11,8 +11,8 @@ import com.example.tasky.agenda.domain.data.TaskRepository
 import com.example.tasky.agenda.domain.data.TaskyRepository
 import com.example.tasky.agenda.domain.data.sync.SyncAgendaItemScheduler
 import com.example.tasky.agenda.domain.util.AgendaKind
-import com.example.tasky.agenda.presentation.util.AgendaDetailView
 import com.example.tasky.agenda.presentation.util.toKotlinInstant
+import com.example.tasky.agenda.presentation.util.toUtc
 import com.example.tasky.auth.domain.AuthRepository
 import com.example.tasky.core.data.database.SyncOperation
 import com.example.tasky.core.data.database.event.RoomLocalEventDataSource
@@ -26,19 +26,24 @@ import com.example.tasky.core.domain.util.onSuccess
 import com.example.tasky.core.presentation.ui.UiText
 import com.example.tasky.core.presentation.ui.asUiText
 import com.example.tasky.core.presentation.util.MenuOptionType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
@@ -79,29 +84,10 @@ class AgendaViewModel(
     val events = eventChannel.receiveAsFlow()
 
     private fun initializeMenuOptions() {
-        val fabMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
-            onEventClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaKind = AgendaKind.EVENT,
-                agendaDetailView = AgendaDetailView.EDIT)
-            )},
-            onTaskClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaKind = AgendaKind.TASK,
-                agendaDetailView = AgendaDetailView.EDIT)
-            )},
-            onReminderClick = { onAction(AgendaAction.OnFabMenuOptionClick(
-                agendaKind = AgendaKind.REMINDER,
-                agendaDetailView = AgendaDetailView.EDIT)
-            )}
-        )
-
-        val profileMenuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions(
-            onLogoutClick = { onAction(AgendaAction.OnLogoutClick) }
-        )
-
         _state.update {
             it.copy(
-                fabButtonMenuOptions = fabMenuOptions,
-                profileButtonMenuOptions = profileMenuOptions
+                fabButtonMenuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(),
+                profileButtonMenuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions()
             )
         }
     }
@@ -119,8 +105,13 @@ class AgendaViewModel(
             .launchIn(viewModelScope)
     }
 
+
     private fun initializeData() {
         viewModelScope.launch {
+            val authInfo = sessionStorage.get()
+            _state.update {
+                it.copy(userName = authInfo?.userName ?: "")
+            }
             syncAgendaItemScheduler.scheduleSync(
                 type = SyncAgendaItemScheduler.SyncType.FetchAgendaItems(
                     interval = 30.minutes
@@ -128,28 +119,44 @@ class AgendaViewModel(
             )
             taskRepository.syncPendingTask()
             taskyRepository.fetchFullAgenda()
+
         }
     }
 
     private fun observeAgendaItems() {
-        // TODO just for test before implement date picking
-        val startOfDay = 1758326400000L
-        val endOfDay = 1759976799000L
+        _state
+            .map { it.selectedDate }
+            .distinctUntilChanged()
+            .flatMapLatest { selectedDateUtc ->
+                val selectedDateLocal = selectedDateUtc.withZoneSameInstant(ZoneId.systemDefault())
 
-        combine(
-            localTaskDataSource.getTasksForDay(startOfDay, endOfDay),
-            localReminderDataSource.getReminderForDay(startOfDay, endOfDay),
-            localEventDataSource.getEventForDay(startOfDay, endOfDay)
-        ) { tasks, reminders, events ->
-            val allItems = buildList {
-                addAll(tasks.map { AgendaItemUi.TaskItem(it) })
-                addAll(reminders.map { AgendaItemUi.ReminderItem(it) })
-                addAll(events.map { AgendaItemUi.EventItem(it) })
+                val startOfDayLocal = selectedDateLocal.toLocalDate()
+                    .atStartOfDay(ZoneId.systemDefault())
+                val endOfDayLocal = startOfDayLocal.plusDays(1).minusNanos(1)
+
+                val startOfDayUtc = startOfDayLocal.withZoneSameInstant(ZoneId.of("UTC"))
+                val endOfDayUtc = endOfDayLocal.withZoneSameInstant(ZoneId.of("UTC"))
+
+                val startOfDayMillis = startOfDayUtc.toInstant().toEpochMilli()
+                val endOfDayMillis = endOfDayUtc.toInstant().toEpochMilli()
+
+                combine(
+                    localTaskDataSource.getTasksForDay(startOfDayMillis, endOfDayMillis),
+                    localReminderDataSource.getReminderForDay(startOfDayMillis, endOfDayMillis),
+                    localEventDataSource.getEventForDay(startOfDayMillis, endOfDayMillis)
+                ) { tasks, reminders, events ->
+                    val allItems = buildList {
+                        addAll(tasks.map { AgendaItemUi.TaskItem(it) })
+                        addAll(reminders.map { AgendaItemUi.ReminderItem(it) })
+                        addAll(events.map { AgendaItemUi.EventItem(it) })
+                    }
+                    allItems.sortedBy { it.time.toKotlinInstant().toEpochMilliseconds() }
+                }
             }
-            allItems.sortedBy { it.time.toKotlinInstant().toEpochMilliseconds() }
-        }.onEach { sortedAgendaItems ->
-            _state.update { it.copy(agendaItems = sortedAgendaItems) }
-        }.launchIn(viewModelScope)
+            .onEach { sortedAgendaItems ->
+                _state.update { it.copy(agendaItems = sortedAgendaItems) }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onAction(action: AgendaAction) {
@@ -181,7 +188,7 @@ class AgendaViewModel(
             AgendaAction.OnDismissModalDialog -> {
                 _state.update { it.copy(isModalDialogVisible = false) }
             }
-            is AgendaAction.OnDeleteMenuOptionClick -> {
+            is AgendaAction.OnDeleteItemClick -> {
                 _state.update {
                     it.copy(
                         isModalDialogVisible = true,
@@ -190,20 +197,37 @@ class AgendaViewModel(
                 }
             }
             AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem()
-            is AgendaAction.OnAgendaItemMenuClick -> {
+            is AgendaAction.OnMenuClick -> {
                 _state.update { it.copy(expandedMenuItemId = action.id) }
             }
 
-            is AgendaAction.OnDismissAgendaItemMenu -> {
+            is AgendaAction.OnDismissMenu -> {
                 if (_state.value.expandedMenuItemId == action.id) {
                     _state.update { it.copy(expandedMenuItemId = null) }
                 }
             }
 
-            is AgendaAction.OnCompleteTaskClick -> updateTask(
-                taskId = action.id,
+            is AgendaAction.OnCompleteTaskClick -> updateAgendaItem(
+                id = action.id,
                 isDone = action.isDone
             )
+            is AgendaAction.OnDateSelect -> {
+                Timber.log(1, _state.value.selectedDate.toString())
+                _state.update { it.copy(selectedDate = action.date.toUtc()) }
+                if (_state.value.showDatePicker) {
+                    _state.update { it.copy(showDatePicker = false) }
+                }
+            }
+
+            AgendaAction.OnDatePickerDismiss -> {
+                _state.update { it.copy(showDatePicker = false) }
+            }
+
+            AgendaAction.OnCalendarIconClick,
+            AgendaAction.OnMonthClick,
+                -> {
+                _state.update { it.copy(showDatePicker = true) }
+            }
         }
     }
 
@@ -236,7 +260,7 @@ class AgendaViewModel(
     private fun updateMenuOptionsForConnectivity() {
         val updatedProfileOptions = _state.value.profileButtonMenuOptions.map { option ->
             when (option.type) {
-                is MenuOptionType.Logout -> {
+                is MenuOptionType.Profile.Logout -> {
                     option.copy(enable = _state.value.canLogout)
                 }
                 else -> option
@@ -293,9 +317,9 @@ class AgendaViewModel(
         }
     }
 
-    private fun updateTask(taskId: String, isDone: Boolean) {
+    private fun updateAgendaItem(id: String, isDone: Boolean) {
         viewModelScope.launch {
-            val task = localTaskDataSource.getTask(taskId).firstOrNull()
+            val task = localTaskDataSource.getTask(id).firstOrNull()
             if (task == null) return@launch
 
             taskRepository.upsertTask(

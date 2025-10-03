@@ -26,14 +26,16 @@ import com.example.tasky.core.presentation.designsystem.TaskyProfileIcon
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.util.MenuOption
+import com.example.tasky.core.presentation.util.MenuOptionType
 
 @Composable
 fun TaskyProfileButtonMenu(
     text: String,
     onClick: () -> Unit,
     expanded: Boolean,
-    menuOptions: List<MenuOption>,
-    modifier: Modifier = Modifier
+    menuOptions: List<MenuOption<MenuOptionType.Profile>>,
+    onMenuOptionClick: (MenuOption<MenuOptionType.Profile>) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
         TaskyProfileIcon(
@@ -63,7 +65,7 @@ fun TaskyProfileButtonMenu(
                         )
                     },
                     onClick = {
-                        menuOption.onClick()
+                        onMenuOptionClick(menuOption)
                         onClick()
                     },
                     trailingIcon = {
@@ -99,7 +101,8 @@ private fun TaskyProfileButtonMenuPreview() {
             text = "AG",
             onClick = { expanded = !expanded },
             expanded = expanded,
-            menuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions()
+            menuOptions = DefaultMenuOptions.getTaskyProfileMenuOptions(),
+            onMenuOptionClick = { option -> }
         )
     }
 }

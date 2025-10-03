@@ -289,8 +289,7 @@ fun AgendaDetailScreen(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
-    val isEventCreator =
-        agendaItemTypeConfiguration.type != AgendaKind.EVENT || state.detailsAsEvent()?.isUserEventCreator ?: false || agendaId.isEmpty()
+    val isEventCreator = agendaId.isEmpty() || state.detailsAsEvent()?.isUserEventCreator ?: false
     val canEdit = !isReadOnly && isEventCreator
 
     TaskyScaffold(
@@ -687,7 +686,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(120.dp),
-                                            isReadOnly = canEdit
+                                            isReadOnly = !canEdit
                                         )
                                         TaskyDatePicker(
                                             selectedDate = DateTimeFormatter.formatTaskyDetailPickerDate(
@@ -700,7 +699,7 @@ fun AgendaDetailScreen(
                                                 )
                                             },
                                             modifier = Modifier.requiredWidth(156.dp),
-                                            isReadOnly = canEdit
+                                            isReadOnly = !canEdit
                                         )
                                     }
                                 }

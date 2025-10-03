@@ -34,13 +34,15 @@ import androidx.compose.ui.unit.times
 import com.example.tasky.agenda.presentation.agenda_list.DefaultMenuOptions
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.util.MenuOption
+import com.example.tasky.core.presentation.util.MenuOptionType
 
 @Composable
 fun TaskyFloatingActionButtonMenu(
     onClick: () -> Unit,
     expanded: Boolean,
-    menuOptions: List<MenuOption>,
-    modifier: Modifier = Modifier
+    menuOptions: List<MenuOption<MenuOptionType.Fab>>,
+    onMenuOptionClick: (MenuOption<MenuOptionType.Fab>) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
         FloatingActionButton(
@@ -78,7 +80,7 @@ fun TaskyFloatingActionButtonMenu(
                         )
                     },
                     onClick = {
-                        menuOption.onClick()
+                        onMenuOptionClick(menuOption)
                     },
                     leadingIcon = {
                         menuOption.iconRes?.let {
@@ -114,11 +116,8 @@ private fun TaskyFloatingActionButtonMenuPreview() {
             TaskyFloatingActionButtonMenu(
                 onClick = { expanded = !expanded },
                 expanded = expanded,
-                menuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(
-                    onEventClick = { },
-                    onTaskClick = { },
-                    onReminderClick = { }
-                )
+                menuOptions = DefaultMenuOptions.getTaskyFabMenuOptions(),
+                onMenuOptionClick = { option -> }
             )
         }
     }

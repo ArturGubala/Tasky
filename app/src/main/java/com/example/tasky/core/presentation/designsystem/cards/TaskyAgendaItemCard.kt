@@ -32,12 +32,14 @@ import com.example.tasky.core.presentation.designsystem.drop_downs.TaskyAgendaLi
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.designsystem.theme.extended
 import com.example.tasky.core.presentation.util.MenuOption
+import com.example.tasky.core.presentation.util.MenuOptionType
 
 @Composable
 fun TaskyAgendaItemCard(
     title: String,
     dates: String,
-    menuOptions: List<MenuOption>,
+    menuOptions: List<MenuOption<MenuOptionType.AgendaItem>>,
+    onMenuOptionClick: (MenuOption<MenuOptionType.AgendaItem>) -> Unit,
     expanded: Boolean,
     onMenuClick: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -118,7 +120,8 @@ fun TaskyAgendaItemCard(
                         )
                         TaskyAgendaListDropdownMenu(
                             expanded = expanded,
-                            options = menuOptions,
+                            menuOptions = menuOptions,
+                            onMenuOptionClick = onMenuOptionClick,
                             onDismissRequest = onDismissRequest
                         )
                     }
@@ -161,27 +164,29 @@ private fun TaskyAgendaItemCardPreview() {
             TaskyAgendaItemCard(
                 title = "Project X",
                 dates = "Mar 3, 10:00 - Mar 5, 12:00",
-                menuOptions = DefaultMenuOptions
-                    .getTaskyAgendaItemMenuOptions(),
+                menuOptions = DefaultMenuOptions.getTaskyAgendaItemMenuOptions(),
+                onMenuOptionClick = { option ->
+                    println("Clicked: ${option.type}")
+                },
                 expanded = false,
                 onMenuClick = {},
                 onDismissRequest = {},
                 backgroundColor = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier
-                    .requiredHeight(125.dp),
+                modifier = Modifier.requiredHeight(125.dp),
                 description = "Description \n Sedasdasdasd\n"
             )
             TaskyAgendaItemCard(
                 title = "Project X",
                 dates = "Mar 3, 10:00",
-                menuOptions = DefaultMenuOptions
-                    .getTaskyAgendaItemMenuOptions(),
+                menuOptions = DefaultMenuOptions.getTaskyAgendaItemMenuOptions(),
+                onMenuOptionClick = { option ->
+                    println("Clicked: ${option.type}")
+                },
                 expanded = false,
                 onMenuClick = {},
                 onDismissRequest = {},
                 backgroundColor = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .requiredHeight(125.dp),
+                modifier = Modifier.requiredHeight(125.dp),
                 isDone = true,
                 description = "Description \n"
             )
@@ -189,14 +194,15 @@ private fun TaskyAgendaItemCardPreview() {
             TaskyAgendaItemCard(
                 title = "Project X",
                 dates = "Mar 5, 12:00",
-                menuOptions = DefaultMenuOptions
-                    .getTaskyAgendaItemMenuOptions(),
+                menuOptions = DefaultMenuOptions.getTaskyAgendaItemMenuOptions(),
+                onMenuOptionClick = { option ->
+                    println("Clicked: ${option.type}")
+                },
                 expanded = false,
                 onMenuClick = {},
                 onDismissRequest = {},
                 backgroundColor = MaterialTheme.colorScheme.extended.onSurfaceVariantOpacity70,
-                modifier = Modifier
-                    .requiredHeight(125.dp),
+                modifier = Modifier.requiredHeight(125.dp),
                 isDone = false,
                 description = "Description \n"
             )

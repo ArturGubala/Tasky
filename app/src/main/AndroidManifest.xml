@@ -37,6 +37,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.tasky.OPEN_AGENDA" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:scheme="https"
+                    android:host="tasky.com"
+                    android:path="/agenda-detail" />
+            </intent-filter>
         </activity>
 
         <provider

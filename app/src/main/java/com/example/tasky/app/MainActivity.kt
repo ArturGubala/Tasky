@@ -15,7 +15,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
-import com.example.tasky.agenda.presentation.util.toAgendaKind
 import com.example.tasky.core.presentation.designsystem.theme.TaskyTheme
 import com.example.tasky.core.presentation.navigation.TaskyNavHost
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -46,9 +45,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
-            val itemId = intent.getStringExtra("AGENDA_ITEM_ID")
-            val itemType = intent.getStringExtra("AGENDA_ITEM_TYPE")
-            val itemKind = itemType?.toAgendaKind()
 
             TaskyTheme {
                 if(!state.isCheckingAuth) {
@@ -56,8 +52,6 @@ class MainActivity : ComponentActivity() {
                     TaskyNavHost(
                         navController = navController,
                         isLoggedIn = state.isLoggedIn,
-                        itemId,
-                        itemKind
                     )
                 }
             }

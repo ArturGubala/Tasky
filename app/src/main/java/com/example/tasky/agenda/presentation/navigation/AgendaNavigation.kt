@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.example.tasky.agenda.domain.util.AgendaKind
 import com.example.tasky.agenda.presentation.agenda_detail.AgendaDetailScreenRoot
@@ -16,6 +17,8 @@ import com.example.tasky.agenda.presentation.util.AgendaEditTextFieldType
 import com.example.tasky.agenda.presentation.util.PhotoDetail
 import com.example.tasky.agenda.presentation.util.PhotoDetailAction
 import com.example.tasky.auth.presentation.navigation.navigateToLoginScreen
+import com.example.tasky.core.presentation.util.AGENDA_DETAIL_DEEPLINK_PATH
+import com.example.tasky.core.presentation.util.DEEPLINK_DOMAIN
 import kotlinx.serialization.Serializable
 
 fun NavGraphBuilder.agendaNavGraph(
@@ -76,9 +79,13 @@ fun NavController.navigateToAgendaDetailScreen(
 ))
 
 fun NavGraphBuilder.agendaDetailScreen(
-    navController: NavController
+    navController: NavController,
 ) {
-    composable<AgendaDetailScreen> { entry ->
+    composable<AgendaDetailScreen>(
+        deepLinks = listOf(
+            navDeepLink<AgendaDetailScreen>(basePath = "https://$DEEPLINK_DOMAIN/$AGENDA_DETAIL_DEEPLINK_PATH")
+        )
+    ) { entry ->
         val args = entry.toRoute<AgendaDetailScreen>()
         val text = entry.savedStateHandle.get<String>("text")
         val savedFieldType = entry.savedStateHandle.get<AgendaEditTextFieldType>("fieldType")

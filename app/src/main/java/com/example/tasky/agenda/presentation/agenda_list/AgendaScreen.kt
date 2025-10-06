@@ -34,7 +34,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -69,6 +72,9 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.ZonedDateTime
 import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
+
+
+typealias AgendaItemId = String
 
 @Composable
 fun AgendaScreenRoot(
@@ -132,6 +138,7 @@ private fun AgendaScreen(
     onEditClick: (AgendaKind, AgendaDetailView, String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    var showDeleteConfirmationDialog by rememberSaveable { mutableStateOf<AgendaItemId?>(null) }
 
     TaskyScaffold(
         topBar = {
@@ -309,8 +316,8 @@ private fun AgendaScreen(
                                             }
 
                                             MenuOptionType.AgendaItem.Delete -> {
+                                                showDeleteConfirmationDialog = item.id
                                                 onAction(AgendaAction.OnDismissMenu(id = item.id))
-                                                onAction(AgendaAction.OnDeleteItemClick(id = item.id))
                                             }
                                         }
                                     },
@@ -405,10 +412,13 @@ private fun AgendaScreen(
             }
         }
 
-        if (state.isModalDialogVisible) {
+        showDeleteConfirmationDialog?.let { itemId ->
             TaskyModalDialog(
-                onDismiss = { onAction(AgendaAction.OnDismissModalDialog) },
-                onConfirm = { onAction(AgendaAction.OnConfirmDeleteClick) },
+                onDismiss = { showDeleteConfirmationDialog = null },
+                onConfirm = {
+                    onAction(AgendaAction.OnConfirmDeleteClick(id = itemId))
+                    showDeleteConfirmationDialog = null
+                },
                 isConfirmEnable = !state.isDeleting
             )
         }

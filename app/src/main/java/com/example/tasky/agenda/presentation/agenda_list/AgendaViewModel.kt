@@ -185,18 +185,7 @@ class AgendaViewModel(
                     )
                 }
             }
-            AgendaAction.OnDismissModalDialog -> {
-                _state.update { it.copy(isModalDialogVisible = false) }
-            }
-            is AgendaAction.OnDeleteItemClick -> {
-                _state.update {
-                    it.copy(
-                        isModalDialogVisible = true,
-                        agendaItemIdToDelete = action.id
-                    )
-                }
-            }
-            AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem()
+            is AgendaAction.OnConfirmDeleteClick -> deleteAgendaItem(id = action.id)
             is AgendaAction.OnMenuClick -> {
                 _state.update { it.copy(expandedMenuItemId = action.id) }
             }
@@ -263,7 +252,6 @@ class AgendaViewModel(
                 is MenuOptionType.Profile.Logout -> {
                     option.copy(enable = _state.value.canLogout)
                 }
-                else -> option
             }
         }
 
@@ -274,23 +262,16 @@ class AgendaViewModel(
         }
     }
 
-    private fun deleteAgendaItem() {
+    private fun deleteAgendaItem(id: String) {
         viewModelScope.launch {
             _state.update {
-                it.copy(
-                    isDeleting = true,
-                    isModalDialogVisible = true
-                )
+                it.copy(isDeleting = true)
             }
             val agendaItemToDelete =
-                _state.value.agendaItems.firstOrNull { it.id == _state.value.agendaItemIdToDelete }
+                _state.value.agendaItems.firstOrNull { it.id == id }
             if (agendaItemToDelete == null) {
                 _state.update {
-                    it.copy(
-                        isDeleting = false,
-                        isModalDialogVisible = false,
-                        agendaItemIdToDelete = null
-                    )
+                    it.copy(isDeleting = false)
                 }
                 return@launch
             }
@@ -307,11 +288,7 @@ class AgendaViewModel(
                 }
                 .onSuccess {
                     _state.update {
-                        it.copy(
-                            isDeleting = false,
-                            isModalDialogVisible = false,
-                            agendaItemIdToDelete = null
-                        )
+                        it.copy(isDeleting = false)
                     }
                 }
         }

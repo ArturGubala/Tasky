@@ -13,8 +13,6 @@ data class AgendaState(
     val fabButtonMenuOptions: List<MenuOption<MenuOptionType.Fab>> = emptyList(),
     val profileButtonMenuOptions: List<MenuOption<MenuOptionType.Profile>> = emptyList(),
     val agendaItems: List<AgendaItemUi> = listOf(),
-    val isModalDialogVisible: Boolean = false,
-    val agendaItemIdToDelete: String? = null,
     val isDeleting: Boolean = false,
     val expandedMenuItemId: String? = null,
     val selectedDate: ZonedDateTime = ZonedDateTime.now(ZoneId.of("UTC")),

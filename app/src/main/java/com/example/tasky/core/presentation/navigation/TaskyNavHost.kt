@@ -11,7 +11,7 @@ import com.example.tasky.auth.presentation.navigation.authNavGraph
 @Composable
 fun TaskyNavHost(
     navController: NavHostController,
-    isLoggedIn: Boolean
+    isLoggedIn: Boolean,
 ) {
     NavHost(
         navController = navController,

@@ -289,7 +289,9 @@ fun AgendaDetailScreen(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceConfiguration = DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
-    val isEventCreator = agendaId.isEmpty() || state.detailsAsEvent()?.isUserEventCreator ?: false
+    val isEventCreator =
+        agendaItemTypeConfiguration.type != AgendaKind.EVENT || state.detailsAsEvent()?.isUserEventCreator ?: false || agendaId.isEmpty()
+//    val isEventCreator = agendaId.isEmpty() || state.detailsAsEvent()?.isUserEventCreator ?: false
     val canEdit = !isReadOnly && isEventCreator
 
     TaskyScaffold(

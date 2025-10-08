@@ -20,6 +20,9 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE id = :id")
     fun getTask(id: String): Flow<TaskEntity>
 
+    @Query("SELECT id FROM task")
+    fun getTasksIds(): Flow<List<String>>
+
     @Query(
         """
         SELECT * FROM task

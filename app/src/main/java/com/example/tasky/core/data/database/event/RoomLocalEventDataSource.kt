@@ -22,6 +22,10 @@ class RoomLocalEventDataSource(
             .map { it.toEvent(userId = userId) }
     }
 
+    override fun getEventsIds(): Flow<List<String>> {
+        return eventDao.getEventsIds()
+    }
+
     override fun getEventForDay(
         startOfDay: Long,
         endOfDay: Long,

@@ -20,6 +20,9 @@ interface ReminderDao {
     @Query("SELECT * FROM reminder WHERE id = :id")
     fun getReminder(id: String): Flow<ReminderEntity>
 
+    @Query("SELECT id FROM reminder")
+    fun getRemindersIds(): Flow<List<String>>
+
     @Query(
         """
         SELECT * FROM reminder

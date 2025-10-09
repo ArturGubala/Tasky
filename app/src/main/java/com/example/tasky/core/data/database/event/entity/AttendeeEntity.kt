@@ -3,10 +3,10 @@ package com.example.tasky.core.data.database.event.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
-import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "attendee",
+    primaryKeys = ["userId", "eventId"],  // Composite primary key
     foreignKeys = [
         ForeignKey(
             entity = EventEntity::class,
@@ -18,7 +18,6 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["eventId"])]
 )
 data class AttendeeEntity(
-    @PrimaryKey(autoGenerate = false)
     val userId: String,
     val eventId: String,
     val email: String,

@@ -59,11 +59,12 @@ class HttpClientFactory(
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val info = sessionStorage.get()
-                        BearerTokens(
-                            accessToken = info?.accessToken ?: "",
-                            refreshToken = info?.refreshToken ?: ""
-                        )
+                        sessionStorage.get()?.let { info ->
+                            BearerTokens(
+                                accessToken = info.accessToken,
+                                refreshToken = info.refreshToken
+                            )
+                        }
                     }
                     refreshTokens {
                         val info = sessionStorage.get()

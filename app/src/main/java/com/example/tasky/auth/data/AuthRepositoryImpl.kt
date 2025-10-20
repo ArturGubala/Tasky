@@ -9,6 +9,8 @@ import com.example.tasky.core.domain.util.EmptyResult
 import com.example.tasky.core.domain.util.Result
 import com.example.tasky.core.domain.util.asEmptyDataResult
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 
 class AuthRepositoryImpl(
     private val httpClient: HttpClient,
@@ -55,5 +57,9 @@ class AuthRepositoryImpl(
                 refreshToken = refreshToken
             )
         )
+    }
+
+    override fun invalidateAuthTokens() {
+        httpClient.authProvider<BearerAuthProvider>()?.clearToken()
     }
 }

@@ -21,6 +21,10 @@ class RoomLocalTaskDataSource(
             .map { it.toTask() }
     }
 
+    override fun getTasksIds(): Flow<List<String>> {
+        return taskDao.getTasksIds()
+    }
+
     override fun getTasksForDay(
         startOfDay: Long,
         endOfDay: Long,

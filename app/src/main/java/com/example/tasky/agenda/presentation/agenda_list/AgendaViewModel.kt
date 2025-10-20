@@ -240,6 +240,8 @@ class AgendaViewModel(
                 }
                 is Result.Success -> {
                     taskyRepository.cleanUpLocalData()
+                    sessionStorage.set(info = null)
+                    authRepository.invalidateAuthTokens()
                     eventChannel.send(AgendaEvent.LogoutSuccessful)
                 }
             }

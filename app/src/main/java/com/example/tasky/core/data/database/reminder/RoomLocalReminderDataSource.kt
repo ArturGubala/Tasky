@@ -21,6 +21,10 @@ class RoomLocalReminderDataSource(
             .map { it.toReminder() }
     }
 
+    override fun getRemindersIds(): Flow<List<String>> {
+        return reminderDao.getRemindersIds()
+    }
+
     override fun getReminderForDay(
         startOfDay: Long,
         endOfDay: Long,

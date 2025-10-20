@@ -61,7 +61,20 @@ class NotificationSchedulerImpl(
         }
     }
 
-    override fun cancelNotifications() {
-        // Implementation depends on how you track scheduled reminders
+    override fun cancelNotifications(itemIds: List<String>) {
+        itemIds.forEach { itemId ->
+            val intent = Intent(context, NotificationReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                itemId.hashCode(),
+                intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            pendingIntent?.let {
+                alarmManager.cancel(it)
+                it.cancel()
+            }
+        }
     }
 }

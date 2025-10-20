@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface TaskLocalDataSource {
     fun getTask(id: String): Flow<Task>
+    fun getTasksIds(): Flow<List<String>>
     fun getTasksForDay(startOfDay: Long, endOfDay: Long): Flow<List<Task>>
     suspend fun upsertTask(task: Task): EmptyResult<DataError.Local>
 

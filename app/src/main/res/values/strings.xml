@@ -91,4 +91,6 @@
     <string name="open_item">Open agenda item details</string>
     <string name="edit_item">Edit agenda item</string>
     <string name="delete_item">Delete agenda item</string>
+    <string name="add_description_here">Add description here</string>
+    <string name="place_for_your_title">Place for your title</string>
 </resources>

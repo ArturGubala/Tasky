@@ -21,6 +21,7 @@ fun TaskyLabel(
     textStyle: TextStyle,
     modifier: Modifier = Modifier,
     labelLeadingIcon: @Composable (() -> Unit) = {},
+    placeholder: String? = null,
 ) {
     Row(
         modifier = modifier,
@@ -28,11 +29,19 @@ fun TaskyLabel(
         verticalAlignment = Alignment.CenterVertically
     ) {
         labelLeadingIcon.invoke()
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.primary,
-            style = textStyle
-        )
+        if (placeholder == null) {
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.primary,
+                style = textStyle
+            )
+        } else {
+            Text(
+                text = placeholder,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = .2f),
+                style = textStyle
+            )
+        }
     }
 }
 
@@ -66,6 +75,19 @@ private fun TaskyLabelPreview() {
                         modifier = Modifier
                     )
                 }
+            )
+            TaskyLabel(
+                text = "Project X",
+                textStyle = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier,
+                labelLeadingIcon = {
+                    TaskyCircle(
+                        size = 20.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                    )
+                },
+                placeholder = "Placeholder"
             )
         }
     }

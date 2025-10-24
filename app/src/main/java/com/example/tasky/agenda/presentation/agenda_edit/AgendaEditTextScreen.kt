@@ -9,8 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -68,6 +72,12 @@ fun AgendaEditTextScreen(
     fieldType: AgendaEditTextFieldType,
     appBarTitle: String
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     TaskyScaffold(
         topBar = {
             TaskyTopAppBar(
@@ -136,7 +146,8 @@ fun AgendaEditTextScreen(
                     }
                 },
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                isSingleLine = fieldType.isSingleLine()
+                isSingleLine = fieldType.isSingleLine(),
+                modifier = Modifier.focusRequester(focusRequester)
             )
         }
     }

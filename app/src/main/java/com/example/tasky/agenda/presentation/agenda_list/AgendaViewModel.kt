@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
@@ -201,7 +200,6 @@ class AgendaViewModel(
                 isDone = action.isDone
             )
             is AgendaAction.OnDateSelect -> {
-                Timber.log(1, _state.value.selectedDate.toString())
                 _state.update { it.copy(selectedDate = action.date.toUtc()) }
                 if (_state.value.showDatePicker) {
                     _state.update { it.copy(showDatePicker = false) }

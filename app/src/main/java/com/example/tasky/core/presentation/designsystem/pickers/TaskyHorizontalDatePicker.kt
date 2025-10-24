@@ -40,14 +40,13 @@ fun HorizontalDatePicker(
     selectedDate: ZonedDateTime,
     onDateSelected: (ZonedDateTime) -> Unit,
 ) {
-    val today = ZonedDateTime.now()
+    val today = selectedDate
     val startDate = today.minusDays(15)
 
-    val dates = remember {
+    val dates = remember(selectedDate) {
         (0..30).map { startDate.plusDays(it.toLong()) }
     }
 
-//    var selectedDate by remember { mutableStateOf(today) }
     val listState = rememberLazyListState()
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {

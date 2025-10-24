@@ -89,6 +89,7 @@ class HttpClientFactory(
                                 refreshToken = newAuthInfo.refreshToken
                             )
                         } else {
+                            sessionStorage.set(info = null)
                             BearerTokens(
                                 accessToken = "",
                                 refreshToken = ""

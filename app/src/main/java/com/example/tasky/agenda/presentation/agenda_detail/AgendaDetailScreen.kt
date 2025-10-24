@@ -455,7 +455,9 @@ fun AgendaDetailScreen(
                                             color = MaterialTheme.colorScheme.onBackground,
                                             modifier = Modifier
                                         )
-                                    }
+                                    },
+                                    placeholder = if (state.title.isEmpty()) stringResource(R.string.place_for_your_title)
+                                    else null
                                 )
                                 if (canEdit) {
                                     TaskyTextButton(
@@ -487,11 +489,19 @@ fun AgendaDetailScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 20.dp)
                             ) {
-                                Text(
-                                    text = state.description ?: "",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                                if (state.description?.isEmpty() ?: true) {
+                                    Text(
+                                        text = stringResource(R.string.add_description_here),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = .2f),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                } else {
+                                    Text(
+                                        text = state.description,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                                 if (canEdit) {
                                     TaskyTextButton(
                                         onClick = {
